@@ -1,0 +1,91 @@
+{
+    "Pantallas" :[
+        {
+            "Nombre" : "Asistencias",
+            "Estado" : 4.1,
+            "Procedimiento" : "up_Personal_Asistencias_Insert",
+            "Campos" :[
+                {
+                    "Variable" : "@IdPersonalAsistencia",
+                    "OUTPUT" : 1,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "Valores" :[],
+                    "Required": 0,
+                    "MsgError":""
+
+                },
+                {
+                    "Variable" : "@IdPersonal",
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "@IdTipoI",
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Tipo de asistencia",
+                    "TipoDatoHtml": "text",
+                    "SelectorDesplegable": 1,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "@Fecha",
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "datetime",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "Fecha",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable": 0,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "@FechaInicio",
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "datetime",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Fecha Inicio",
+                    "TipoDatoHtml": "datetime-local",
+                    "SelectorDesplegable": 1,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "@IdIdentidad",
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable": 0,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "@Justificada",
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable": 0,
+                    "Required": 0,
+                    "MsgError":""
+                }
+            ]        
+        }
+    ]
+    
+}

@@ -1,0 +1,24 @@
+<?php
+
+
+function ConexionBD( $server = "192.168.204.111", $bd = "OnixInteco",$un = "sa", $ps = "Iiaslgv52d")
+{
+    //Variables que sacaremos de la BBDD de wordpress
+            $bbdd = $bd;
+            $username = $un;
+            $pass = $ps;
+            $server = $server;
+    try {
+  
+        $connectionInfo = array(
+            "Database" => $bbdd, "UID" => $username, "PWD" => $pass, "CharacterSet" => "UTF-8", "ConnectionPooling" => "1", "MultipleActiveResultSets" => '0');
+        $conn = sqlsrv_connect($server, $connectionInfo);
+        //$conn = new PDO ("sqlsrv:Server=$server,$puerto;Database=$bbdd",$username,$pass);
+    } catch (EXCEPTION $e) {
+        echo ("No se logró conectar correctamente con la base de datos: $bbdd, error: $e");
+    }
+    
+    return $conn;
+}
+?>
+
