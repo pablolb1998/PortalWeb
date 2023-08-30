@@ -1,0 +1,9 @@
+#flecha_volver{
+    all: unset;
+    cursor: pointer;
+}
+    
+      
+#flecha_volver:focus {
+    outline: revert;
+}
