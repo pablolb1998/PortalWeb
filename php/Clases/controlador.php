@@ -18,6 +18,7 @@ class Controlador
         $this -> miEstado -> tipo_App = $_SESSION["TipoPortal"];
         if(isset($_SESSION["header"])){
             $this -> miEstado -> header = $_SESSION["header"];
+            $_SESSION["header"] = null;
         }else{
             $header_Empresa = '../html/header.html';
             $header = fopen($header_Empresa, "r");
@@ -65,12 +66,10 @@ class Controlador
 
     function IniciarSesion($usr, $pass){
         //si no encuentra usuario devuelve false
-        //print_r("holas");
         $datosSesion = comprueba_usuario($usr, $pass);
-        //print_r("holas2");
         if($datosSesion != false){
             $this -> miEstado -> nombre_descriptivo = $datosSesion[2];
-            
+            $this -> miEstado -> IdIdentidad = $datosSesion[4];
             if($this -> miEstado -> tipo_App == 1){
                 //PORTAL DEL CLIENTE: Añadir variables de sesion al comprobar usuario
                     $this -> miEstado -> IdCliente = $datosSesion[0];
@@ -81,6 +80,7 @@ class Controlador
                 $this -> miEstado -> IdPersonal = $datosSesion[0];
                 $this -> miEstado -> lista_sociedades = compruebaSociedades($this -> miEstado -> IdPersonal);
                 $this -> miEstado -> EstadoJornada = comprueba_jornada_personal();
+                $this -> miEstado -> permisosSecciones = comprobarPermisosUsuarios();
                 $this -> miEstado -> Documentos = extraerDocPersonal_Masivo();
             }
             return true;
@@ -196,10 +196,8 @@ class Controlador
             $jsonData = file_get_contents($json);
             $formularios = json_decode($jsonData, true);
             $this -> miEstado -> formularios = $formularios['Pantallas'];
-        }
-
-        print_r($this -> miEstado -> formularios);
-       
+            $this -> miEstado -> dropdownsFormularios = extraerDropdownsFormsValores();
+        }       
     }
 
     //funciones de para generar el contenido
@@ -239,7 +237,7 @@ class Controlador
             //DESCARGAR DOCUMENTO MEDIANTE CIF
                 $nav = 0.5;
                 $this -> navegarPestanas($nav);
-        }elseif($this -> miEstado -> tipo_App == 1.5 && $c === 0.5 && !empty($arrayDatos)){
+        }elseif($this -> miEstado -> tipo_App == 1.5 && $c === 0.5 && !empty($arrayDatos)){ 
             //PORTAL CLIENTE DESCARGAR DOC
             //DESCARGAR DOCUMENTO MEDIANTE CIF
             $DatosDoc = ExtraerDocumento_Por_CIF($_SESSION["tipoArchivo"],$_SESSION["IdDocumento"],$arrayDatos[0]);
@@ -374,17 +372,14 @@ class Controlador
         //Portal empleado cargar Formulario
             $this -> cargarDatosForm();
             $this -> miEstado -> cargarForm = 1;
-        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 2 && isset($arrayDatos[2])){
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 ){
         //portal del empleado guardar o cancelar en la pestaña de formulario
             $this -> miEstado -> camposFormularios = null;
-            if($arrayDatos[2] == 1){
-                try {
-                    $msgError = "X ha insertado correctamente";
-                } catch (\Throwable $th) {
-                    $msgError = "Ha habido un error al añadir X";
-                }
-                
+            if($arrayDatos[2] != 0){
+                //exect_Insert_From_Dinamico($arrayDatos);
+                $msgError = "Registro insertado correctamente";
             }
+            $this -> miEstado -> cargarForm = 0;
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $this -> miEstado -> Estado == 5 && $this -> miEstado -> tipo_App == 2){
             //PORTAL Empleado
             //iniciar/ finalizar jornada en la pestaña de tiempos
@@ -397,7 +392,7 @@ class Controlador
         // optimizar todo el script de pintar
         // return pinta_contenido($this -> miEstado -> Estado)."idc :".$this -> miEstado -> IdCliente."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd);
         return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App)."A:".$this -> miEstado -> tipo_App. "idc :".$this -> miEstado -> IdCliente.$this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd,$msgError,0);
-        $this -> miEstado -> cargarForm = 0;
+        
     }
 }
     

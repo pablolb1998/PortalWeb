@@ -4,6 +4,7 @@ class Estado{
     //variables de estado?
     public $Estado;
     public $EstadosAnteriores = array();
+    public $IdIdentidad;
 
     //variables documentos
     public $tipo_documento;
@@ -32,6 +33,7 @@ class Estado{
 
     //datos del empleado
     public $IdPersonal;
+    public $permisosSecciones = array();
     public $EstadoJornada = array();
     public $HistoricoJornada;
 
@@ -42,6 +44,8 @@ class Estado{
     //generador formularios
     public $cargarForm;
     public $formularios = array();
+    public $dropdownsFormularios = array();
+    public $formulariosDuplasValores; 
 
 
     //Datos de conexion
