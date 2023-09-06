@@ -48,7 +48,7 @@ function pinta_contenido($estado){
                     $filename = "../html/secciones_Cliente.html";
                     break;
                 case 2:
-                    $filename = "../html/secciones_Empleado.html";
+                    //$filename = "../html/secciones_Empleado.html";
                     break;
 
             }
@@ -69,14 +69,14 @@ function pinta_contenido($estado){
                 case 2:
                     $titulo = $_SESSION["Controlador"] -> miEstado -> NombreSociedad;
                     $cabecera = "../html/header.html";
-                    $filename = "../html/secciones_Empleado_02.html";
+                    //$filename = "../html/secciones_Empleado_02.html";
                     break;
 
             }
             
             break;
         case 4.1:
-            $titulo = "Mis Asistencias";
+            $titulo = "Asistencias";
             $cabecera = "../html/header.html";
             $filename = "../html/documentos.html";
             break;
@@ -160,16 +160,20 @@ function pinta_contenido($estado){
         //$filesizeheader = filesize($cabecera);
         //$fileheadertext = fread($fileheader, $filesizeheader);
         $fileheadertext = $_SESSION["Controlador"] -> miEstado -> header;
-        $fileheadertext = str_replace("%NombreE%",$titulo,$fileheadertext);
+        $fileheadertext = str_replace("%NombreE%",$titulo.($_SESSION["Controlador"] -> miEstado -> cargarForm == 1 ? ' / Nueva':''),$fileheadertext);
     }
 
 
 
-
-    $file = fopen($filename, "r");
-    $filesize = filesize($filename);
-    $filetext = fread($file, $filesize);
-    $filetext =  $fileheadertext. $filetext;
+    if(isset($filename) && $filename != "" ){
+        $file = fopen($filename, "r");
+        $filesize = filesize($filename);
+        $filetext = fread($file, $filesize);
+        $filetext =  $fileheadertext. $filetext;
+    }else{
+        $filetext = $fileheadertext.cargarSeccionesDinamicas();
+    }
+    
 
 
     // $footer = fopen("../html/footer.html", "r");
@@ -196,10 +200,16 @@ function pinta_contenido($estado){
                     $filetext = str_replace('id="pestanaEnJornada" style="display: none;">','id="pestanaEnJornada" style="display: flex;">',$filetext);
                     break;
             }
+            
+            
+            
+
+            
+
             return $filetext;
 
 
-        }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> camposFormularios == null ){
+        }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null ){
         //Pestañas de navegacion
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
             return $filetext.DibujaLineas_PortalEmpleado();
@@ -405,7 +415,7 @@ function DibujaLineas_PortalEmpleado(){
             $acciones_linea = '<a href="#" target="_blank"><img class="pdf_icono" src="img/Observaciones.png"></a>';    
         }
         if(isset($_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"]) == 1 && $_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"] == 1){
-            $acciones_linea .= '<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:20px;cursor: pointer;" class="btn_acciones"><img class="pdf_icono" src="img/Portal_Empleado_Nuevo2.png" width="100"></button>';    
+            $acciones_linea .= '<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="img/Portal_Empleado_Nuevo2.png"></button>';    
         }
         if($_SESSION["Controlador"] -> miEstado -> Estado == 4.4){
             $acciones_linea = '<a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin='.$_SESSION["pinC"].'&IdArchivo=%IdProp%" target="_blank">
@@ -455,7 +465,6 @@ function DibujaLineas_PortalEmpleado(){
             });
         }
 
-        //print_r($arrayDoc);
         //filtro por tipo 1 de filtro es decir string 
         // if($_SESSION["Controlador"] -> miEstado -> CadenaFiltro !== null && $_SESSION["Controlador"] -> miEstado -> tipofiltro == 1){
         //     $arrayDoc = array_filter($arrayDoc, function ($docF) use($arrayDoc) {
@@ -472,11 +481,10 @@ function DibujaLineas_PortalEmpleado(){
 
         // funcion para reinedxarlo 
         $arrayDoc = array_values($arrayDoc);
-        //print_r($arrayDoc);
         $listaDoc = "";
         $listaDoc .= "<section>";
         if(count($arrayDoc)>0){
-
+            
             $listaDoc .=  "<table class='table table-striped table-bordered-bottom' id='cuerpo'>";
 
             $listaDoc .=  "<tbody id='myTable'>";
@@ -642,35 +650,122 @@ function cargarJornadaHistorico(){
         return $listaJ;
 }
 
+//pintar los formularios dinamicamente
 function cargaFormularioDinamico(){
 
     $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
         return $form["Estado"] == $_SESSION["Controlador"] -> miEstado -> Estado;
     });
-    //print_r($_SESSION["Controlador"] -> miEstado -> camposFormularios);
-    //print_r($arrayForm);
-    $arrayForm = $arrayForm[0]["Campos"];
+    $arrayCamposForm = $arrayForm[0]["Campos"];
+    
+    $arraydropdown = array_filter($_SESSION["Controlador"] -> miEstado -> dropdownsFormularios, function ($filtro) use($arrayCamposForm){
+        //el array colum me devuelve la
+        return in_array($filtro["IdTipoDefinicion"],array_column($arrayCamposForm, "IdTipoDefinicion")); 
+    });
     
     $camposForm = "";
     $camposForm = "<section class='row justify-content-center'>";
-    $camposForm .= "<form class='col-10 col-md-12 mt-3'>";
-    foreach($arrayForm as $campo){
-        //print_r($campo);
-        if($campo["Mostrar"] == 1){
-            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1">';
+    $camposForm .= "<form class='formulario_Dinamico col-10 col-md-12 mt-3'>";
+    foreach($arrayCamposForm as $campo){
+        if($campo["SelectorDesplegable"] == 0 && $campo["OUTPUT"] == 0){
+            // print_r($campo);'.($campo["Mostrar"] == 1 ? "" : 'display:none;').'
+          
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1" style="'.($campo["Mostrar"] == 1 ? "" : 'display:none;').'">';
             $camposForm .= '<label for="'.$campo["Nombre_campo"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
-            $camposForm .= '<input type="'.$campo["TipoDatoHtml"].'" class="form-control" id="'.$campo["Nombre_campo"].'" aria-describedby="'.$campo["Nombre_campo"].'">';
+            $camposForm .= '<input type="'.$campo["TipoDatoHtml"].'" class="form-control" id = "'.$campo["Nombre_campo"].'" aria-describedby="'.$campo["Nombre_campo"].'"'
+            .($campo["VariableAlmacenada"] != null ? ' value = "'. $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}.'"' : ' value = "'. $campo["ValorPorDefecto"].'"').' '.($campo["Required"] == 1 ? "required" : "").'>';
             //$camposForm .= '<div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>''
             $camposForm .= '</div>';
+        }elseif($campo["Mostrar"] == 1 && $campo["SelectorDesplegable"] == 1 && isset($campo["IdTipoDefinicion"])){
+            //filtrar el select
+            $arraydropdownfiltrado = array_filter($arraydropdown, function ($valorDropdown) use($campo) {
+                return $valorDropdown["IdTipoDefinicion"] == $campo["IdTipoDefinicion"];
+            });
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1">';
+            $camposForm .= '<label for="'.$campo["Nombre_campo"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
+            $camposForm .= '<select class="form-select" aria-label="'.$campo["Nombre_campo"].'" id="'.$campo["Nombre_campo"].'">';
+            $existeSelecion = 0;
+            foreach($arraydropdownfiltrado as $valorSelecionable){
+                switch ($existeSelecion){
+                    case 0:
+                        $camposForm .= '<option value="'.$valorSelecionable['IdTipo'].'" selected>'.$valorSelecionable['Nombre'].'</option>';
+                        break;
+                    default:
+                        $camposForm .= '<option value="'.$valorSelecionable['IdTipo'].'">'.$valorSelecionable['Nombre'].'</option>';
+                        break;
+                }
+                $existeSelecion = 1;
+            }
+            $camposForm .= '</select></div>';
         }
         
 
     }
     $camposForm .= '<br><div class="bg-light"><br><br><br></div>';
     $camposForm .= '<div class="row col-11 justify-content-center">';
-    $camposForm .= '<div class="col-5 col-lg-3 offset-1 btn  mt-3" onclick="dibuja_pagina([0,3,0])"  onmouseover="this.style.backgroundColor='."'#d6d5d3'".'" onmouseout="this.style.backgroundColor='."'#ffffff'".'";><h3>Cancelar</h3></div>';
-    $camposForm .= '<div class="col-5 col-lg-3 offset-1 btn  mt-3" onclick="dibuja_pagina([0,3,1])" style="color:#0265bd;" onmouseover="this.style.backgroundColor='."'#d6d5d3'".'" onmouseout="this.style.backgroundColor='."'#ffffff'".'";><h3>Guardar</h3></div>';
+    $camposForm .= '<button class="col-5 col-lg-3 offset-1 btn  mt-3" onclick="dibuja_pagina([0,3,0])"  onmouseover="this.style.backgroundColor='."'#d6d5d3'".'" onmouseout="this.style.backgroundColor='."'#ffffff'".'";><h3>Cancelar</h3></button>';
+    $camposForm .= '<button class="col-5 col-lg-3 offset-1 btn  mt-3" onclick="" type="submit" style="color:#0265bd;" onmouseover="this.style.backgroundColor='."'#d6d5d3'".'" onmouseout="this.style.backgroundColor='."'#ffffff'".'";><h3>Guardar</h3></button>';
+    //$camposForm .= '<button class="btn btn-primary" type="submit">Submit form</button>';
     $camposForm .= "</div><br>";
     $camposForm .= "</form></section></div></div></div>";
     return $camposForm;
+}
+
+function cargarSeccionesDinamicas(){
+    //fragmento comun
+    $pestanaSecciones = "";
+    $pestanaSecciones .= '<br><br><div class="row h-75 justify-content-center">';
+    $pestanaSecciones .= '<div class="col-12 col-md-9">';
+    $pestanaSecciones .= '<div class="card shadow-2-strong shadow">';
+    $pestanaSecciones .= '<div class="button-container  justify-content-center pb-5 ">';
+    if ($_SESSION["Controlador"] -> miEstado -> Estado == 2) {
+        $pestanaSecciones .= '<div class="row col-12 col-lg-6 offset-lg-3">';
+    } else {
+        $pestanaSecciones .= '<div class="row  justify-content-center col-10 offset-1">';
+    }
+    
+    
+
+    //Portal Empleado Menu principal
+    $arraySecciones = array_filter($_SESSION["Controlador"] -> miEstado -> permisosSecciones, function ($seccion) {
+        return ($seccion["OrdenEstado"] == $_SESSION["Controlador"] -> miEstado -> Estado && $seccion["TipoApp"] == $_SESSION["Controlador"] -> miEstado -> tipo_App);
+    });
+    
+    if(count($arraySecciones)>0){
+        foreach($arraySecciones as $seccion){
+            
+            if($seccion['IdFormulario'] == 2612){
+                $pestanaSecciones .= '<div class=" col-12 col-sm-6 mt-5" id="pestanaEnJornada" style="display: none;">';
+                $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
+                $pestanaSecciones .=  'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
+                $pestanaSecciones .=  '<img src="img/PortalEmpleado/Pestanamenu/portal-empleado-jornada-entrada-f.png" />';
+                $pestanaSecciones .= '</button>';
+                $pestanaSecciones .= '</div>';
+              
+                $pestanaSecciones .=  '<div class=" col-12 col-sm-6 mt-5" id="pestanaFueraJornada" style="display: none;">';
+                $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
+                $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
+                $pestanaSecciones .= '<img src="img/PortalEmpleado/Pestanamenu/portal-empleado-jornada-salida-f2.png"/>';
+                $pestanaSecciones .= '</button>';
+                $pestanaSecciones .= '</div>';
+                
+            }else{
+                $pestanaSecciones .= '<div class="'.$seccion['EstiloPestaña'].'">';
+                $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina(['.$seccion['ValorAccion'].'])"';
+                $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
+                $pestanaSecciones .= '<img src="img/PortalEmpleado/Pestanamenu/'.$seccion['Imagen'].'"/>';
+                $pestanaSecciones .= '</button>';
+                $pestanaSecciones .= '</div>';
+            }
+           
+            
+        }
+    }else{
+        $pestanaSecciones = "No tienes permisos para acceder a la siguiente pestaña";
+    }
+    
+
+    //cierre fragmento comun
+    $pestanaSecciones .= '</div></div></div></div></div>';
+    return $pestanaSecciones;
 }
