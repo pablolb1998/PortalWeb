@@ -13,8 +13,30 @@ function comprueba_usuario($usuario, $contraseña){
         die;
     } else {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            return array($row['IdUsuario'], $row["Usuario"], $row["Nombre"],$row["IdTipoUsuario"]);
+            return array($row['IdUsuario'], $row["Usuario"], $row["Nombre"],$row["IdTipoUsuario"],$row['IdIdentidad']);
         }
+    }
+    sqlsrv_close( $conn );
+}
+
+function comprobarPermisosUsuarios(){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $arrayPermisos = array();
+    $sql = "SELECT IdFormulario,Imagen,OrdenEstado,TipoApp,ValorAccion,EstiloPestaña
+    FROM vw_PW_PermisosPestañas  
+    WHERE IdIdentidad = ?;";
+    $parm = array($_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+    $stmt = sqlsrv_prepare($conn, $sql, $parm);
+    //print_r($stmt);
+    if (!sqlsrv_execute($stmt)) {
+        return false;
+        die;
+    } else {
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+           
+            array_push($arrayPermisos, $row);
+        }
+        return $arrayPermisos;
     }
     sqlsrv_close( $conn );
 }
@@ -149,7 +171,7 @@ function extraer_JornadaHistorico(){
     sqlsrv_close( $conn );
 } 
 
-//extraer todos los doc del personal
+//extraer todos los doc     del personal
 function extraerDocPersonal_Masivo(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $DatosBD = array();
@@ -267,6 +289,24 @@ function extraerDocPersonal_Masivo(){
 
 }
 
+//Extraer los dropdonws de los forms
+function extraerDropdownsFormsValores(){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $DatosBD = array();
+    $sql = "SELECT IdTipoDefinicion,CodigoPestaña,Nombre,IdTipo
+    FROM dbo.vw_camposFormDropdown";
+    $stmt = sqlsrv_query($conn,$sql);
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($DatosBD, $row);
+        }
+        return $DatosBD;
+    }
+    sqlsrv_close( $conn );
+}
+
 //iniciar o finalizar jornada
 function exec_up_Tiempos_Insert(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
@@ -297,6 +337,17 @@ function exec_up_Tiempos_Insert(){
 
 }
 
+function exect_Insert_From_Dinamico(){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    
+    
+    
+    $sql = "";
+    
+    
+    sqlsrv_close( $conn );
+}
+
 function comprobarBD($c){
     $conn = ConexionBD("85.214.41.17,23459","IntecoDistribucion");
     //sacar el primero en caso de que coincidan
@@ -316,6 +367,7 @@ function comprobarBD($c){
     }
     sqlsrv_close( $conn );
 }
+
 
 ?>
 
