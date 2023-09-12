@@ -1,6 +1,17 @@
 <?php
 require_once "Conexion.php";
 
+//---------Definicion de consultas genericas usadas en multiples funciones-----------------------------//
+// $sqlAsistencias = "SELECT IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2,FechaInicio,FechaFin  
+// FROM dbo.vw_PEAsistencias 
+// WHERE IdPersonal = ?";
+
+// $sqlFormacion = "SELECT IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS FechaInicio 
+// FROM dbo.vw_PEFormacion
+// WHERE IdPersonal = ? ORDER BY Fecha DESC";
+
+
+
 function comprueba_usuario($usuario, $contraseña){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     //Comprueba los datos de la tabla de clientes
@@ -176,7 +187,8 @@ function extraerDocPersonal_Masivo(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $DatosBD = array();
     //1 - Asistencias
-        $sql1 = "SELECT IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2 ,* FROM dbo.vw_PEAsistencias 
+        $sql1 = "SELECT IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2,FechaInicio,FechaFin ,NumeroArchivos
+         FROM dbo.vw_PEAsistencias 
         WHERE IdPersonal = ?";
         $DatosBD = array();
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -191,7 +203,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //2 - Contratos
-        $sql2 = "SELECT idpersonalcontrato AS id,tipo AS descripcion,EstadoContrato AS descripcion2,
+        $sql2 = "SELECT idpersonalcontrato AS id,tipo AS descripcion,EstadoContrato AS descripcion2,NumeroArchivos,
         fechainicio AS FechaInicio, ISNULL(fechafin,'1900-01-01 00:00:00') AS FechaFin,observaciones FROM dbo.vw_PEContratos 
         WHERE idpersonal = ? ORDER BY fechainicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -207,7 +219,7 @@ function extraerDocPersonal_Masivo(){
         }
     //3 - Documentos
         $sql2 = "SELECT IdArchivo AS id, Nombre AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS FechaInicio,
-        IdTipoPropietario,IdPropietario,* 
+        IdTipoPropietario,IdPropietario,Documento 
         FROM dbo.vw_PEArchivosPersonal 
         WHERE idpersonal = ? ORDER BY fechainicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -284,7 +296,7 @@ function extraerDocPersonal_Masivo(){
         }
    
    
-        return $DatosBD;
+    return $DatosBD;
     sqlsrv_close( $conn );
 
 }
@@ -337,13 +349,82 @@ function exec_up_Tiempos_Insert(){
 
 }
 
-function exect_Insert_From_Dinamico(){
+function exect_Insert_From_Dinamico($arrayValores){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
-    
-    
-    
     $sql = "";
-    
+    $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
+        return $form["Estado"] == $_SESSION["Controlador"] -> miEstado -> Estado;
+    });
+ 
+    $arrayEjecutable = array_shift($arrayForm);
+
+    if ($arrayEjecutable["Instruccion"] == "INSERT_UP") {
+        $sql .= "INSERT INTO ".$arrayEjecutable["Pro_Tabla"].' (';
+        $sql2 ='VALUES (';
+        for ($i = 0; $i < count($arrayEjecutable['Campos']); $i++){
+            if($i == (count($arrayEjecutable['Campos']) - 1) ){
+                $sql .= $arrayEjecutable['Campos'][$i]["Variable"].')';
+                $sql2 .= ' ?)';
+            }elseif($arrayEjecutable['Campos'][$i]["OUTPUT"] == 0){
+                $sql .= $arrayEjecutable['Campos'][$i]["Variable"].',';
+                $sql2 .= ' ?,';
+            }
+        }
+        $sql .=$sql2;
+        $parm = $arrayValores;
+        $stmt = sqlsrv_prepare($conn, $sql, $parm);
+        if (!sqlsrv_execute($stmt)) {
+            die(print_r(sqlsrv_errors(), true));
+            return false;
+            die;
+        }else{
+            //SOLUCION TEMPORAL esto esta mal esto esta mal
+            $valoresInsertados = array();
+            $sqlReturn = "";
+            $tipoDoc = 0;
+            switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
+                case 4.1:
+                    $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2,FechaInicio,FechaFin ,NumeroArchivos
+                    FROM dbo.vw_PEAsistencias 
+                    WHERE IdPersonal = ? ORDER BYIdPersonalAsistencia DESC" ;
+                    $tipoDoc = 1;
+                    break;
+                case 4.5:
+                    
+                    $sqlReturn = "SELECT TOP 1 IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS FechaInicio 
+                    FROM dbo.vw_PEFormacion
+                    WHERE IdPersonal = ? ORDER BY IdPersonalFormacion DESC" ;
+                    $tipoDoc = 4;
+                    break;
+                
+                case 4.6:
+                    
+                    $sqlReturn = "SELECT TOP 1 IdPersonalIncidencia AS id,TipoIncidencia AS descripcion,Justificada AS descripcion2,Fecha AS FechaInicio 
+                    FROM dbo.vw_PEIncidencias
+                    WHERE IdPersonal = ? ORDER BY IdPersonalIncidencia DESC";
+                    $tipoDoc = 5;
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+            $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
+            sqlsrv_free_stmt($stmt);
+            $stmt = sqlsrv_query($conn, $sqlReturn, $parm);
+            if ($stmt === false) {
+                die(print_r(sqlsrv_errors(), true));
+            }else{
+                while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                    $row["tipoDocPortal"] = $tipoDoc;
+                    array_push($valoresInsertados, $row);
+                }
+                return $valoresInsertados;
+            }
+        }
+       
+
+    }
     
     sqlsrv_close( $conn );
 }

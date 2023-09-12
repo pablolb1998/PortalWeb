@@ -3,10 +3,11 @@
         {
             "Nombre" : "Asistencias",
             "Estado" : 4.1,
-            "+" : "up_Personal_Asistencias_Insert",
+            "Instruccion" : "INSERT_UP",
+            "Pro_Tabla" : "PCAsistencias",
             "Campos" :[
                 {
-                    "Variable" : "@IdPersonalAsistencia",
+                    "Variable" : "IdPCAsistencia",
                     "IdTipoDefinicion" : null,
                     "OUTPUT" : 1,
                     "TipoDatoBBDD" : "Int",
@@ -20,7 +21,7 @@
                     "MsgError":""
                 },
                 {
-                    "Variable" : "@IdPersonal",
+                    "Variable" : "IdPersonal",
                     "IdTipoDefinicion" : null,
                     "OUTPUT" : 0,
                     "TipoDatoBBDD" : "Int",
@@ -34,7 +35,63 @@
                     "MsgError":""
                 },
                 {
-                    "Variable" : "@IdTipoI",
+                    "Variable" : "FechaInicio",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "datetime",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Fecha",
+                    "TipoDatoHtml": "datetime-local",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "Required": 1,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "FechaFin",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "datetime",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "Fecha",
+                    "TipoDatoHtml": "datetime-local",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "AsistenciaIncidencia",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : 142,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Descripcion",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Varchar",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Descripción",
+                    "TipoDatoHtml": "text",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdTipo",
                     "IdTipoDefinicion" : 38,
                     "OUTPUT" : 0,
                     "TipoDatoBBDD" : "Int",
@@ -48,27 +105,63 @@
                     "MsgError":""
                 },
                 {
-                    "Variable" : "@Fecha",
+                    "Variable" : "Duracion",
                     "IdTipoDefinicion" : null,
                     "OUTPUT" : 0,
-                    "TipoDatoBBDD" : "datetime",
+                    "TipoDatoBBDD" : "Decimal",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Duración(h)",
+                    "TipoDatoHtml": "Number",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : 0,
+                    "Required": 1,
+                    "MsgError":""
+                }
+            ]        
+        },
+        {
+            "Nombre" : "Formación",
+            "Estado" : 4.5,
+            "Instruccion" : "INSERT_UP",
+            "Pro_Tabla" : "PEPersonal_FormacionAuxiliar",
+            "Campos" :[
+                {
+                    "Variable" : "IdPECursoAuxiliar",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 1,
+                    "TipoDatoBBDD" : "Int",
                     "Mostrar" : 0,
-                    "Nombre_campo" : "Fecha",
+                    "Nombre_campo" : "",
                     "TipoDatoHtml": "",
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
-                    "ValorPorDefecto" : "%now%",
+                    "ValorPorDefecto" : null,
                     "Required": 0,
                     "MsgError":""
                 },
                 {
-                    "Variable" : "@FechaInicio",
+                    "Variable" : "IdPersonal",
                     "IdTipoDefinicion" : null,
                     "OUTPUT" : 0,
-                    "TipoDatoBBDD" : "datetime",
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdPersonal",
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Fecha",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "date",
                     "Mostrar" : 1,
-                    "Nombre_campo" : "Fecha Inicio",
-                    "TipoDatoHtml": "datetime-local",
+                    "Nombre_campo" : "Fecha",
+                    "TipoDatoHtml": "date",
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
@@ -76,21 +169,99 @@
                     "MsgError":""
                 },
                 {
-                    "Variable" : "@IdIdentidad",
+                    "Variable" : "Curso",
                     "IdTipoDefinicion" : null,
                     "OUTPUT" : 0,
-                    "TipoDatoBBDD" : "int",
+                    "TipoDatoBBDD" : "Varchar",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Curso",
+                    "TipoDatoHtml": "text",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "Required": 1,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "horas",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Decimal",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Duración(h)",
+                    "TipoDatoHtml": "Number",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : 0,
+                    "Required": 1,
+                    "MsgError":""
+                }
+            ]        
+        },
+        {
+            "Nombre" : "Incidencias",
+            "Estado" : 4.6,
+            "Instruccion" : "INSERT_UP",
+            "Pro_Tabla" : "PCAsistencias",
+            "Campos" :[
+                {
+                    "Variable" : "IdPCAsistencia",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 1,
+                    "TipoDatoBBDD" : "Int",
                     "Mostrar" : 0,
                     "Nombre_campo" : "",
                     "TipoDatoHtml": "",
                     "SelectorDesplegable": 0,
-                    "VariableAlmacenada" : "IdIdentidad",
+                    "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
                     "Required": 0,
                     "MsgError":""
                 },
                 {
-                    "Variable" : "@Justificada",
+                    "Variable" : "IdPersonal",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdPersonal",
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "FechaInicio",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "date",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Fecha",
+                    "TipoDatoHtml": "date",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : "null",
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "FechaFin",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "datetime",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "Fecha",
+                    "TipoDatoHtml": "datetime-local",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "AsistenciaIncidencia",
                     "IdTipoDefinicion" : null,
                     "OUTPUT" : 0,
                     "TipoDatoBBDD" : "int",
@@ -99,12 +270,132 @@
                     "TipoDatoHtml": "",
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : 143,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Descripcion",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Varchar",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Descripción",
+                    "TipoDatoHtml": "text",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdTipo",
+                    "IdTipoDefinicion" : 45,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Tipo de Incidencia",
+                    "TipoDatoHtml": "text",
+                    "SelectorDesplegable": 1,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Duracion",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Decimal",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "Duración(h)",
+                    "TipoDatoHtml": "Number",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
                     "ValorPorDefecto" : 0,
                     "Required": 0,
                     "MsgError":""
                 }
             ]        
+        },{
+            "Nombre" : "Material",
+            "Estado" : 4.7,
+            "Instruccion" : "INSERT_UP",
+            "Pro_Tabla" : "PE_Personal_Material_Auxiliar",
+            "Campos" :[
+                {
+                    "Variable" : "IdAppsheet_Personal_Material",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 1,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdPersonal",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdPersonal",
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Fecha",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "date",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Fecha",
+                    "TipoDatoHtml": "date",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : "null",
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Material",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Varchar",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Material",
+                    "TipoDatoHtml": "text",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Cantidad",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Decimal",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Cantidad",
+                    "TipoDatoHtml": "Number",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : 0,
+                    "Required": 1,
+                    "MsgError":""
+                }
+            ]        
         }
+
     ]
     
 }

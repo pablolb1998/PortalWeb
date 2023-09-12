@@ -171,8 +171,15 @@ class Controlador
     function navegarPestanas($ps){
         //volver a la aterior
         if($ps == -1){
-            $estadoAnterior = array_shift($this -> miEstado -> EstadosAnteriores);
-            $this -> miEstado -> Estado = $estadoAnterior;
+            //salir del modo formulario
+            
+            if($this -> miEstado -> cargarForm == 1){
+                $this -> miEstado -> cargarForm = 0;
+            }else{
+                $estadoAnterior = array_shift($this -> miEstado -> EstadosAnteriores);
+                $this -> miEstado -> Estado = $estadoAnterior;
+            }
+            
         }else{
             array_unshift($this -> miEstado -> EstadosAnteriores , $this -> miEstado -> Estado);
             $this -> miEstado -> Estado = $ps;
@@ -319,18 +326,25 @@ class Controlador
                     break;
                 case 4.3 :
                     $this -> miEstado -> IdTipoPropietario = 24;
+                    $this -> miEstado -> acciones["archivos"] = 1;
                     break;
                 case 4.4 :
                     $this -> miEstado -> IdTipoPropietario = null;
                     break;
                 case 4.5:
                     $this -> miEstado -> IdTipoPropietario = 144;
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
                     break;
                 case 4.6:
                     $this -> miEstado -> IdTipoPropietario = 142;
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
                     break;
                 case 4.7:
                     $this -> miEstado -> IdTipoPropietario = 145;
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
                     break;
                 case 4.8:
                     $this -> miEstado -> IdTipoPropietario = 25;
@@ -339,6 +353,7 @@ class Controlador
                     $this -> miEstado -> IdTipoPropietario = null;
                     break;
             }
+           
             $this -> navegarPestanas($arrayDatos[0]);
         }elseif ($c > 4 && $c < 5 && $c != 4.4 && !empty($arrayDatos) && $arrayDatos[0] == 4.4 && $this -> miEstado -> tipo_App == 2) {
         //Navegar a la pestaña de documentos  
@@ -376,8 +391,38 @@ class Controlador
         //portal del empleado guardar o cancelar en la pestaña de formulario
             $this -> miEstado -> camposFormularios = null;
             if($arrayDatos[2] != 0){
-                //exect_Insert_From_Dinamico($arrayDatos);
-                $msgError = "Registro insertado correctamente";
+                $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
+                    return $form["Estado"] == $_SESSION["Controlador"] -> miEstado -> Estado;
+                });
+                $arrayIntermedio = array_shift($arrayForm);
+                $arraycampos = $arrayIntermedio["Campos"];
+                $arrayValores = array();
+                foreach($arraycampos as $campo){
+                    if($campo["OUTPUT"] == 0 && $campo["Mostrar"] == 0){
+                        $valorCampo = isset($campo["VariableAlmacenada"]) ? $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}  : $campo["ValorPorDefecto"];
+                        if($valorCampo == "%now%"){
+                            $valorCampo = date('Ymd H:i:s');
+                        }
+                        array_push($arrayValores,$valorCampo);
+                    }elseif($campo["Mostrar"] == 1){
+                        $valorCampo = array_shift($arrayDatos[2]);
+                        if (DateTime::createFromFormat('Y-m-d\TH:i', $valorCampo) !== false) {
+                            $valorCampo = DateTime::createFromFormat('Y-m-d\TH:i', $valorCampo) -> format('Ymd H:i:s');
+                        }elseif(DateTime::createFromFormat('Y-m-d', $valorCampo) !== false){
+                            $valorCampo = DateTime::createFromFormat('Y-m-d', $valorCampo) -> format('Ymd');
+                        }
+                        array_push($arrayValores,$valorCampo);
+                    }
+                }
+               
+                $resultadoEjecucion = exect_Insert_From_Dinamico($arrayValores);
+                // Modificar este sistema, muy poco automatico
+                if($resultadoEjecucion == false){
+                    $msgError = "Ha ocurrido un error al insertal el registro";
+                }else{
+                    array_push($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
+                    
+                }
             }
             $this -> miEstado -> cargarForm = 0;
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $this -> miEstado -> Estado == 5 && $this -> miEstado -> tipo_App == 2){

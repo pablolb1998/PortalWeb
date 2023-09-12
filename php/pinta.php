@@ -22,7 +22,7 @@ $nombre_cliente;
 
 function pinta_contenido($estado){
     
-    $titulo = "";
+    $titulo = ""; 
     $cabecera = "";
     $fileheadertext = "";
     switch ($estado) {
@@ -408,20 +408,22 @@ function DibujaLineas_PortalEmpleado(){
         $arrayDoc = array();
         $tipoDocf = 0;
         $acciones_linea = '';
+        $acciones_globales = '';
         if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
-            $acciones_linea = '<button onclick="dibuja_pagina([4.4,%IdProp%])"    style="all: initial;cursor: pointer;"><img class="pdf_icono" src="img/Documentos2.png"></button>';    
+            $acciones_linea .= '<button onclick="dibuja_pagina([4.4,%IdProp%])"    style="all: initial;cursor: pointer;"><img class="pdf_icono" src="%ImgArchivos%"></button>';    
         }
         if($_SESSION["Controlador"] -> miEstado -> acciones["observaciones"] == 1 ){
-            $acciones_linea = '<a href="#" target="_blank"><img class="pdf_icono" src="img/Observaciones.png"></a>';    
+            $acciones_linea .= '<a href="#" target="_blank"><img class="pdf_icono" src="img/Observaciones.png"></a>';    
         }
-        if(isset($_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"]) == 1 && $_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"] == 1){
-            $acciones_linea .= '<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="img/Portal_Empleado_Nuevo2.png"></button>';    
+        if($_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"] == 1){
+            $acciones_globales .= '<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="img/Portal_Empleado_Nuevo2.png"></button>';    
         }
         if($_SESSION["Controlador"] -> miEstado -> Estado == 4.4){
             $acciones_linea = '<a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin='.$_SESSION["pinC"].'&IdArchivo=%IdProp%" target="_blank">
-            <img class="pdf_icono" src="img/descargar-pdf.png"></a>';
+            <img class="pdf_icono" src="%imgTipoArchivo%"></a>';
         }
-        
+        $acciones_linea .= '<a href="" target="_blank">
+        <img class="firma_icono" src="img/firma2.png"></a>';
        
         switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
             case 4.1 :
@@ -519,13 +521,43 @@ function DibujaLineas_PortalEmpleado(){
                 }
                 //añadir a las acciones el id del propietario y el tipo
                 $acciones_linea_pintar = str_replace('%IdProp%',$id,$acciones_linea);
+                //elegir el color de la carpeta segun tenga archivos
+                if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
+                    $imgRutaCarpeta = '';
+                    $imgRutaCarpeta = 'img/Documentos2.png';
+                    //print_r($carperta);
+                    if(isset($valor["NumeroArchivos"]) && $valor["NumeroArchivos"]>0){
+                        $imgRutaCarpeta = 'img/Documentos_verde2.png';
+                    }
+                    $acciones_linea_pintar = str_replace('%ImgArchivos%',$imgRutaCarpeta,$acciones_linea_pintar);
+                }
+
+                //elegir el icono
+                if( $_SESSION["Controlador"] -> miEstado -> Estado == 4.4 ){
+                    $imgExtension = 'img/descarga_generica.png';
+                    $file_name = $valor["Documento"];
+                    $temp = explode('.',$file_name);
+                    $extension = end($temp);
+                    
+                    if($extension == 'pdf'){
+                        $imgExtension = 'img/descarga_pdf.png';
+                    }elseif($extension == 'docx'){
+                        $imgExtension = 'img/descarga_word.png';
+                    }elseif($extension == 'xlsx'){
+                        $imgExtension = 'img/descarga_excell.png';
+                    }
+                    $acciones_linea_pintar = str_replace('%imgTipoArchivo%',$imgExtension,$acciones_linea_pintar);
+                }
+
                 
+                
+
                 //pintar cada linea
                 $listaDoc .= '<tr data-tipo-servicio="'.$id.'" id="'.$id.'" >';
-                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $descripcion. '<br><details><summary></summary>';
+                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador"><h5>' . $descripcion. '<h5><br><details><summary></summary>';
                 $listaDoc .='<p><b style="color:'.'Blue'.';">' . $descripcion2 . '</b><br>';
                 $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td></b>';
-                $listaDoc .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;color:'.'Blue'.';"><b>'. $FechaInicio.'</b>';
+                $listaDoc .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;"><h5>'. $FechaInicio.'<h5>';
                 $listaDoc .= '<div class="mt-1">' . $acciones_linea_pintar . '</a></div>';
                 $listaDoc .= '</p></div></td></tr>'; 
             }
@@ -544,6 +576,7 @@ function DibujaLineas_PortalEmpleado(){
         }
         
         $listaDoc .= "</div></div></div></div></div></section></div></div></div>";
+        $listaDoc .= $acciones_globales;
         return $listaDoc;
 }
 
@@ -656,7 +689,8 @@ function cargaFormularioDinamico(){
     $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
         return $form["Estado"] == $_SESSION["Controlador"] -> miEstado -> Estado;
     });
-    $arrayCamposForm = $arrayForm[0]["Campos"];
+    $arrayIntermedio = array_shift($arrayForm);
+    $arrayCamposForm = $arrayIntermedio["Campos"];
     
     $arraydropdown = array_filter($_SESSION["Controlador"] -> miEstado -> dropdownsFormularios, function ($filtro) use($arrayCamposForm){
         //el array colum me devuelve la
@@ -667,23 +701,23 @@ function cargaFormularioDinamico(){
     $camposForm = "<section class='row justify-content-center'>";
     $camposForm .= "<form class='formulario_Dinamico col-10 col-md-12 mt-3'>";
     foreach($arrayCamposForm as $campo){
-        if($campo["SelectorDesplegable"] == 0 && $campo["OUTPUT"] == 0){
+        if($campo["SelectorDesplegable"] == 0 && $campo["OUTPUT"] == 0 && $campo["Mostrar"] == 1){
             // print_r($campo);'.($campo["Mostrar"] == 1 ? "" : 'display:none;').'
-          
-            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1" style="'.($campo["Mostrar"] == 1 ? "" : 'display:none;').'">';
+            
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="'.($campo["Mostrar"] == 1 ? "" : 'display:none;').'">';
             $camposForm .= '<label for="'.$campo["Nombre_campo"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
-            $camposForm .= '<input type="'.$campo["TipoDatoHtml"].'" class="form-control" id = "'.$campo["Nombre_campo"].'" aria-describedby="'.$campo["Nombre_campo"].'"'
+            $camposForm .= '<input type="'.$campo["TipoDatoHtml"].'" class="form-control border-secondary" id = "'.$campo["Nombre_campo"].'" aria-describedby="'.$campo["Nombre_campo"].'"'
             .($campo["VariableAlmacenada"] != null ? ' value = "'. $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}.'"' : ' value = "'. $campo["ValorPorDefecto"].'"').' '.($campo["Required"] == 1 ? "required" : "").'>';
             //$camposForm .= '<div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>''
-            $camposForm .= '</div>';
+            $camposForm .= '</div><br>';
         }elseif($campo["Mostrar"] == 1 && $campo["SelectorDesplegable"] == 1 && isset($campo["IdTipoDefinicion"])){
             //filtrar el select
             $arraydropdownfiltrado = array_filter($arraydropdown, function ($valorDropdown) use($campo) {
                 return $valorDropdown["IdTipoDefinicion"] == $campo["IdTipoDefinicion"];
             });
-            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1">';
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
             $camposForm .= '<label for="'.$campo["Nombre_campo"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
-            $camposForm .= '<select class="form-select" aria-label="'.$campo["Nombre_campo"].'" id="'.$campo["Nombre_campo"].'">';
+            $camposForm .= '<select class="form-select border-secondary" aria-label="'.$campo["Nombre_campo"].'" id="'.$campo["Nombre_campo"].'">';
             $existeSelecion = 0;
             foreach($arraydropdownfiltrado as $valorSelecionable){
                 switch ($existeSelecion){
@@ -696,7 +730,7 @@ function cargaFormularioDinamico(){
                 }
                 $existeSelecion = 1;
             }
-            $camposForm .= '</select></div>';
+            $camposForm .= '</select></div><br>';
         }
         
 
@@ -708,6 +742,7 @@ function cargaFormularioDinamico(){
     //$camposForm .= '<button class="btn btn-primary" type="submit">Submit form</button>';
     $camposForm .= "</div><br>";
     $camposForm .= "</form></section></div></div></div>";
+
     return $camposForm;
 }
 
