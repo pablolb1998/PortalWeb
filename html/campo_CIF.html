@@ -20,9 +20,13 @@
                 src="%logoImg%">
             </h3>
             <form id="form_Documento_Cif" class="formulario">
-              <div class="mb-3">
-                <label for="CIF" class="form-label"></label>
-                <input type="password" class="form-control" placeholder="CIF" id="CIF" required>
+              <div class="input-group mb-3">
+                <!-- <span class="input-group-text"><i class="fa fa-lock"></i></span> -->
+                <input class="form-control" id="password" type="password" placeholder="CIF" >
+                <span class="input-group-text">
+                  <i class="fa fa-eye" id="ImgPw" 
+                 style="cursor: pointer"></i>
+                 </span>
               </div>
               <button type="submit" class="btn btn-outline-primary" id="btnForm">Descargar</button>
             </form>

@@ -19,20 +19,29 @@
             <h3 class="mb-3"><img id="logo_Empresa_login" width="50%"
                 src="%logoImg%">
             </h3>
+            <br>
+            <div><h4>Soy %TipoUsuario%</h4boostrap></div>
+            <br>
             <form id="form_login" class="formulario">
-              <div class="mb-3">
+              <div class="input-group mb-3 input-group-lg rounded-pill">
                 <label for="user" class="form-label"></label>
-                <input type="text" class="form-control" placeholder="Usuario" id="user" required>
+                <input type="text" class="form-control rounded-pill" placeholder="Usuario" id="user" required>
               </div>
-              <div class="mb-3">
-                <label for="pass" class="form-label"></label>
-                <input type="password" class="form-control" placeholder="Contraseña" id="pass" required>
+              
+              <div class="input-group mb-3 input-group-lg rounded-pill">
+                <!-- <span class="input-group-text"><i class="fa fa-lock"></i></span> -->
+                <input class="form-control" id="password" type="password" placeholder="Contraseña" value="">
+                <span class="input-group-text">
+                  <i class="fa fa-eye" id="ImgPw" 
+                 style="cursor: pointer"></i>
+                 </span>
               </div>
-              <div class="mb-3 form-check">
+              
+              <!-- <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="exampleCheck1">
                 <label class="form-check-label" for="exampleCheck1" style="float:left">Recordar contraseña</label>
-              </div>
-              <button type="submit" class="btn btn-outline-primary" id="btnForm">Entrar</button>
+              </div> -->
+              <button type="submit" class="col-6 btn btn-primary rounded-pill" id="btnForm">ENTRAR</button>
             </form>
           </div>
         </div>
