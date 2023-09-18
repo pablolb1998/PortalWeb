@@ -182,7 +182,7 @@ function extraer_JornadaHistorico(){
     sqlsrv_close( $conn );
 } 
 
-//extraer todos los doc     del personal
+//extraer todos los doc del personal
 function extraerDocPersonal_Masivo(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $DatosBD = array();
@@ -218,8 +218,8 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //3 - Documentos
-        $sql2 = "SELECT IdArchivo AS id, Nombre AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS FechaInicio,
-        IdTipoPropietario,IdPropietario,Documento 
+        $sql2 = "SELECT IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS FechaInicio,
+        IdTipoPropietario,IdPropietario,Documento,1 as Firmable 
         FROM dbo.vw_PEArchivosPersonal 
         WHERE idpersonal = ? ORDER BY fechainicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -301,6 +301,23 @@ function extraerDocPersonal_Masivo(){
 
 }
 
+//Extraer los tipos de archivo a los que tiene acceso el personal 
+function extraerArchivosTiposAccesos(){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $sql = "SELECT IdArchivoTipo,Nombre,IdTipoPropietario FROM dbo.vw_PEArchivosTipos_Acceso WHERE idpersonal  = ?;";
+    $ListaTipos = array();
+    $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
+    $stmt = sqlsrv_query($conn, $sql, $parm);
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($ListaTipos, $row);
+        }
+        return $ListaTipos;
+    }
+    sqlsrv_close( $conn );
+}
 //Extraer los dropdonws de los forms
 function extraerDropdownsFormsValores(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
@@ -386,7 +403,7 @@ function exect_Insert_From_Dinamico($arrayValores){
                 case 4.1:
                     $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2,FechaInicio,FechaFin ,NumeroArchivos
                     FROM dbo.vw_PEAsistencias 
-                    WHERE IdPersonal = ? ORDER BYIdPersonalAsistencia DESC" ;
+                    WHERE IdPersonal = ? ORDER BY IdPersonalAsistencia DESC" ;
                     $tipoDoc = 1;
                     break;
                 case 4.5:

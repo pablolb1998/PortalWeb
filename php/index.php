@@ -12,7 +12,6 @@ function devuelveContenido(){
     if(!isset($_POST['arrayDatos'])){
         return $_SESSION["Controlador"] -> generarContenido();
     }else{
-     
         return $_SESSION["Controlador"] -> generarContenido($_POST['arrayDatos']);   
     }  
 }
