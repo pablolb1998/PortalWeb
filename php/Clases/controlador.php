@@ -82,6 +82,7 @@ class Controlador
                 $this -> miEstado -> EstadoJornada = comprueba_jornada_personal();
                 $this -> miEstado -> permisosSecciones = comprobarPermisosUsuarios();
                 $this -> miEstado -> Documentos = extraerDocPersonal_Masivo();
+                $this -> miEstado -> archivostiposAccesos = extraerArchivosTiposAccesos();
             }
             return true;
         }else{
@@ -179,12 +180,14 @@ class Controlador
                 $estadoAnterior = array_shift($this -> miEstado -> EstadosAnteriores);
                 $this -> miEstado -> Estado = $estadoAnterior;
             }
-            
+            //reinicializar variables
+            $this -> miEstado -> IdPropietario = null;
         }else{
             array_unshift($this -> miEstado -> EstadosAnteriores , $this -> miEstado -> Estado);
             $this -> miEstado -> Estado = $ps;
         }
         $this -> miEstado -> CadenaFiltro = null;
+        $this -> cargarPermisosAcciones();
     }
 
     function cerrarSesion(){
@@ -205,6 +208,43 @@ class Controlador
             $this -> miEstado -> formularios = $formularios['Pantallas'];
             $this -> miEstado -> dropdownsFormularios = extraerDropdownsFormsValores();
         }       
+    }
+
+    function cargarPermisosAcciones(){
+        //Resetear el acceso a las acciones
+        $this -> miEstado -> acciones["archivos"] = 0;
+        $this -> miEstado -> acciones["anadirLinea"] = 0;
+        //print_r("me ejecute");
+        switch ($this -> miEstado -> Estado) {   
+            case 4.1 :
+                $this -> miEstado -> acciones["archivos"] = 1;
+                $this -> miEstado -> acciones["anadirLinea"] = 1;
+                break;
+            case 4.3 :
+                $this -> miEstado -> acciones["archivos"] = 1;
+                break;
+            case 4.4 :
+                $this -> miEstado -> acciones["anadirLinea"] = 1;
+                break;
+            case 4.5:
+                $this -> miEstado -> acciones["archivos"] = 1;
+                $this -> miEstado -> acciones["anadirLinea"] = 1;
+                break;
+            case 4.6:
+                $this -> miEstado -> acciones["archivos"] = 1;
+                $this -> miEstado -> acciones["anadirLinea"] = 1;
+                break;
+            case 4.7:
+                $this -> miEstado -> acciones["archivos"] = 1;
+                $this -> miEstado -> acciones["anadirLinea"] = 1;
+                break;
+            case 4.8:
+                break;
+            default:
+                $this -> miEstado -> IdTipoPropietario = null;
+                break;
+        }
+
     }
 
     //funciones de para generar el contenido
@@ -263,13 +303,11 @@ class Controlador
                 
 
         }elseif($c === 1 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1){
-            //PORTAL CLIENTE
-            //coloca los datos de la sociedad seleccionada y navega a la siguiente pestaña
+        //PORTAL CLIENTE coloca los datos de la sociedad seleccionada y navega a la siguiente pestaña
             $this -> setSociedad($arrayDatos[0]);
             $this -> navegarPestanas(2);
         }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1) {
-            //PORTAL CLIENTE
-            // la navegación va en funcion del tipo de documento 
+        //PORTAL CLIENTE la navegación va en funcion del tipo de documento 
             $nav = null;
             $this -> cargaDocumentos_Parcial($arrayDatos[0]);
             switch ($arrayDatos[0]) {
@@ -291,8 +329,7 @@ class Controlador
             }
             $this -> navegarPestanas($nav);
         }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
-            //PORTAL EMPLEADO
-            // la navegación Menu principal 
+        //PORTAL EMPLEADO la navegación Menu principal 
             $nav = null;
             switch ($arrayDatos[0]) {
                 case 1 :
@@ -314,37 +351,26 @@ class Controlador
             $this -> navegarPestanas($nav);
         }elseif ($c === 4 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
         //navegacion del submenu y adicion de acciones
-            //Resetear el acceso a las acciones
-            $this -> miEstado -> acciones["archivos"] = 0;
-            $this -> miEstado -> acciones["anadirLinea"] = 0;
+            
             //PORTAL EMPLEADO  la navegación Submenu
             switch ($arrayDatos[0]) {   
                 case 4.1 :
                     $this -> miEstado -> IdTipoPropietario = 143;
-                    $this -> miEstado -> acciones["archivos"] = 1;
-                    $this -> miEstado -> acciones["anadirLinea"] = 1;
                     break;
                 case 4.3 :
                     $this -> miEstado -> IdTipoPropietario = 24;
-                    $this -> miEstado -> acciones["archivos"] = 1;
                     break;
                 case 4.4 :
-                    $this -> miEstado -> IdTipoPropietario = null;
+                    $this -> miEstado -> IdTipoPropietario = 23;
                     break;
                 case 4.5:
                     $this -> miEstado -> IdTipoPropietario = 144;
-                    $this -> miEstado -> acciones["archivos"] = 1;
-                    $this -> miEstado -> acciones["anadirLinea"] = 1;
                     break;
                 case 4.6:
                     $this -> miEstado -> IdTipoPropietario = 142;
-                    $this -> miEstado -> acciones["archivos"] = 1;
-                    $this -> miEstado -> acciones["anadirLinea"] = 1;
                     break;
                 case 4.7:
                     $this -> miEstado -> IdTipoPropietario = 145;
-                    $this -> miEstado -> acciones["archivos"] = 1;
-                    $this -> miEstado -> acciones["anadirLinea"] = 1;
                     break;
                 case 4.8:
                     $this -> miEstado -> IdTipoPropietario = 25;
@@ -361,6 +387,11 @@ class Controlador
             //$this -> reinicializarAccionesArchivos();
             $this -> miEstado -> IdPropietario = $arrayDatos[1];
             $this -> navegarPestanas($arrayDatos[0]);
+        }elseif($c == 4.4 && !empty($arrayDatos) && $arrayDatos[1] == 6 && $arrayDatos[2] != null ){
+        //Navegar a la pestaña de firma desde documentos
+            $this -> miEstado -> IdDocumentoPadre = $arrayDatos[2];
+            $this -> miEstado -> cargarFormFirma = 1;
+           
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == 0 ){
         //Volver a la anterior pestaña
             $this -> navegarPestanas(-1);
@@ -414,13 +445,19 @@ class Controlador
                         array_push($arrayValores,$valorCampo);
                     }
                 }
-               
+                
+                //subir archivo al direcotrio teporal
+                
+
+                    // $directorio_destino = "archivos_subidos/"; // Ruta donde deseas almacenar los archivos subidos
+                    // $nombre_archivo = $_FILES["archivo"]["name"];
+                    // $_SESSION["DirectorioRaizEmpresa"]
                 $resultadoEjecucion = exect_Insert_From_Dinamico($arrayValores);
                 // Modificar este sistema, muy poco automatico
                 if($resultadoEjecucion == false){
                     $msgError = "Ha ocurrido un error al insertal el registro";
                 }else{
-                    array_push($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
+                    array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
                     
                 }
             }
@@ -436,7 +473,8 @@ class Controlador
         //navega a la siguiente pestaña segun el estado de la clase estado
         // optimizar todo el script de pintar
         // return pinta_contenido($this -> miEstado -> Estado)."idc :".$this -> miEstado -> IdCliente."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd);
-        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App)."A:".$this -> miEstado -> tipo_App. "idc :".$this -> miEstado -> IdCliente.$this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd,$msgError,0);
+        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App)."A:".$this -> miEstado -> tipo_App. "idc :".$this -> miEstado -> IdCliente.
+        $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario,$msgError,0);
         
     }
 }

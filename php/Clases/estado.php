@@ -46,7 +46,9 @@ class Estado{
     public $formularios = array();
     public $dropdownsFormularios = array();
     public $formulariosDuplasValores; 
-
+    public $cargarFormFirma;
+    public $IdDocumentoPadre;
+    public $archivostiposAccesos;
 
     //Datos de conexion
     public $IP;
