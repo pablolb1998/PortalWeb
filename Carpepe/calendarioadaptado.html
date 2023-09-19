@@ -1,0 +1,675 @@
+<html lang="ES">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Portal Cliente</title>
+    <!-- font awesome  -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+        integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <!--Librerias de bootstrap-->
+    <link href="https://unpkg.com/css.gg@2.0.0/icons/css/arrow-left.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/tabla.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.4.js"
+        integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="/js/Index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+
+    <!-- Incluye el archivo principal de FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.js"></script>
+
+    <!-- Incluye el archivo de localización en español -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/es.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.js"></script>
+    <style data-fullcalendar=""></style>
+    <link href="/docs/dist/demo-to-codepen.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.6.4.js"
+        integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.3.5/signature_pad.min.js"
+        integrity="sha512-kw/nRM/BMR2XGArXnOoxKOO5VBHLdITAW00aG8qK4zBzcLVZ4nzg7/oYCaoiwc8U9zrnsO9UHqpyljJ8+iqYiQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+
+    <script src="/docs/dist/demo-to-codepen.js"></script>
+    <!--Funciones-->
+    <script>
+
+        /********* Modificación, unica funcion que se deberia llamar **********/
+
+
+
+
+        function aplicafiltros(f) {
+            var filtro
+            var tipo
+            if (f == null) {
+                filtro = $('#filtro_txt').val().toLowerCase();
+                tipo = 0
+            } else {
+                filtro = f
+                tipo = 2
+            }
+            //alert(filtro)
+            dibuja_pagina([0, tipo, filtro])
+        }
+
+        $(document).on("submit", ".formulario", function (event) {
+            event.preventDefault();
+            let valArray = [];
+            $(".formulario :input").each(function () {
+                valArray.push($(this).val());
+            })
+            //alert(valArray);
+            dibuja_pagina(valArray);
+        })
+
+        //Subir los datos del formulario dinamico
+        $(document).on("submit", ".formulario_Dinamico", function (event) {
+            event.preventDefault();
+            let valArray = [];
+            $(".formulario_Dinamico :input").each(function () {
+                valArray.push($(this).val());
+            })
+            if (valArray.length != 0) {
+                dibuja_pagina([0, 3, valArray]);
+            } else {
+                dibuja_pagina(0, 3, 0);
+            }
+
+        })
+
+        //Ajax para mostrar u ocultar la contraseña
+        $(document).on("click", "#ImgPw", function (event) {
+            var btnPw = document.querySelector("#togglePassword");
+            var txtPw = document.querySelector("#password");
+
+            //toogle
+            var tipoCampo = password.getAttribute("type") === "password" ? "text" : "password";
+            password.setAttribute("type", tipoCampo);
+            // toggle the eye icon
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+
+        })
+
+
+        //boton flotante
+
+
+        /********* ------------------------------------------------------------- **********/
+        if (window.history.replaceState) { // verificamos disponibilidad
+            window.history.replaceState(null, null, window.location.href);
+        }
+
+    </script>
+</head>
+
+
+<body onload="dibuja_pagina()" style="min-height: 100%;">
+
+    <div class="modal fade" id="popupError" tabindex="-1" aria-labelledby="TituloError" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="TituloError">MSG</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="msgError">
+                </div>
+                <div class="modal-footer">
+                    <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
+                    <button type="button" class="btn btn-primary">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cuerpo"><!-- Cabecera  -->
+
+        <header>
+
+            <div class="row  justify-content-center">
+                <div class="col-12 col-md-9">
+                    <div class="card shadow-2-strong shadow">
+
+                        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                            <div class="container-fluid">
+                                <div class="col-12">
+                                    <h3 id="titulo_seccion" class="mb-3 mt-2 show" name="titulo_seccion">
+                                        <button id="flecha_volver" onclick="dibuja_pagina([-1,0])">
+                                            <img src="./Img/flecha_back.png" height="30px" alt="buttonpng">
+                                        </button>
+                                        <span class="text-truncate">Calendario</span>
+
+                                        <div style="float: right;" class="dropdown">
+                                            <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <span style="color: black;" class="navbar-toggler-icon"></span>
+                                            </button>
+
+                                            <div class="dropdown-menu"h aria-labelledby="dropdownMenuButton">
+
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" placeholder="Buscar..."
+                                                        aria-label="Buscar..." id="filtro_txt">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-outline-secondary" type="button"
+                                                            onclick="aplicafiltros()"><img src="Img/lupa.png"
+                                                                width="17px"></button>
+                                                    </div>
+                                                </div>
+
+                                                <span id="filtros_dinamicos" >
+                                                    <div class="form-check form-switch "> 
+                                                        <label class="form-check-label"
+                                                            for="1">Asistencias</label>
+                                                            <input class="form-check-input"
+                                                            type="checkbox" value="1" id="1" checked></div>
+                                                    <div class="form-check form-switch"> <label class="form-check-label"
+                                                            for="2">Contratos</label><input class="form-check-input"
+                                                            type="checkbox" value="2" id="2"checked></div>
+                                                    <div class="form-check form-switch"> <label class="form-check-label"
+                                                            for="3">Formación</label><input class="form-check-input"
+                                                            type="checkbox" value="3" id="3"checked></div>
+                                                    <div class="form-check form-switch"> <label class="form-check-label"
+                                                            for="4">Incidencias</label><input class="form-check-input"
+                                                            type="checkbox" value="4" id="4"checked></div>
+                                                    <div class="form-check form-switch"> <label class="form-check-label"
+                                                            for="5">Material</label><input class="form-check-input"
+                                                            type="checkbox" value="5" id="5"checked></div>
+                                                            
+                                                </span>
+                                                <button id="btnBuscar" class="btn btn-primary m-2">buscar</button>
+
+                                                <button onclick="dibuja_pagina([-1,-1])" style="color:black;"
+                                                    class="dropdown-item mt-2"><b>Cerrar Sesión</b></button>
+                                            </div>
+                                        </div>
+
+
+
+                                    </h3>
+
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="row h-100 justify-content-center my-4">
+            <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                <div class="card shadow-2-strong shadow">
+                <div class="demo-topbar">
+                    <div id="calendar"></div>
+                    <input type="text" id="eventName" placeholder="Nombre del evento">
+                    Fecha inicio:<input type="date" id="eventDate">
+                    Fecha final:<input type="date" id="eventEndDate">
+                    Hora Inicio:
+                    <input type="time" id="eventStartTime" placeholder="Hora de inicio">
+                    Hora finalización:
+                    <input type="time" id="eventEndTime" placeholder="Hora de finalización">
+                    <button id="addEvent">Añadir Evento</button>
+
+                    <!--                    
+                    <label>
+                        <input type="checkbox" id="filtrarTipoCheckbox"> Filtrar por Tipo
+                    </label> -->
+                    <button onclick="dibuja_pagina([0,3])"
+                        style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones">
+                        <img src="img/Portal_Empleado_Nuevo2.png"></button>
+                    <!-- <label>
+                        <input type="checkbox" id="filtrarIdCheckbox"> Filtrar por ID
+                    </label>
+                    <label>
+                        <input type="checkbox" id="filtrarDescripcionCheckbox"> Filtrar por Descripción
+                    </label>
+                    <label> -->
+                        <br>
+                    <input type="checkbox" id="filtrarFechaCheckbox"> Filtrar por Fecha
+                    </label>
+                    <input type="date" id="fechaInput">
+                    <!--                 
+                    
+                
+                    <input type="text" id="idInput" placeholder="ID">
+                    <input type="text" id="descripcionInput" placeholder="Descripción">-->
+                    
+                    <label>
+                        <input type="checkbox" id="filtrarColorCheckbox"> Filtrar por Color
+                    </label>
+                    <input type="color" id="colorInput">
+
+                    <input type="text" id="titleInput" placeholder="Titulo">
+                    <input type="checkbox" id="filtrarTitleCheckbox"> Filtrar por Titulo
+                    </label>
+                    <ul id="resultado"></ul>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- Plantilla Seccion de Documentos -->
+
+
+
+
+
+</body>
+<style>
+    .texto-desactivado {
+        color: #999; /* Cambia este color al color que desees para el texto desactivado */
+    }
+     #filtros_dinamicos div {
+        margin: 5px;
+    
+    }
+    .form-check-input:checked{
+        background-color: rgb(92, 91, 134);
+    }
+  
+
+   
+    
+    
+    </style>
+A:2idc :15pin :123654Estado:4.1tipo:ip :192.168.204.111bbdd :OnixInteco
+<script>
+    var eventos = [
+            {
+                title: 'Long Evento',
+                start: '2023-09-07T00:00:00',
+                end: '2023-09-10T00:00:00',
+                backgroundColor: 'purple',
+                tipo: 'Asistencias',
+                id: '1',
+                descripcion: 'Descripción del evento 1',
+                fecha: '2023-09-07',
+            },
+           
+            {
+                title: 'Long Evento 2',
+                start: '2023-10-07',
+                end: '2023-10-10',
+                backgroundColor: 'purple',
+                tipo: 'Asistencias',
+                id: '1',
+                descripcion: 'Descripción del evento 2',
+                fecha: '2023-09-07',
+            },
+            {
+                title: 'Patata',
+                start: '2023-09-14',
+                end: '2023-09-15',
+                backgroundColor: '#B93030',
+                tipo: 'Contratos',
+                id: '2',
+                descripcion: 'Descripción del evento 2',
+                fecha: '2023-09-14',
+            },
+            {
+                title: 'Anterior',
+                start: '2023-08-14',
+                end: '2023-08-15',
+                backgroundColor: 'green',
+                tipo: 'Formacion',
+                id: '3',
+                descripcion: 'Descripción del evento 2',
+                fecha: '2023-09-14',
+            },
+            // Puedes agregar más eventos aquí...
+        ];
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+
+        var today = new Date(); // Obtener la fecha actual
+    var formattedDate = today.toISOString().split('T')[0];
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            initialDate: formattedDate,
+            dayHeaderFormat: { weekday: 'long', month: 'numeric', day: 'numeric' },
+
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            buttonText: {
+                month: 'Mes',
+                today: 'Hoy',
+                week: 'Semana',
+                day: 'Día'
+            },
+            events: eventos, 
+           
+            
+
+
+
+            locale: 'es'
+        });
+        
+        
+        calendar.render();
+
+
+
+   
+        
+        document.getElementById('addEvent').addEventListener('click', function () {
+            var eventName = document.getElementById('eventName').value;
+            var eventStartDate = document.getElementById('eventDate').value;
+            var eventEndDate = document.getElementById('eventEndDate').value; // Obtener la fecha de finalización
+
+            var eventStartTime = document.getElementById('eventStartTime').value;
+            var eventEndTime = document.getElementById('eventEndTime').value;
+
+            if (eventName && eventStartDate && eventEndDate && eventStartTime && eventEndTime) {
+                // Generar un color aleatorio único para cada evento
+                var randomColor = getRandomColor();
+
+                // Combina la fecha y hora de inicio y finalización en objetos Date
+                var startDateTime = new Date(eventStartDate + 'T' + eventStartTime);
+                var endDateTime = new Date(eventEndDate + 'T' + eventEndTime); // Utiliza la fecha de finalización
+
+                calendar.addEvent({
+                    title: eventName,
+                    start: startDateTime,
+                    end: endDateTime,
+                    backgroundColor: randomColor // Asignar el color aleatorio al evento
+                });
+
+                // Crear un objeto de evento y agregarlo al array de eventos
+                var nuevoEvento = {
+                    title: eventName,
+                    start: startDateTime,
+                    end: endDateTime,
+                    backgroundColor: randomColor // Asignar el color aleatorio al evento
+                };
+
+                eventos.push(nuevoEvento);
+
+                // Limpiar los campos después de añadir el evento
+                document.getElementById('eventName').value = '';
+                document.getElementById('eventDate').value = '';
+                document.getElementById('eventEndDate').value = ''; // Limpiar el campo de fecha de finalización
+                document.getElementById('eventStartTime').value = '';
+                document.getElementById('eventEndTime').value = '';
+            } else {
+                alert('Por favor, ingresa un nombre, fecha de inicio, fecha de finalización, hora de inicio y hora de finalización para el evento.');
+            }
+
+        });
+
+        // Función para generar colores aleatorios únicos
+        //   function getRandomColor() {
+        //     var letters = '0123456789ABCDEF';
+        //     var color = '#';
+        //     for (var i = 0; i < 6; i++) {
+        //       color += letters[Math.floor(Math.random() * 16)];
+        //     }
+        //     return color;
+        //   }
+        function getRandomColor() {
+            var r = Math.floor(Math.random() * 256); // Componente rojo (0-255)
+            var g = Math.floor(Math.random() * 256); // Componente verde (0-255)
+            var b = Math.floor(Math.random() * 256); // Componente azul (0-255)
+
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+
+        var filtrarFechaCheckbox = document.getElementById('filtrarFechaCheckbox');
+        var fechaInput = document.getElementById('fechaInput');
+
+        var filtrarColorCheckbox = document.getElementById('filtrarColorCheckbox');
+        var colorInput = document.getElementById('colorInput');
+
+
+        filtrarFechaCheckbox.addEventListener('change', actualizarFiltro);
+        fechaInput.addEventListener('change', actualizarFiltro);
+       
+       
+
+        // Agregar un manejador de eventos al checkbox
+        function actualizarFiltro() {
+            var filteredEvents = eventos;
+
+            if (filtrarColorCheckbox.checked) {
+                var selectedColor = colorInput.value;
+                filteredEvents = filteredEvents.filter(function (evento) {
+                    return evento.backgroundColor === selectedColor;
+                });
+            }
+
+            if (filtrarFechaCheckbox.checked) {
+                 var selectedDate = fechaInput.value;
+                // filteredEvents = filteredEvents.filter(function (evento) {
+
+                //     return evento.fecha === selectedDate;
+                // });
+                var filteredEvents = filtrarEventosPorFecha(eventos, selectedDate);
+        
+            }
+
+            // Actualiza el calendario con los eventos filtrados o todos los eventos
+            calendar.removeAllEvents();
+            calendar.addEventSource(filteredEvents);
+        }
+
+        function filtrarEventosPorFecha(eventos, selectedDate) {
+    return eventos.reduce(function (filtered, evento) {
+        var eventoStartDate = new Date(evento.start);
+        var eventoEndDate = new Date(evento.end);
+        var fechaSeleccionadaDate = new Date(selectedDate);
+
+        // Verifica si la fecha seleccionada está dentro del rango del evento
+        if (fechaSeleccionadaDate >= eventoStartDate && fechaSeleccionadaDate <= eventoEndDate) {
+            // Crea una copia del evento original
+            var eventoFiltrado = Object.assign({}, evento);
+
+            // Ajusta la fecha de inicio del evento copiado para que comience desde la fecha seleccionada
+            eventoFiltrado.start = selectedDate + eventoStartDate.toISOString().substring(10);
+
+            // Ajusta la fecha de finalización del evento copiado para que termine en la fecha seleccionada si es posterior
+            if (eventoEndDate > fechaSeleccionadaDate) {
+                eventoFiltrado.end = selectedDate + eventoEndDate.toISOString().substring(10);
+            }
+
+            // Agrega el evento copiado al array de eventos filtrados
+            filtered.push(eventoFiltrado);
+        }
+
+        return filtered;
+    }, []);
+}
+
+
+
+
+
+        filtrarColorCheckbox.addEventListener('change', function () {
+            var filteredEvents;
+
+            if (filtrarColorCheckbox.checked) {
+                var selectedColor = colorInput.value; // Obtener el color del colorInput
+                console.log(selectedColor);
+
+                filteredEvents = eventos.filter(function (evento) {
+                    console.log(evento.backgroundColor); // Accede a backgroundColor del evento
+                    return evento.backgroundColor === selectedColor;
+                });
+            } else {
+                // Si el checkbox no está marcado, muestra todos los eventos
+                filteredEvents = eventos;
+            }
+
+            // Actualiza el calendario con los eventos filtrados o todos los eventos
+            calendar.removeAllEvents();
+            calendar.addEventSource(filteredEvents);
+        });
+
+        calendar.render();
+
+        document.getElementById('btnBuscar').addEventListener('click', function () {
+            var selectedIds = [];
+            // Obtén los IDs de los checkboxes seleccionados
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(function (checkbox) {
+                if (checkbox.checked) {
+                    selectedIds.push(checkbox.value);
+                }
+            });
+
+            // Filtra los eventos por los IDs seleccionados
+            var filteredEvents = eventos.filter(function (evento) {
+                return selectedIds.includes(evento.id);
+            });
+
+            // Actualiza el calendario con los eventos filtrados
+            calendar.removeAllEvents();
+            calendar.addEventSource(filteredEvents);
+        });
+        // function filtrarEventos() {
+        //     const tipoSelect = document.getElementById("tipoSelect");
+        //     const idInput = document.getElementById("idInput");
+        //     const descripcionInput = document.getElementById("descripcionInput");
+        //     const fechaInput = document.getElementById("fechaInput");
+        //     const colorInput = document.getElementById("colorInput");
+        //     const resultado = document.getElementById("resultado");
+        //     resultado.innerHTML = ""; // Limpiar resultados anteriores
+
+        //     const tipoFiltrar = tipoSelect.value;
+        //     const idFiltrar = idInput.value.trim();
+        //     const descripcionFiltrar = descripcionInput.value.trim();
+        //     const fechaFiltrar = fechaInput.value;
+        //     const colorFiltrar = colorInput.value;
+
+        //     const eventosFiltrados = eventos.filter(evento => {
+        //         let cumpleCriterios = true;
+
+        //         if (tipoFiltrar !== "todos" && evento.tipo !== tipoFiltrar) {
+        //             cumpleCriterios = false;
+        //         }
+
+        //         if (idFiltrar !== "" && evento.id !== idFiltrar) {
+        //             cumpleCriterios = false;
+        //         }
+
+        //         if (descripcionFiltrar !== "" && !evento.descripcion.includes(descripcionFiltrar)) {
+        //             cumpleCriterios = false;
+        //         }
+
+        //         if (fechaFiltrar !== "" && evento.start.split("T")[0] !== fechaFiltrar) {
+        //             cumpleCriterios = false;
+        //         }
+
+        //         if (colorFiltrar !== "" && evento.backgroundColor !== colorFiltrar) {
+        //             cumpleCriterios = false;
+        //         }
+
+        //         return cumpleCriterios;
+        //     });
+
+        //     eventosFiltrados.forEach(evento => {
+        //         const listItem = document.createElement("li");
+        //         listItem.textContent = `Tipo: ${evento.tipo}, ID: ${evento.id}, Descripción: ${evento.descripcion}, Fecha: ${evento.start}, Color: ${evento.backgroundColor}`;
+        //         resultado.appendChild(listItem);
+        //     });
+        // }
+
+        // const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        // checkboxes.forEach(checkbox => {
+        //     checkbox.addEventListener("change", function () {
+        //         filtrarEventos();
+        //     });
+        // });
+
+        // const inputs = document.querySelectorAll('input[type="text"], input[type="date"], input[type="color"]');
+        // inputs.forEach(input => {
+        //     input.addEventListener("input", function () {
+        //         filtrarEventos();
+        //     });
+        // });
+
+        // document.getElementById("tipoSelect").addEventListener("change", function () {
+        //     filtrarEventos();
+        // });
+        // filtrarEventos();
+
+        var filtrarTitleCheckbox = document.getElementById('filtrarTitleCheckbox');
+        var titleInput = document.getElementById('titleInput');
+
+        filtrarTitleCheckbox.addEventListener('change', function () {
+            var filteredEvents;
+
+            if (filtrarTitleCheckbox.checked) {
+                // Si el checkbox está marcado, filtra los eventos por título
+                var selectedTitle = titleInput.value.trim(); // Obtener el título del titleInput
+
+                filteredEvents = eventos.filter(function (evento) {
+                    // Compara el título del evento con el título seleccionado
+
+                    return evento.title.toLowerCase().includes(selectedTitle.toLowerCase());
+                });
+            } else {
+                // Si el checkbox no está marcado, muestra todos los eventos
+                filteredEvents = eventos;
+            }
+
+            // Actualiza el calendario con los eventos filtrados o todos los eventos
+            calendar.removeAllEvents();
+            calendar.addEventSource(filteredEvents);
+        });
+
+$(document).ready(function () {
+    // Detecta el cambio de estado en los checkboxes
+    $('input[type="checkbox"]').change(function () {
+        if (!$(this).prop('checked')) {
+            // Si el checkbox está desactivado, agrega la clase CSS al texto
+            $(this).siblings('label').addClass('texto-desactivado');
+        } else {
+            // Si el checkbox está activado, quita la clase CSS del texto
+            $(this).siblings('label').removeClass('texto-desactivado');
+        }
+    });
+});
+
+    });
+
+
+
+</script>
+
+</html>
