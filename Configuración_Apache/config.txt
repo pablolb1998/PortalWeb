@@ -1,0 +1,45 @@
+Pasos a seguir par alojar dos dominios en apache
+
+
+Descargar ubuntu LTS de: https://ubuntu.com/download/desktop (en caso de que no funcione la dirección ir a la pagina oficial)
+
+Descargar e Instalar virtualbox de: https://www.virtualbox.org/wiki/Downloads 
+
+Crear la maquina con la ISO y configurar los parametros
+
+Al tener la maquina lista instalar apache "sudo apt install apache2"
+
+Creamos una carpeta en /var/www/miproyecto y el archivo HTML en la carpeta o los archivos de un proyecto
+
+Configuraremos el archivo /etc/apache2/sites-available/000-default.conf haciendo una copia con otro nombre
+Configuramos los diferentes virtualhosts de diferntes maneras.
+<VirtualHost nombre_virtualhost>
+
+    ServerName www.ejemplo.com
+    ServerAdmin tunombre@example.com
+    DocumentRoot /var/www/miproyecto
+
+</VirtualHost>
+
+Sera necesario:
+ - admitir la configuracion "sudo a2ensite ejemplo.conf" 
+ - reiniciar con "service apache2 reload"
+
+Es necesario modificar la resolucion con los nombre definidos en los deferentes VirtualHostsen en la maquina windows C:\Windows\System32\drivers\etc\hosts con la ip e DNS
+Esto sera necesario si los dominios no estan distribuidos en Internet
+
+Instalar php: https://blogubuntu.com/como-instalar-php-8-1-en-ubuntu-20-04  
+Comprueba con un archivo .php simple se ejecuta adecuadamente.
+
+Instalar sql siguiendo estos pasos: https://learn.microsoft.com/es-es/sql/connect/php/installation-tutorial-linux-mac?view=sql-server-ver16#installing-on-ubuntu-with-php-fpm
+Configurar el archivo /etc/php/version/apache2/php.ini con las extensiones necesarias.
+
+Configurar el OpenSS: https://github.com/microsoft/msphpsql/issues/1462#issuecomment-1645992247
+Comprueba con un archivo .php simple con una conexion SQL se ejecuta adecuadamente.
+
+
+
+
+
+
+
