@@ -5,33 +5,85 @@ Descargar ubuntu LTS de: https://ubuntu.com/download/desktop (en caso de que no 
 
 Descargar e Instalar virtualbox de: https://www.virtualbox.org/wiki/Downloads 
 
-Crear la maquina con la ISO y configurar los parametros
+Crear la maquina con la ISO y configurar los parametros con 2 adaptadores de red Con adaptador puente ambas.
 
-Al tener la maquina lista instalar apache "sudo apt install apache2"
+Al tener la maquina lista instalar apache ejecutando el siguiente comando en la terminal.
+    -> sudo apt install apache2
 
-Creamos una carpeta en /var/www/miproyecto y el archivo HTML en la carpeta o los archivos de un proyecto
+Creamos una carpeta en /var/www/miproyecto y el archivo HTML en la carpeta o los archivos de un proyecto y le adjudicamos los permisos "sudo chmod 777 " al directorio corespondiente
+ -> /var/www/miproyecto
+ -> sudo chmod 777 miproyecto cd
 
-Configuraremos el archivo /etc/apache2/sites-available/000-default.conf haciendo una copia con otro nombre
+Hacemos una copia /etc/apache2/sites-available/000-default.conf con otro nombre e configuraremos el archivo con otro nombre
+-> sudo cp 000-default.conf portal_emp.conf
+
+abrimos el archivo para editarlo con
+-> sudo gedit portal_emp.conf
+
 Configuramos los diferentes virtualhosts de diferntes maneras.
-<VirtualHost nombre_virtualhost>
-
+<VirtualHost #ip>
     ServerName www.ejemplo.com
     ServerAdmin tunombre@example.com
     DocumentRoot /var/www/miproyecto
-
 </VirtualHost>
+Siendo el #ip la ip del segundo adaptador de red que hemos configurado.
 
 Sera necesario:
  - admitir la configuracion "sudo a2ensite ejemplo.conf" 
- - reiniciar con "service apache2 reload"
+ - Desactivar la otra configuracion "sudo a2dissite 000-default.conf"
+ - reiniciar el servicio con:
+    -> service apache2 reload
 
-Es necesario modificar la resolucion con los nombre definidos en los deferentes VirtualHostsen en la maquina windows C:\Windows\System32\drivers\etc\hosts con la ip e DNS
+Es necesario modificar la resolucion con los nombre definidos en los deferentes VirtualHostsen en la maquina windows C:\Windows\System32\drivers\etc\hosts 
+con la ip del segundo adaptador de red de la MV e DNS
+ejemplo 	192.168.204.178	www.portaldelempleado.de
+
+
 Esto sera necesario si los dominios no estan distribuidos en Internet
 
 Instalar php: https://blogubuntu.com/como-instalar-php-8-1-en-ubuntu-20-04  
+-> sudo add-apt-repository ppa:ondrej/php
+-> sudo apt install php8.2
+
+
 Comprueba con un archivo .php simple se ejecuta adecuadamente.
 
 Instalar sql siguiendo estos pasos: https://learn.microsoft.com/es-es/sql/connect/php/installation-tutorial-linux-mac?view=sql-server-ver16#installing-on-ubuntu-with-php-fpm
+ -> sudo su
+ -> add-apt-repository ppa:ondrej/php -y
+ -> apt update
+ -> apt install php8.2-dev php8.2-fpm php8.2-xml -y --allow-unauthenticated
+instalamos curl
+-> sudo apt install curl
+crear un archivo bash para ejecutarlo
+ -> sudo gedit mecagoentodo.sh
+
+y pegamos elsiguiente codigo 
+        #!/bin/bash
+        if ! [[ "18.04 20.04 22.04 23.04" == *"$(lsb_release -rs)"* ]];
+        then
+            echo "Ubuntu $(lsb_release -rs) is not currently supported.";
+            exit;
+        fi
+        
+        curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+        
+        curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+        
+        sudo apt-get update
+        sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+        # optional: for bcp and sqlcmd
+        sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18
+        echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+        source ~/.bashrc
+        # optional: for unixODBC development headers
+        sudo apt-get install -y unixodbc-dev
+
+ejecutar los sigguientes comandos:
+ -> sudo chmod 777 mecagoentodo.sh
+ -> ./mecagoentod.sh
+
+
 Configurar el archivo /etc/php/version/apache2/php.ini con las extensiones necesarias.
 
 Configurar el OpenSS: https://github.com/microsoft/msphpsql/issues/1462#issuecomment-1645992247
