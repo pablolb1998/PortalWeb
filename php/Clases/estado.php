@@ -49,6 +49,7 @@ class Estado{
     public $cargarFormFirma;
     public $IdDocumentoPadre;
     public $archivostiposAccesos;
+    public $linkDocumentoSubido;
 
     //Datos de conexion
     public $IP;

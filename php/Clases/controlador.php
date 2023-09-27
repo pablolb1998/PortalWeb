@@ -83,6 +83,7 @@ class Controlador
                 $this -> miEstado -> permisosSecciones = comprobarPermisosUsuarios();
                 $this -> miEstado -> Documentos = extraerDocPersonal_Masivo();
                 $this -> miEstado -> archivostiposAccesos = extraerArchivosTiposAccesos();
+                $this -> miEstado -> linkDocumentoSubido = null;
             }
             return true;
         }else{
@@ -214,7 +215,6 @@ class Controlador
         //Resetear el acceso a las acciones
         $this -> miEstado -> acciones["archivos"] = 0;
         $this -> miEstado -> acciones["anadirLinea"] = 0;
-        //print_r("me ejecute");
         switch ($this -> miEstado -> Estado) {   
             case 4.1 :
                 $this -> miEstado -> acciones["archivos"] = 1;
@@ -247,9 +247,23 @@ class Controlador
 
     }
 
+    //Subir los archivos mediante llamada al servicio web
+    function subirArchivosServicioWeb($pin,$IdtipoPropietario,$idPropietario,$idArchivoTipo,$url,$nombre_archivo){
+        $url = "http://onixsw.esquio.es:8080/Funciones.aspx?SubirArchivo=1&pin=".$pin.
+        "&IdTipoPropietario=".$IdtipoPropietario.'&IdPropietario='.$idPropietario.
+        '&IdArchivoTipo='.$idArchivoTipo.'&URL='.$url.'&NombreArchivo='.$nombre_archivo;
+        
+        $response = file_get_contents($url);
+        print_r($response);
+        print_r($url);
+        return true;
+    }
+
+
     //funciones de para generar el contenido
     // optimizar el navegar pestañas
     function generarContenido($arrayDatos = array()){
+        $arrayAuxiliarHtml = array();
         $msgError = "" ;
         $c = $this -> miEstado -> Estado;
         $this -> comprobarBBDD($_SESSION["pinC"]);
@@ -320,9 +334,6 @@ class Controlador
                 case 3 :
                     $nav = 6;
                     break;
-                case 4 :
-                    $nav = 7;
-                    break;
                 default:
                     $nav = 3;
                     break;
@@ -343,10 +354,28 @@ class Controlador
                 case 3 :
                     $nav = 6;
                     break;
+                case 4 :
+                    $nav = 7;
+                    foreach($this -> miEstado -> Documentos as $documento){
+                        if( $documento["tipoDocPortal"] != 3){
+                            $dc = array($documento["descripcion"],
+                                    $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
+                                    $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
+                                    "#800080",
+                                    $documento["tipoDocPortal"]
+                                );
+                            array_push($arrayAuxiliarHtml,$dc);
+
+                        }
+                        
+                    }
+                    
+                    break;
                 default:
                     $nav = 3;
                     break;
             }
+            
             $this -> miEstado -> puntero_posicion = 30;
             $this -> navegarPestanas($nav);
         }elseif ($c === 4 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
@@ -362,6 +391,7 @@ class Controlador
                     break;
                 case 4.4 :
                     $this -> miEstado -> IdTipoPropietario = 23;
+                    $this -> miEstado -> IdPropietario = $this -> miEstado -> IdPersonal;
                     break;
                 case 4.5:
                     $this -> miEstado -> IdTipoPropietario = 144;
@@ -395,6 +425,26 @@ class Controlador
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == 0 ){
         //Volver a la anterior pestaña
             $this -> navegarPestanas(-1);
+        }elseif($this -> miEstado -> Estado == 7  && $this -> miEstado -> tipo_App == 2 && empty($arrayDatos) &&  $this -> miEstado -> cargarForm == 0){
+        // cargar la pestaña de calendario
+            foreach($this -> miEstado -> Documentos as $documento){
+                if( $documento["tipoDocPortal"] != 3){
+                    $dc = array($documento["descripcion"],
+                            $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
+                            $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
+                            "#800080",
+                            $documento["tipoDocPortal"]
+                        );
+                    array_push($arrayAuxiliarHtml,$dc);
+
+                }
+                
+            }
+        }elseif($this -> miEstado -> Estado == 7  && $this -> miEstado -> tipo_App == 2 && !empty($arrayDatos) &&  $this -> miEstado -> cargarForm == 1){
+        // navegacion al formulario correspondiente desde la pestaña de calendario
+
+
+
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 1 && in_array($this -> miEstado -> Estado, array(3,4,5,6,7)) && $this -> miEstado -> tipo_App == 1){
             //PORTAL CLIENTE
         //Sumar de 30  en 30 al puntero de mostrar documentos
@@ -416,26 +466,28 @@ class Controlador
             $this -> miEstado -> CadenaFiltro = $arrayDatos[2];
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 2 && !isset($arrayDatos[2])){
         //Portal empleado cargar Formulario
-            $this -> cargarDatosForm();
+            if($this -> miEstado -> Estado != 7){
+                $this -> cargarDatosForm();
+            }
             $this -> miEstado -> cargarForm = 1;
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 ){
         //portal del empleado guardar o cancelar en la pestaña de formulario
             $this -> miEstado -> camposFormularios = null;
             if($arrayDatos[2] != 0){
-                $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
-                    return $form["Estado"] == $_SESSION["Controlador"] -> miEstado -> Estado;
+                $arrayForm = array_filter($this -> miEstado -> formularios, function ($form) {
+                    return $form["Estado"] == $this -> miEstado -> Estado;
                 });
                 $arrayIntermedio = array_shift($arrayForm);
                 $arraycampos = $arrayIntermedio["Campos"];
                 $arrayValores = array();
                 foreach($arraycampos as $campo){
-                    if($campo["OUTPUT"] == 0 && $campo["Mostrar"] == 0){
+                    if($campo["OUTPUT"] == 0 && $campo["Mostrar"] == 0 && $campo["ValorAdicional"] == null){
                         $valorCampo = isset($campo["VariableAlmacenada"]) ? $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}  : $campo["ValorPorDefecto"];
                         if($valorCampo == "%now%"){
                             $valorCampo = date('Ymd H:i:s');
                         }
                         array_push($arrayValores,$valorCampo);
-                    }elseif($campo["Mostrar"] == 1){
+                    }elseif($campo["Mostrar"] == 1 && $campo["ValorAdicional"] == null){
                         $valorCampo = array_shift($arrayDatos[2]);
                         if (DateTime::createFromFormat('Y-m-d\TH:i', $valorCampo) !== false) {
                             $valorCampo = DateTime::createFromFormat('Y-m-d\TH:i', $valorCampo) -> format('Ymd H:i:s');
@@ -452,14 +504,22 @@ class Controlador
                     // $directorio_destino = "archivos_subidos/"; // Ruta donde deseas almacenar los archivos subidos
                     // $nombre_archivo = $_FILES["archivo"]["name"];
                     // $_SESSION["DirectorioRaizEmpresa"]
-                $resultadoEjecucion = exect_Insert_From_Dinamico($arrayValores);
-                // Modificar este sistema, muy poco automatico
-                if($resultadoEjecucion == false){
-                    $msgError = "Ha ocurrido un error al insertal el registro";
+             
+                $resultadoEjecucion = true;
+
+                if( $this -> miEstado -> Estado == 4.4 ){
+                    $temp = explode('/',$arrayValores[1]);
+                    $nombreA = end($temp);
+                    $this -> subirArchivosServicioWeb($_SESSION["pinC"],$this -> miEstado -> IdTipoPropietario,$this -> miEstado -> IdPropietario,$arrayValores[4],$arrayValores[1],$nombreA);
                 }else{
-                    array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
-                    
+                    $resultadoEjecucion = exect_Insert_From_Dinamico($arrayValores);
+                    if($resultadoEjecucion == false ){
+                        $msgError = "Ha ocurrido un error al insertal el registro";
+                    }else{
+                        array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
+                    }
                 }
+                
             }
             $this -> miEstado -> cargarForm = 0;
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $this -> miEstado -> Estado == 5 && $this -> miEstado -> tipo_App == 2){
@@ -469,12 +529,11 @@ class Controlador
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == -1){
             $this -> cerrarSesion();
         }
-        
         //navega a la siguiente pestaña segun el estado de la clase estado
         // optimizar todo el script de pintar
         // return pinta_contenido($this -> miEstado -> Estado)."idc :".$this -> miEstado -> IdCliente."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd);
         return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App)."A:".$this -> miEstado -> tipo_App. "idc :".$this -> miEstado -> IdCliente.
-        $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario,$msgError,0);
+        $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdPropietario,$msgError,0,$arrayAuxiliarHtml);
         
     }
 }
