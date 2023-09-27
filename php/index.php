@@ -16,6 +16,7 @@ function devuelveContenido(){
     }  
 }
 // $respuestaJSON = json_encode(array($_SESSION["TipoPortal"],0,0));
- $respuestaJSON = json_encode(devuelveContenido());
+
+$respuestaJSON = json_encode(devuelveContenido());
 echo $respuestaJSON;
 ?>

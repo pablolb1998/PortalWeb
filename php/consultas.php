@@ -33,7 +33,7 @@ function comprueba_usuario($usuario, $contraseña){
 function comprobarPermisosUsuarios(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $arrayPermisos = array();
-    $sql = "SELECT IdFormulario,Imagen,OrdenEstado,TipoApp,ValorAccion,EstiloPestaña
+    $sql = "SELECT IdFormulario,Imagen,OrdenEstado,TipoApp,ValorAccion,EstiloPestaña,Nombre
     FROM vw_PW_PermisosPestañas  
     WHERE IdIdentidad = ?;";
     $parm = array($_SESSION["Controlador"] -> miEstado -> IdIdentidad);
@@ -387,7 +387,10 @@ function exect_Insert_From_Dinamico($arrayValores){
                 $sql2 .= ' ?,';
             }
         }
+        
         $sql .=$sql2;
+        //  print_r($sql);
+        //  print_r($arrayValores);
         $parm = $arrayValores;
         $stmt = sqlsrv_prepare($conn, $sql, $parm);
         if (!sqlsrv_execute($stmt)) {

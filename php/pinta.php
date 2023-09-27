@@ -153,10 +153,20 @@ function pinta_contenido($estado){
                 
             break;
         case 7:
-                $titulo = "Mis Proyectos";
-                $cabecera = "../html/header.html";
-                $filename = "../html/documentos.html";
-                break;
+               
+                switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
+                    case 1:
+                        $titulo = "Mis Proyectos";
+                        $cabecera = "../html/header.html";
+                        $filename = "../html/documentos.html";
+                        break;
+                    case 2:
+                        $titulo = "Mi calendario";
+                        $filename = "../html/documentos.html";
+                        $cabecera = "../html/header.html";
+                        break;
+                }
+            break;
         default:
             $filename = "../html/login.html";
             break;
@@ -198,6 +208,7 @@ function pinta_contenido($estado){
         }elseif(in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7)) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
             //Documentos portal del comercial
             $filetext = str_replace('<span id="filtros_dinamicos">',cargaFiltros(),$filetext);
+            $filetext = str_replace('%FuncionFiltrar%','aplicafiltros()',$filetext);
             return $filetext.muestra_documentos();
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 2 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
             // elegir la pestaña de la jornada correspondiente switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
@@ -313,6 +324,25 @@ function pinta_contenido($estado){
             $filetext .= cargarJornadaHistorico();
             return $filetext;
 
+        }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 0){
+        
+        //Pestaña de calendario (Pepe)
+            $filtrosCalendario = '<span id="filtros_dinamicos">
+                                    <div class="form-check form-switch"> <label class="form-check-label" for="1">Asistencias</label><input class="form-check-input" type="checkbox" value="1" id="1" checked=""></div>
+                                    <div class="form-check form-switch"> <label class="form-check-label" for="2">Contratos</label><input class="form-check-input" type="checkbox" value="2" id="2" checked=""></div>
+                                    <div class="form-check form-switch"> <label class="form-check-label" for="4">Formación</label><input class="form-check-input" type="checkbox" value="4" id="4" checked=""></div>
+                                    <div class="form-check form-switch"> <label class="form-check-label" for="5">Incidencias</label><input class="form-check-input" type="checkbox" value="5" id="5" checked=""></div>
+                                    <div class="form-check form-switch"> <label class="form-check-label" for="6">Material</label><input class="form-check-input" type="checkbox" value="6" id="6" checked=""></div>
+                                </span>';
+            $filetext = str_replace('<span id="filtros_dinamicos">',$filtrosCalendario,$filetext);
+            $filetext = str_replace('%FuncionFiltrar%','aplicaFiltrosCalendario()',$filetext);
+            return $filetext.'<div id="calendar"></div></div></div></div>
+            <button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="img/Portal_Empleado_Nuevo2.png"></button>';    
+        
+        }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
+        //selección de el tipo de documneto
+            
+            return $filetext.cargarSeleccionDocumentosCalendario();
         }else{
             return $filetext;
         }
@@ -837,7 +867,6 @@ function cargaFormularioDinamico(){
     if($formularioConArchivos == true){
         $camposForm = str_replace("%tipoForm%",'enctype="multipart/form-data" class="formulario_Dinamico_Archivos col-10 col-md-12 mt-3"',$camposForm);
     }else{
-        //print_r("pepe guarra");
         $camposForm = str_replace("%tipoForm%","class=' formulario_Dinamico col-10 col-md-12 mt-3'",$camposForm);
         
     }
@@ -908,10 +937,30 @@ function cargarSeccionesDinamicas(){
 
 //cargar el formulario de firma
 function cargarFormularioFirma(){
-    //print_r($_SESSION["Controlador"] -> miEstado -> Documentos);
     $documentoFirmable = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($documento) {
         return $documento["id"] == $_SESSION["Controlador"] -> miEstado -> IdDocumentoPadre;
     });
     $documentoFirmable = array_shift($documentoFirmable);
     print_r($documentoFirmable["Documento"]);
+}
+
+
+function cargarSeleccionDocumentosCalendario(){
+    $secciones = $_SESSION["Controlador"] -> miEstado -> permisosSecciones;
+    $opcionesArch = array_filter($secciones, function ($documento) {
+        return !in_array($documento["IdFormulario"],[2641,2620,2616]);
+    });
+
+
+    $seccionbtn = '<div class="d-grid gap-2 col-6 mx-auto p-4" role="group">';
+
+    foreach($opcionesArch as $doc){
+        $seccionbtn .= '<button type="button " class=" btn btn-light" id="'.$doc["ValorAccion"].'" onclick="dibuja_pagina('.$doc["ValorAccion"].')" ">'.$doc["Nombre"].'</button>';
+
+        // $seccionbtn .= '<input type="radio" class="btn-check"  autocomplete="off" >';
+        // $seccionbtn .= '<label class="btn btn-outline-primary" for="btnradio1"></label>';
+    }
+    $seccionbtn .= '</div></div></div></div>';
+    return $seccionbtn;
+    
 }

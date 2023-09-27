@@ -1,8 +1,8 @@
 <?php
-session_start();
 
 if(isset($_FILES["Archivo"])){
-    $directorio_destino = $_SESSION["DirectorioEmpresa"] ."/inteco/subidasTemp/";
+    
+    //$directorio_destino = $_SESSION["DirectorioEmpresa"] ."/inteco/subidasTemp/";
     //$nombre_archivo = $_FILES["Archivo"]["name"];
     // echo $directorio_destino;
     // echo $_FILES["Archivo"]["tmp_name"];
