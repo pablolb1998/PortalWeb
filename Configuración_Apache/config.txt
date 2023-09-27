@@ -21,6 +21,8 @@ abrimos el archivo para editarlo con
 -> sudo gedit portal_emp.conf
 
 Configuramos los diferentes virtualhosts de diferntes maneras.
+modificamos el document root a /var/www/"Nombre del sitio"
+y añadimos lo siguiente al final
 <VirtualHost #ip>
     ServerName www.ejemplo.com
     ServerAdmin tunombre@example.com
@@ -70,23 +72,66 @@ y pegamos elsiguiente codigo
         
         curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
         
-        sudo apt-get update
-        sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+        sudo apt update
+        sudo ACCEPT_EULA=Y apt install -y msodbcsql18
         # optional: for bcp and sqlcmd
-        sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18
+        sudo ACCEPT_EULA=Y apt install -y mssql-tools18
         echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
         source ~/.bashrc
         # optional: for unixODBC development headers
-        sudo apt-get install -y unixodbc-dev
+        sudo apt install -y unixodbc-dev
 
 ejecutar los sigguientes comandos:
  -> sudo chmod 777 mecagoentodo.sh
- -> ./mecagoentod.sh
+ -> ./mecagoentodo.sh
 
+ejecutar los siguientes comandos una vez ejecutado el bash
+ -> sudo pecl config-set php_ini /etc/php/8.2/fpm/php.ini
+ -> sudo pecl install sqlsrv
+ -> sudo pecl install pdo_sqlsrv
+ -> sudo su
+ -> printf "; priority=20\nextension=sqlsrv.so\n" > /etc/php/8.2/mods-available/sqlsrv.ini
+ -> printf "; priority=30\nextension=pdo_sqlsrv.so\n" > /etc/php/8.2/mods-available/pdo_sqlsrv.ini
+ -> exit
+ -> sudo phpenmod -v 8.2 sqlsrv pdo_sqlsrv
 
-Configurar el archivo /etc/php/version/apache2/php.ini con las extensiones necesarias.
+comprobamos que se han creado los archivos
+ -> ls /etc/php/8.2/fpm/conf.d/*sqlsrv.ini
+
+y comprobamos que solo tengamos una carpeta de php
+-> ls /etc/php
+
+Se reinicia el php
+ -> sudo systemctl restart php8.2-fpm
+
+Configurar el archivo /etc/php/"version-de-php"/apache2/php.ini con las extensiones necesarias.
+y descomentar las extensiones de fileinfo y de pdo_odbc
+y añadir al final de las extensiones extension=sqlsrv.so y extension=pdo_sqlsrv.so
+
+en el mismo archivo buscamos session.save_path y descomentamos en que tiene la ruta, lo anterior es para ver las sesiones,
+ahora buscamos display_errors y le asignamos el valor On
 
 Configurar el OpenSS: https://github.com/microsoft/msphpsql/issues/1462#issuecomment-1645992247
+Abrimos el archivo /etc/ssl/openssl.cnf
+al inicio del archivo modificamos 
+    openssl_conf = default_conf
+al final del archivo modificamos 
+    [default_conf]
+    ssl_conf = ssl_sect
+    
+    [system_default_sect]
+    MinProtocol = TLSv1.1
+    CipherString = DEFAULT@SECLEVEL=0
+    
+    [openssl_init]
+    providers = provider_sect
+
+y justo arriba de system_default_sect añadimos
+    [ssl_sect]
+    system_default = system_default_sect
+
+reiniciar el servicio apache 
+ -> service apache2 reload
 Comprueba con un archivo .php simple con una conexion SQL se ejecuta adecuadamente.
 
 
