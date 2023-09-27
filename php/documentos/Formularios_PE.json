@@ -17,6 +17,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -31,6 +32,7 @@
                     "SelectorDesplegable":0,
                     "VariableAlmacenada" : "IdPersonal",
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -45,6 +47,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 1,
                     "MsgError":""
                 },
@@ -59,6 +62,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -73,6 +77,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : 142,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -87,6 +92,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -101,6 +107,7 @@
                     "SelectorDesplegable": 1,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -115,6 +122,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : 0,
+                    "ValorAdicional": null,
                     "Required": 1,
                     "MsgError":""
                 }
@@ -137,6 +145,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -151,6 +160,7 @@
                     "SelectorDesplegable":0,
                     "VariableAlmacenada" : "IdPersonal",
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -165,6 +175,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 1,
                     "MsgError":""
                 },
@@ -179,6 +190,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 1,
                     "MsgError":""
                 },
@@ -193,6 +205,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : 0,
+                    "ValorAdicional": null,
                     "Required": 1,
                     "MsgError":""
                 }
@@ -215,6 +228,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -229,6 +243,7 @@
                     "SelectorDesplegable":0,
                     "VariableAlmacenada" : "IdPersonal",
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -243,6 +258,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : "null",
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -257,6 +273,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -271,6 +288,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : 143,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -285,6 +303,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -299,6 +318,7 @@
                     "SelectorDesplegable": 1,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -313,11 +333,13 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : 0,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 }
             ]        
-        },{
+        },
+        {
             "Nombre" : "Material",
             "Estado" : 4.7,
             "Instruccion" : "INSERT_UP",
@@ -334,6 +356,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -348,6 +371,7 @@
                     "SelectorDesplegable":0,
                     "VariableAlmacenada" : "IdPersonal",
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -362,6 +386,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : "null",
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -376,6 +401,7 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 0,
                     "MsgError":""
                 },
@@ -390,6 +416,105 @@
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
                     "ValorPorDefecto" : 0,
+                    "ValorAdicional": null,
+                    "Required": 1,
+                    "MsgError":""
+                }
+            ]        
+        },
+        {
+            "Nombre" : "Documentos",
+            "Estado" : 4.4,
+            "Instruccion" : "INSERT_UP",
+            "Pro_Tabla" : "PEArchivosAuxiliar",
+            "Campos" :[
+                {
+                    "Variable" : "IdArchivoAppsheet",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 1,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdIdentidad",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdIdentidad",
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Link",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Varchar",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Archivo",
+                    "TipoDatoHtml": "file",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 1,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdPropietario",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdPropietario",
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdTipoPropietario",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdTipoPropietario",
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdArchivosTipo",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Tipo de archivo",
+                    "TipoDatoHtml": "Number",
+                    "SelectorDesplegable": 1,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
                     "Required": 1,
                     "MsgError":""
                 }
