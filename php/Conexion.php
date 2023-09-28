@@ -9,9 +9,19 @@ function ConexionBD( $server = "192.168.204.111", $bd = "OnixInteco",$un = "sa",
             $pass = $ps;
             $server = $server;
     try {
-  
         $connectionInfo = array(
-            "Database" => $bbdd, "UID" => $username, "PWD" => $pass, "CharacterSet" => "UTF-8", "ConnectionPooling" => "1", "MultipleActiveResultSets" => '0');
+            "Database" => $bbdd,
+                "UID" => $username,
+                "PWD" => $pass,
+                "CharacterSet" => "UTF-8",
+                "ConnectionPooling" => "1",
+                "MultipleActiveResultSets" => '0',
+                "Encrypt" => false
+                );
+        if( $conn === false ) {
+                    die( print_r( sqlsrv_errors(), true));
+        }
+        
         $conn = sqlsrv_connect($server, $connectionInfo);
         //$conn = new PDO ("sqlsrv:Server=$server,$puerto;Database=$bbdd",$username,$pass);
     } catch (EXCEPTION $e) {

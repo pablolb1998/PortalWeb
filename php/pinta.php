@@ -337,7 +337,7 @@ function pinta_contenido($estado){
             $filetext = str_replace('<span id="filtros_dinamicos">',$filtrosCalendario,$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicaFiltrosCalendario()',$filetext);
             return $filetext.'<div id="calendar"></div></div></div></div>
-            <button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="img/Portal_Empleado_Nuevo2.png"></button>';    
+            <button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
         
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
         //selección de el tipo de documneto
@@ -475,7 +475,7 @@ function muestra_documentos(){
                 $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td>';
                 $listaDoc .= '<td class="col-5"><div class="precio" name="precio" ><b id="importe_documento" style="float:right;color:'.$color.';">' . $importe;
                 $listaDoc .= '</b><br><a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=' . $PinDescargas .'&IdOrigenImpresion='.$Origen_impresion.'&IdPropietario='. $id. '" target="_blank">';
-                $listaDoc .= '<img class="pdf_icono" src="img/descargar-pdf.png"></a></div></td></tr>'; 
+                $listaDoc .= '<img class="pdf_icono" src="Img/descargar-pdf.png"></a></div></td></tr>'; 
                 }
                 $listaDoc .= "</tbody></table></span>";
                 $listaDoc .= "<div class='container text-center'>";
@@ -505,10 +505,10 @@ function DibujaLineas_PortalEmpleado(){
             $acciones_linea .= '<button onclick="dibuja_pagina([4.4,%IdProp%])"    style="all: initial;cursor: pointer;"><img class="pdf_icono" src="%ImgArchivos%"></button>';    
         }
         if($_SESSION["Controlador"] -> miEstado -> acciones["observaciones"] == 1 ){
-            $acciones_linea .= '<a href="#" target="_blank"><img class="pdf_icono" src="img/Observaciones.png"></a>';    
+            $acciones_linea .= '<a href="#" target="_blank"><img class="pdf_icono" src="Img/Observaciones.png"></a>';    
         }
         if($_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"] == 1){
-            $acciones_globales .= '<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="img/Portal_Empleado_Nuevo2.png"></button>';    
+            $acciones_globales .= '<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
         }
         if($_SESSION["Controlador"] -> miEstado -> Estado == 4.4){
             $acciones_linea = '<a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin='.$_SESSION["pinC"].'&IdArchivo=%IdProp%" target="_blank">
@@ -608,31 +608,31 @@ function DibujaLineas_PortalEmpleado(){
                 //elegir el color de la carpeta segun tenga archivos
                 if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
                     $imgRutaCarpeta = '';
-                    $imgRutaCarpeta = 'img/Documentos2.png';
+                    $imgRutaCarpeta = 'Img/Documentos2.png';
                     //print_r($carperta);
                     if(isset($valor["NumeroArchivos"]) && $valor["NumeroArchivos"]>0){
-                        $imgRutaCarpeta = 'img/Documentos_verde2.png';
+                        $imgRutaCarpeta = 'Img/Documentos_verde2.png';
                     }
                     $acciones_linea_pintar = str_replace('%ImgArchivos%',$imgRutaCarpeta,$acciones_linea_pintar);
                 }
                 // incluir la accion de abrir el formulario de firma
                 if(isset($valor["Firmable"]) && $valor["Firmable"] == 1 ){
                     $acciones_linea_pintar .= '<button onclick="dibuja_pagina([0,6,'.$valor["id"].'])"  style="all: initial;cursor: pointer;" >
-                                        <img  src="img/firma2.png"></button>';
+                                        <img  src="Img/firma2.png"></button>';
                 }
                 //elegir el icono
                 if( $_SESSION["Controlador"] -> miEstado -> Estado == 4.4 ){
-                    $imgExtension = 'img/descarga_generica.png';
+                    $imgExtension = 'Img/descarga_generica.png';
                     $file_name = $valor["Documento"];
                     $temp = explode('.',$file_name);
                     $extension = end($temp);
                     
                     if($extension == 'pdf'){
-                        $imgExtension = 'img/descarga_pdf.png';
+                        $imgExtension = 'Img/descarga_pdf.png';
                     }elseif($extension == 'docx'){
-                        $imgExtension = 'img/descarga_word.png';
+                        $imgExtension = 'Img/descarga_word.png';
                     }elseif($extension == 'xlsx'){
-                        $imgExtension = 'img/descarga_excell.png';
+                        $imgExtension = 'Img/descarga_excell.png';
                     }
                     $acciones_linea_pintar = str_replace('%imgTipoArchivo%',$imgExtension,$acciones_linea_pintar);
                 }
@@ -902,14 +902,14 @@ function cargarSeccionesDinamicas(){
                 $pestanaSecciones .= '<div class=" col-12 col-sm-6 mt-5" id="pestanaEnJornada" style="display: none;">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
                 $pestanaSecciones .=  'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .=  '<img class="img-fluid" src="img/PortalEmpleado/Pestanamenu/portal-empleado-jornada-entrada-f.png" />';
+                $pestanaSecciones .=  '<img class="img-fluid" src="Img/PortalEmpleado/PestanaMenu/portal-empleado-jornada-entrada-f.png" />';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
               
                 $pestanaSecciones .=  '<div class=" col-12 col-sm-6 mt-5" id="pestanaFueraJornada" style="display: none;">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
                 $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .= '<img class="img-fluid" src="img/PortalEmpleado/Pestanamenu/portal-empleado-jornada-salida-f2.png"/>';
+                $pestanaSecciones .= '<img class="img-fluid" src="Img/PortalEmpleado/PestanaMenu/portal-empleado-jornada-salida-f2.png"/>';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
                 
@@ -917,7 +917,7 @@ function cargarSeccionesDinamicas(){
                 $pestanaSecciones .= '<div class="'.$seccion['EstiloPestaña'].'">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina(['.$seccion['ValorAccion'].'])"';
                 $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .= '<img class="img-fluid" src="img/PortalEmpleado/Pestanamenu/'.$seccion['Imagen'].'"/>';
+                $pestanaSecciones .= '<img class="img-fluid" src="Img/PortalEmpleado/PestanaMenu/'.$seccion['Imagen'].'"/>';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
             }
