@@ -135,6 +135,36 @@ reiniciar el servicio apache
 Comprueba con un archivo .php simple con una conexion SQL se ejecuta adecuadamente.
 
 
+Actualizar carpeta con los nuevos cambios
+ ->git init
+ ->git remote add origin https://github.com/pablolb1998/PortalWeb
+
+Crear script para actualizar automaticamente
+  #!/bin/bash
+    #Ruta de la carpeta local y URL del repositorio
+    carpeta_local="/var/www/portal"
+    repositorio_github="https://github.com/pablolb1998/PortalWeb"
+
+    #Bule infinito para verificar cambios
+    while true
+    do
+        #Actualizar el repositorio local
+        cd "$carpeta_local"
+        git pull origin main
+
+    #Dormir durante un tiempo (por ejemplo, 1 hora) antes de verificar nuevamente
+        sleep 3600
+    done
+
+ -> chmod +x nonbre script
+ -> ./nombrescript
+
+
+
+
+
+
+
 
 
 
