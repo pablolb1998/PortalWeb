@@ -180,6 +180,9 @@ function pinta_contenido($estado){
         //$fileheadertext = fread($fileheader, $filesizeheader);
         $fileheadertext = $_SESSION["Controlador"] -> miEstado -> header;
         $fileheadertext = str_replace("%NombreE%",$titulo.($_SESSION["Controlador"] -> miEstado -> cargarForm == 1 ? ' / Nueva':''),$fileheadertext);
+        if($_SESSION["Controlador"] -> miEstado -> Estado ==2){
+            $fileheadertext = str_replace('class="col-2"','class="col-2 d-none"',$fileheadertext);
+        }
     }
 
 
@@ -207,6 +210,13 @@ function pinta_contenido($estado){
             return $filetext.muestra_sociedades();
         }elseif(in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7)) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
             //Documentos portal del comercial
+            $btnBuscar = '<li><div class="input-group">
+            <input type="text" class="form-control" placeholder="Buscar..." aria-label="Buscar..." id="filtro_txt" >
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" onclick="%FuncionFiltrar%"><img src="Img/lupa.png" width="17px"></button>
+            </div>
+          </div></li>';
+            $filetext = str_replace('<li class="d-none" id="%btnBuscar%"></li>',$btnBuscar,$filetext);
             $filetext = str_replace('<span id="filtros_dinamicos">',cargaFiltros(),$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicafiltros()',$filetext);
             return $filetext.muestra_documentos();
@@ -348,16 +358,15 @@ function pinta_contenido($estado){
         }
 
     } else {
+        if($_SESSION['Controlador'] -> miEstado -> tipo_App == 1){
+            $filetext = str_replace("%NombrePortal%",'Area del Cliente',$filetext);
+            $filetext = str_replace("%TipoUsuario%",'cliente',$filetext);
+        }else{
+            $filetext = str_replace("%NombrePortal%",'Portal del Empleado',$filetext);
+            $filetext = str_replace("%TipoUsuario%",'empleado',$filetext);
+        }
         if(isset($_SESSION["imgLogo"])){
             $filetext = str_replace("%logoImg%",$_SESSION["imgLogo"],$filetext);
-            if($_SESSION['Controlador'] -> miEstado -> tipo_App == 1){
-                $filetext = str_replace("%NombrePortal%",'Portal del Cliente',$filetext);
-                $filetext = str_replace("%TipoUsuario%",'cliente',$filetext);
-            }else{
-                $filetext = str_replace("%NombrePortal%",'Portal del Empleado',$filetext);
-                $filetext = str_replace("%TipoUsuario%",'empleado',$filetext);
-            }
-
         }else{
             $filetext = str_replace("%logoImg%",'https://esquio.es/wp-content/uploads/elementor/thumbs/logo-esquio-pq0g3tu6khq6p3k32wrm4q6iwu2nqga9msxptholvk.png',$filetext);
         }
@@ -475,7 +484,7 @@ function muestra_documentos(){
                 $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td>';
                 $listaDoc .= '<td class="col-5"><div class="precio" name="precio" ><b id="importe_documento" style="float:right;color:'.$color.';">' . $importe;
                 $listaDoc .= '</b><br><a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=' . $PinDescargas .'&IdOrigenImpresion='.$Origen_impresion.'&IdPropietario='. $id. '" target="_blank">';
-                $listaDoc .= '<img class="pdf_icono" src="Img/descargar-pdf.png"></a></div></td></tr>'; 
+                $listaDoc .= '<img class="pdf_icono" src="Img/pdf_generico.png"></a></div></td></tr>'; 
                 }
                 $listaDoc .= "</tbody></table></span>";
                 $listaDoc .= "<div class='container text-center'>";

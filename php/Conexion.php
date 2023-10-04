@@ -18,11 +18,12 @@ function ConexionBD( $server = "192.168.204.111", $bd = "OnixInteco",$un = "sa",
                 "MultipleActiveResultSets" => '0',
                 "Encrypt" => false
                 );
-        if( $conn === false ) {
-                    die( print_r( sqlsrv_errors(), true));
-        }
-        
+ 
         $conn = sqlsrv_connect($server, $connectionInfo);
+        if( $conn === false ) {
+            die( print_r( sqlsrv_errors(), true));
+}
+
         //$conn = new PDO ("sqlsrv:Server=$server,$puerto;Database=$bbdd",$username,$pass);
     } catch (EXCEPTION $e) {
         echo ("No se logró conectar correctamente con la base de datos: $bbdd, error: $e");
