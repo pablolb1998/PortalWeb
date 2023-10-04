@@ -484,7 +484,7 @@ function muestra_documentos(){
                 $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td>';
                 $listaDoc .= '<td class="col-5"><div class="precio" name="precio" ><b id="importe_documento" style="float:right;color:'.$color.';">' . $importe;
                 $listaDoc .= '</b><br><a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=' . $PinDescargas .'&IdOrigenImpresion='.$Origen_impresion.'&IdPropietario='. $id. '" target="_blank">';
-                $listaDoc .= '<img class="pdf_icono" src="Img/pdf_generico.png"></a></div></td></tr>'; 
+                $listaDoc .= '<img class="pdf_icono" src="Img/descarga_generica.png"></a></div></td></tr>'; 
                 }
                 $listaDoc .= "</tbody></table></span>";
                 $listaDoc .= "<div class='container text-center'>";
