@@ -46,12 +46,6 @@
     transform: scale(1.03)
 }
 
-/* #cuerpo{
-    padding-right: 1em;
-    padding-left: 1em;
-} */
-
-
 
 .hover-effect:hover {
     background-color: #a1cbf9; /* Color de fondo cuando se realiza el hover */
@@ -91,26 +85,6 @@
     font-weight:bold;
     float: right;
 
-}
-.pdf_icono{
-    width: 1.1%;
-    float: right;
-    min-width: 2.5em;
-}
-
-.bolsa_dinero{
-    width: 1.1%;
-    float: right;
-    min-width: 1.5em;
-    margin-right: 0.6em;
-}
-.bolsa_dinero:hover{
-   transform:scale(1.07);
-}
-
-
-.pdf_icono:hover{
-    transform:scale(1.07);
 }
 
 #vencido{

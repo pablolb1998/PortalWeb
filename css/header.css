@@ -1,9 +1,84 @@
+
+/* Flecha del header */
 #flecha_volver{
     all: unset;
     cursor: pointer;
 }
     
-      
 #flecha_volver:focus {
     outline: revert;
 }
+
+#flecha_volver:hover {
+    transform: scale(1.1);
+}
+
+/* Estilos iconos */
+
+.pdf_icono{
+    width: 1.1%;
+    float: right;
+    min-width: 2.5em;
+}
+
+.bolsa_dinero{
+    width: 1.1%;
+    float: right;
+    min-width: 1.5em;
+    margin-right: 0.6em;
+}
+.bolsa_dinero:hover{
+   transform:scale(1.07);
+}
+
+
+.pdf_icono:hover{
+    transform:scale(1.07);
+}
+
+
+@media (max-width: 600px) {
+    .card {
+        /* Quitalos estilos de sombra y borde en dispositivos móviles */
+        box-shadow: none;
+        border: none;
+    }
+/* css para eliminar los margenes en movil de boostrap */
+
+        #no-margin {
+            margin: 0px !important;
+            
+        }
+        #no-padding{
+            padding: 0px !important;
+        }
+
+    
+}
+body {
+    overflow-x: hidden;
+}
+
+/*css para eliminar el paddig por defecto de boostrap */
+/* @media screen and (min-width: 600px) { /* setting default row and cols values for non mobile screens */
+  /*  .row {
+      margin-left: -15px;
+      margin-right: -15px;
+  }
+  
+    .row [class*='col']{
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  
+  } */
+  /*  setting rows margin and cols padding to 0 for mobile screens */
+ /* .row {  
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .row [class*='col']{
+    padding-left: 0;
+    padding-right: 0;
+  }  */
