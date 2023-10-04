@@ -7,7 +7,9 @@ $datosConn = json_decode($datosConn, true);
 $_SESSION["pinC"] = $datosConn["pinC"];
 // nombre empresa
 $_SESSION["NombreM"] = $datosConn["NombreM"];
-$_SESSION["imgLogo"] = $datosConn["imgLogo"];
+if($datosConn["imgLogo"] != ""){
+    $_SESSION["imgLogo"] = $datosConn["imgLogo"];
+}
 
 if(isset($_GET["IdD"])){
     //$_SESSION["IdDocumento"] = hexdec($_GET["IdD"]);
@@ -25,7 +27,7 @@ if(isset($_GET["IdD"])){
         
     }
 }
-$ruta = "../index.html";
-header('Location:'.$ruta);
+$ruta = "";
+header('Location:../Index.html');
 exit;
 ?>
