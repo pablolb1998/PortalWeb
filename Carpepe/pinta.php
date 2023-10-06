@@ -241,7 +241,7 @@ function pinta_contenido($estado){
                 "Descripcion" => "Material"]
             ];
         
-            // funcion para reinedxarlo 
+            // funcion para reindexarlo 
             
             $txt_filtros = '<span id="filtros_dinamicos">';
             if(count($arrayFiltros)>0){
@@ -253,9 +253,13 @@ function pinta_contenido($estado){
 
 
         }
+        //Pestaña de Vacaciones del empleado
         elseif($_SESSION["Controlador"] -> miEstado -> Estado == 4.9 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null){
-            $filetext .= cargarVacacionesEmpleado();
-            return $filetext;
+          
+            return $filetext.cargarVacacionesEmpleado();
+        } elseif($_SESSION["Controlador"] -> miEstado -> Estado == 4.9 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
+          
+            return $filetext.cargarFormVacacionesEmpleado();
         }
         elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null && $_SESSION["Controlador"] -> miEstado -> cargarFormFirma == null ){
         //Pestañas de navegacion
@@ -275,7 +279,7 @@ function pinta_contenido($estado){
                 //     "Descripcion" => "Material"]
                 // ];
             
-                // // funcion para reinedxarlo 
+                // // funcion para reindexarlo 
                 
                 // $txt_filtros = '<span id="filtros_dinamicos">';
                 // if(count($arrayFiltros)>0){
@@ -987,66 +991,130 @@ function cargarVacacionesEmpleado(){
 
 
    $seccionvcn='
-<div class="row h-100 justify-content-center my-4">
-       <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
-           <br>
+   
+   <section class="">
+   <nav>
+       <div class="nav nav-tabs mt-4 " id="nav-tab" role="tablist">
+           <button class="nav-link" id="nav-graficos-tab" data-bs-toggle="tab"
+               data-bs-target="#nav-graficos" type="button" role="tab" aria-controls="nav-graficos"
+               aria-selected="false">Gráficos</button>
+           <button class="nav-link active" id="nav-resumen-tab" data-bs-toggle="tab"
+               data-bs-target="#nav-resumen" type="button" role="tab" aria-controls="nav-resumen"
+               aria-selected="true" aria-expanded="true">Resumen</button>
+
+           <button class="nav-link" id="nav-festivos-tab" data-bs-toggle="tab"
+               data-bs-target="#nav-festivos" type="button" role="tab" aria-controls="nav-festivos"
+               aria-selected="false">Festivos</button>
+       </div>
+   </nav>
+   <div class="tab-content mt-2 p-3" id="nav-tabContent">
+       <!-- Contenido de Resumen. -->
+       <div class="tab-pane fade show active" id="nav-resumen" role="tabpanel"
+           aria-labelledby="nav-resumen-tab">
+           <div id="resumen">
+
+           </div>
+
+
+        
+       </div>
        
-               <section class="row justify-content-center col-10 col-md-6 col-sm-6 col-xs-6 offset-1 offset-lg-3">
-                   <div class="container mt-4">
-                       <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#resumenCollapse" aria-expanded="false" aria-controls="resumenCollapse"
-                               onclick="toggleCollapse(\'resumenCollapse\')" id="resumenButton">
-                           Resumen
-                       </button>
-                       <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#graficosCollapse" aria-expanded="false" aria-controls="graficosCollapse"
-                               onclick="toggleCollapse(\'graficosCollapse\')">
-                           Gráficos
-                       </button>
-                       <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#festivosCollapse" aria-expanded="false" aria-controls="festivosCollapse"
-                               onclick="toggleCollapse(\'festivosCollapse\')">
-                           Festivos
-                       </button>
-                   </div>
-                   <div class="collapse" id="resumenCollapse">
-                       <div class="card card-body">
-                           Contenido para Resumen.
-                       </div>
-                   </div>
-                   <div class="collapse collapse-horizontal" id="graficosCollapse">
-                       <div class="card card-body">
-                           <canvas id="graficoBarras"></canvas>
-                       </div>
-                   </div>
-                   <div class="collapse" id="festivosCollapse">
-                       <div class="card card-body">
-                           <div id="calendarioFestivos"></div>
-                       </div>
-                   </div>
-                   <form class="formulario_Dinamico ">
-                       <button class="btn btn-primary floating-btn">
-                           <i class="bi bi-tsunami"></i>
-                       </button>
-                       <button class="btn btn-primary floating2-btn">
-                           <i class="bi bi-calendar"></i>
-                       </button>
-                       <div class="container mt-4">
-                           <div class="row justify-content-center">
-                               <button class="btn btn-primary col-2" onclick="window.location.href=\'inicio.html\'">
-                                   <i class="bi bi-house-door"></i> Inicio
-                               </button>
-                           </div>
-                       </div>
-                   </form>
-               </section>
+       <!-- Contenido de Festivos. -->
+       <div class="tab-pane fade" id="nav-festivos" role="tabpanel"
+           aria-labelledby="nav-festivos-tab">
+           <div id="festivos">
+
            </div>
        </div>
+       <!-- Contenido de Gráficos. -->
+      
+       <canvas class="tab-pane fade" id="nav-graficos" role="tabpanel"
+           aria-labelledby="nav-graficos-tab"></canvas>
    </div>
 
-   
-';
+
+
+
+   <form class="formulario_Dinamico ">
+
+       <button class="btn btn-primary floating-btn">
+           <i class="bi bi-tsunami"></i>
+       </button>
+       <button class="btn btn-primary floating2-btn">
+           <i class="bi bi-calendar"></i>
+       </button>
+
+
+
+       <div class="container mt-4">
+           <div class="row justify-content-center">
+               <button class="btn btn-primary col-2">
+                   <i class="bi bi-house-door"></i> Inicio
+               </button>
+           </div>
+       </div>
+   </form>
+</section>
+             
+            
+   ';
 
 return $seccionvcn;
+
+}
+
+function cargarFormVacacionesEmpleado(){
+
+    $seleccionvcn ='<div class="row  h-100 justify-content-center my-4">
+               <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                   <br>
+                   <div class="card shadow-2-strong shadow">
+   
+   
+   
+                       <section class="row justify-content-center col-10 col-md-6 col-sm-6 col-xs-6 offset-1 offset-lg-3 ">
+                           <label class="tipo">Tipo</label>
+                               <div class="mb-3  col-12  input-group-lg "  style="margin-left: 16px;">
+                                   
+                                   <div class="btn-group-vertical col-12 ">
+                                       <button type="button" class="btn btn-light  mb-2">Solicitud de Vacaciones</button>
+                                       <button type="button" class="btn btn-light col-6 mb-2">Asistencia</button>
+                                       <button type="button" class="btn btn-light col-6 mb-2">Material</button>
+                                       
+                                     </div>
+                                 
+                                              
+                                           
+                                       
+                                   
+                                   </div>
+                                       
+                               <form class="formulario_Dinamico ">
+                               
+                              
+                           
+                               
+                               <div class="row col-11 justify-content-center">
+                                   <button
+                                       class="col-5  offset-1   btn mt-3 " onclick="dibuja_pagina([0,3,0])"
+                                       onmouseover="this.style.backgroundColor=\'#d6d5d3\'"
+                                       onmouseout="this.style.backgroundColor=\'#ffffff\';">
+                                       Cancelar
+                                   </button>
+                                   <button class="col-5 offset-1 btn  mt-3 " onclick="" type="submit"
+                                       style="color:#0265bd; font-size: 20px; text-align: center;" onmouseover="this.style.backgroundColor=\'#d6d5d3\'"
+                                       onmouseout="this.style.backgroundColor=\'#ffffff\';"  id="save" >
+                                       Siguiente
+                                   </button></div><br>
+                           </form>
+           
+                   </div>
+               </div>
+           </div>
+   ';
+
+
+
+    return $seleccionvcn;
 
 }

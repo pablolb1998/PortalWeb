@@ -5,7 +5,10 @@
         margin: 0;
         font-family: 'Poppins', sans-serif;
     }
-
+    .no-anim {
+      transition: none; /* Elimina la transición */
+      display: none; /* Evita que se muestre con un efecto de deslizamiento */
+  }
 
     .btn-primary {
         background-color: transparent;
@@ -38,3 +41,33 @@
       border: none;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     }
+    /* Estilos para las bolitas */
+.dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.green {
+  background-color: green;
+}
+
+.red {
+  background-color: red;
+}
+
+.blue {
+  background-color: blue;
+}
+.purple {
+  background-color: purple;
+}
+.yellow {
+  background-color: yellow;
+}
+.orangered{
+
+  background-color: orangered;
+}
