@@ -8,6 +8,14 @@ class Controlador
     public $miEstado;
     //valor por defecto en caso de no recibir
     function __construct($Estado = null){
+        
+            $_SESSION["pinC"] = $_COOKIE['pinCPortalE'];
+        if(isset($_COOKIE['LogoUsuarioPortalE'])){
+            $_SESSION["imgLogo"] = $_COOKIE['LogoUsuarioPortalE'];
+        }
+            
+        
+            $_SESSION["TipoPortal"] = $_COOKIE['TipoPortalE'];
         $this -> miEstado = new Estado();
         $this -> miEstado -> Estado = 0;
         $this -> miEstado -> Documentos = array();
@@ -55,7 +63,11 @@ class Controlador
             $this -> miEstado -> IP = $datosBBDD[0]["Servidor"].','.$datosBBDD[0]["Puerto"];
         }
         //pruebas
-        
+        if($_SESSION["pinC"] == 123654){
+            $this -> miEstado -> IP = '192.168.204.111';
+        }elseif ($_SESSION["pinC"] == '65814415D75C') {
+            $this -> miEstado -> IP = '81.169.167.5,23459';
+        }
             
         $this -> miEstado -> bbdd = $datosBBDD[0]["BBDD"];
     }
@@ -272,8 +284,10 @@ class Controlador
     //funciones de para generar el contenido
     // optimizar el navegar pestañas
     function generarContenido($arrayDatos = array()){
+       
         $arrayAuxiliarHtml = array();
         $msgError = "" ;
+        $abrirNuebaPestaña = 0;
         $c = $this -> miEstado -> Estado;
         $this -> comprobarBBDD($_SESSION["pinC"]);
         $nav = "";
@@ -317,7 +331,7 @@ class Controlador
                 $PinDescargas = $valor["PinDescargas"];
                 $Origen_impresion = $valor["OrigenImpresion"];
                 $linkDescarga = 'http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=' . $PinDescargas .'&IdOrigenImpresion='. $Origen_impresion .'&IdPropietario='. $id;
-                return array($linkDescarga,'',1);
+                return array($linkDescarga,0,1);
                 //session_abort();
                 die;
             } else {
@@ -336,15 +350,19 @@ class Controlador
             switch ($arrayDatos[0]) {
                 case 1 :
                     $nav = 4;
+                    $this -> miEstado -> IdTipoPropietario;
                     break;
                 case 2 :
                     $nav = 5;
+                    $this -> miEstado -> IdTipoPropietario;
                     break;
                 case 3 :
                     $nav = 6;
+                    $this -> miEstado -> IdTipoPropietario;
                     break;
                 default:
                     $nav = 3;
+                    $this -> miEstado -> IdTipoPropietario;
                     break;
             }
             $this -> navegarPestanas($nav);
@@ -473,6 +491,36 @@ class Controlador
             $this -> miEstado -> tipofiltro = 2;
             $this -> miEstado -> puntero_posicion += count($this -> miEstado -> Documentos);
             $this -> miEstado -> CadenaFiltro = $arrayDatos[2];
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 4 && in_array($this -> miEstado -> Estado, array(3,4,5,6,7)) && $this -> miEstado -> tipo_App == 1){
+        //PORTAL CLIENTE descargar documentos en local
+            // $arrayDatos[2][0] 
+            // $arrayDatos[2][1] 
+            //print_r($arrayDatos[2][2]);
+            $url ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$arrayDatos[2][1].'&IdPropietario='.$arrayDatos[2][0];
+            $nombre_archivo = $arrayDatos[2][2];
+            $url_archivo = "http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=123654&IdOrigenImpresion=140&IdPropietario=10906";
+            $directorio_destino = "archivos/".$_SESSION["pinC"]."/";
+            // Verificar si el directorio existe, si no, crearlo
+            if (!file_exists($directorio_destino)) {
+                mkdir($directorio_destino, 0755, true);
+            }
+
+            // Realiza la solicitud HTTP para obtener el contenido del archivo
+            $response = file_get_contents($url_archivo);
+            if ($response === false) {
+                $msgError = 'Error al obtener el archivo desde el servicio web.';
+            } else {
+                // Específica la ruta donde deseas guardar el archivo
+                $rutaGuardado = $directorio_destino.$nombre_archivo; // Reemplaza esto con la ruta y nombre deseado
+            
+                // Guarda el contenido en un archivo en el servidor
+                if (file_put_contents($rutaGuardado, $response) !== false) {
+                    //$abrirNuebaPestaña = 1;
+                    return array('php/'.$rutaGuardado,1,1);
+                } else {
+                    $msgError = 'Error al guardar el archivo en el servidor.';
+                }
+            }
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 2 && !isset($arrayDatos[2])){
         //Portal empleado cargar Formulario
             if($this -> miEstado -> Estado != 7){
@@ -542,7 +590,7 @@ class Controlador
         // optimizar todo el script de pintar
         // return pinta_contenido($this -> miEstado -> Estado)."idc :".$this -> miEstado -> IdCliente."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd);
         return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App)."A:".$this -> miEstado -> tipo_App. "idc :".$this -> miEstado -> IdCliente.
-        $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdPropietario,$msgError,0,$arrayAuxiliarHtml);
+        $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdPropietario,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml);
         
     }
 }
