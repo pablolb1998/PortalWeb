@@ -184,6 +184,9 @@ function pinta_contenido($estado){
             $fileheadertext = str_replace('class="col-2"','class="col-2 d-none"',$fileheadertext);
         }
     }
+    //cargar el nombre del usuario
+    $nombre_usu = '<hr size="1px" color="grey"/><li class="dropdown-item">'.$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo.'</li>';
+    $fileheadertext = str_replace('<li class="d-none" id="%NombreUsu%"></li>',$nombre_usu,$fileheadertext);
 
 
 
@@ -195,6 +198,7 @@ function pinta_contenido($estado){
     }else{
         $filetext = $fileheadertext.cargarSeccionesDinamicas();
     }
+    
     
 
 
@@ -208,6 +212,7 @@ function pinta_contenido($estado){
         if ($_SESSION["Controlador"] -> miEstado -> Estado == 1){
             //Pestaña de sociedades del portal del comercial
             return $filetext.muestra_sociedades();
+
         }elseif(in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7)) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
             //Documentos portal del comercial
             $btnBuscar = '<li><div class="input-group">
@@ -216,6 +221,7 @@ function pinta_contenido($estado){
               <button class="btn btn-outline-secondary" type="button" onclick="%FuncionFiltrar%"><img src="Img/lupa.png" width="17px"></button>
             </div>
           </div></li>';
+            
             $filetext = str_replace('<li class="d-none" id="%btnBuscar%"></li>',$btnBuscar,$filetext);
             $filetext = str_replace('<span id="filtros_dinamicos">',cargaFiltros(),$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicafiltros()',$filetext);
@@ -434,8 +440,9 @@ function muestra_documentos(){
 
         //filtro por tipo 1 de filtro es decir string 
         if($_SESSION["Controlador"] -> miEstado -> CadenaFiltro !== null && $_SESSION["Controlador"] -> miEstado -> tipofiltro == 1){
+           
             $arrayDoc = array_filter($arrayDoc, function ($docF) use($arrayDoc) {
-                return str_contains($docF["Descripcion"],$_SESSION["Controlador"] -> miEstado -> CadenaFiltro);
+                return str_contains(strtolower($docF["Descripcion"]),strtolower($_SESSION["Controlador"] -> miEstado -> CadenaFiltro));
             });
         }
         
@@ -483,7 +490,7 @@ function muestra_documentos(){
                 $listaDoc .='<p><b style="color:'.$color.';">' . $estado . '</b><br>';
                 $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td>';
                 $listaDoc .= '<td class="col-5"><div class="precio" name="precio" ><b id="importe_documento" style="float:right;color:'.$color.';">' . $importe;
-                $listaDoc .= '</b><br><a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=' . $PinDescargas .'&IdOrigenImpresion='.$Origen_impresion.'&IdPropietario='. $id. '" target="_blank">';
+                $listaDoc .= '</b><br><a onclick="dibuja_pagina([0,4,['.$id.','.$Origen_impresion.",'".$codigo.".pdf'".']])" >';
                 $listaDoc .= '<img class="pdf_icono" src="Img/descarga_generica.png"></a></div></td></tr>'; 
                 }
                 $listaDoc .= "</tbody></table></span>";
