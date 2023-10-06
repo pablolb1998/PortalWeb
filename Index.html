@@ -54,7 +54,7 @@
 var eventos = [];
 var calendar;
     function dibuja_pagina(arrayDatos = []){
-        //alert(arrayDatos[0])
+        //alert(arrayDatos)
         $.ajax({
               //Informacion que le mandamos al PHP.
                 data:{ arrayDatos : arrayDatos},    
@@ -94,7 +94,12 @@ var calendar;
                             }
                         //Redirigir a otra pagina
                         }else{
-                            window.location.replace(respuesta[0]);
+                            if(respuesta[1] == 0){
+                                window.location.replace(respuesta[0]);
+                            }else if(respuesta[1] == 1){
+                                window.open(respuesta[0], '_blank');
+                            }
+                            
                         }
                     } catch (error) {
                         seccionBody = document.getElementById("cuerpo");
