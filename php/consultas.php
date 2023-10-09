@@ -33,10 +33,12 @@ function comprueba_usuario($usuario, $contraseña){
 function comprobarPermisosUsuarios(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $arrayPermisos = array();
+    $tipoUsr = $_SESSION["TipoPortal"] == 1 ? 1 : 2;
+
     $sql = "SELECT IdFormulario,Imagen,OrdenEstado,TipoApp,ValorAccion,EstiloPestaña,Nombre
     FROM vw_PW_PermisosPestañas  
-    WHERE IdIdentidad = ?;";
-    $parm = array($_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+    WHERE IdIdentidad = ? AND TipoApp = ?;";
+    $parm = array($_SESSION["Controlador"] -> miEstado -> IdIdentidad,$tipoUsr);
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
     //print_r($stmt);
     if (!sqlsrv_execute($stmt)) {

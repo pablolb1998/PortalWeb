@@ -45,7 +45,7 @@ function pinta_contenido($estado){
             
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:
-                    $filename = "../html/secciones_Cliente.html";
+                    //$filename = "../html/secciones_Cliente.html";
                     break;
                 case 2:
                     //$filename = "../html/secciones_Empleado.html";
@@ -893,24 +893,28 @@ function cargaFormularioDinamico(){
 
 function cargarSeccionesDinamicas(){
     //fragmento comun
+    $rutaImg="";
     $pestanaSecciones = "";
     $pestanaSecciones .= '<br><br><div class="row h-75 justify-content-center">';
     $pestanaSecciones .= '<div class="col-12 col-md-9">';
     $pestanaSecciones .= '<div class="card shadow-2-strong shadow">';
     $pestanaSecciones .= '<div class="button-container  justify-content-center pb-5 ">';
+    if($_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
+        $rutaImg="PortalEmpleado/PestanaMenu/";
+    }
+    
     if ($_SESSION["Controlador"] -> miEstado -> Estado == 2) {
-        $pestanaSecciones .= '<div class="row col-12 col-lg-6 offset-lg-3">';
+        $pestanaSecciones .= '<div class="row col-12 col-lg-6 offset-lg-3 justify-content-center">';
     } else {
         $pestanaSecciones .= '<div class="row  justify-content-center col-10 offset-1">';
     }
     
-    
-
-    //Portal Empleado Menu principal
+   
+    //cargar secciones con acceso
     $arraySecciones = array_filter($_SESSION["Controlador"] -> miEstado -> permisosSecciones, function ($seccion) {
-        return ($seccion["OrdenEstado"] == $_SESSION["Controlador"] -> miEstado -> Estado && $seccion["TipoApp"] == $_SESSION["Controlador"] -> miEstado -> tipo_App);
+        return ($seccion["OrdenEstado"] == $_SESSION["Controlador"] -> miEstado -> Estado);
     });
-    
+   
     if(count($arraySecciones)>0){
         foreach($arraySecciones as $seccion){
             
@@ -918,14 +922,14 @@ function cargarSeccionesDinamicas(){
                 $pestanaSecciones .= '<div class=" col-12 col-sm-6 mt-5" id="pestanaEnJornada" style="display: none;">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
                 $pestanaSecciones .=  'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .=  '<img class="img-fluid" src="Img/PortalEmpleado/PestanaMenu/portal-empleado-jornada-entrada-f.png" />';
+                $pestanaSecciones .=  '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-entrada-f.png" />';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
               
                 $pestanaSecciones .=  '<div class=" col-12 col-sm-6 mt-5" id="pestanaFueraJornada" style="display: none;">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
                 $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .= '<img class="img-fluid" src="Img/PortalEmpleado/PestanaMenu/portal-empleado-jornada-salida-f2.png"/>';
+                $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-salida-f2.png"/>';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
                 
@@ -933,7 +937,7 @@ function cargarSeccionesDinamicas(){
                 $pestanaSecciones .= '<div class="'.$seccion['EstiloPestaña'].'">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina(['.$seccion['ValorAccion'].'])"';
                 $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .= '<img class="img-fluid" src="Img/PortalEmpleado/PestanaMenu/'.$seccion['Imagen'].'"/>';
+                $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.''.$seccion['Imagen'].'"/>';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
             }
