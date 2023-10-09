@@ -78,6 +78,7 @@ class Controlador
         if($datosSesion != false){
             $this -> miEstado -> nombre_descriptivo = $datosSesion[2];
             $this -> miEstado -> IdIdentidad = $datosSesion[4];
+            $this -> miEstado -> permisosSecciones = comprobarPermisosUsuarios();
             if($this -> miEstado -> tipo_App == 1){
                 //PORTAL DEL CLIENTE: Añadir variables de sesion al comprobar usuario
                     $this -> miEstado -> IdCliente = $datosSesion[0];
@@ -88,7 +89,6 @@ class Controlador
                 $this -> miEstado -> IdPersonal = $datosSesion[0];
                 $this -> miEstado -> lista_sociedades = compruebaSociedades($this -> miEstado -> IdPersonal);
                 $this -> miEstado -> EstadoJornada = comprueba_jornada_personal();
-                $this -> miEstado -> permisosSecciones = comprobarPermisosUsuarios();
                 $this -> miEstado -> Documentos = extraerDocPersonal_Masivo();
                 $this -> miEstado -> archivostiposAccesos = extraerArchivosTiposAccesos();
                 $this -> miEstado -> linkDocumentoSubido = null;
@@ -350,19 +350,18 @@ class Controlador
             switch ($arrayDatos[0]) {
                 case 1 :
                     $nav = 4;
-                    $this -> miEstado -> IdTipoPropietario;
                     break;
                 case 2 :
                     $nav = 5;
-                    $this -> miEstado -> IdTipoPropietario;
                     break;
                 case 3 :
                     $nav = 6;
-                    $this -> miEstado -> IdTipoPropietario;
+                    break;
+                case 4:
+                    $nav = 7;
                     break;
                 default:
                     $nav = 3;
-                    $this -> miEstado -> IdTipoPropietario;
                     break;
             }
             $this -> navegarPestanas($nav);
@@ -496,9 +495,8 @@ class Controlador
             // $arrayDatos[2][0] 
             // $arrayDatos[2][1] 
             //print_r($arrayDatos[2][2]);
-            $url ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$arrayDatos[2][1].'&IdPropietario='.$arrayDatos[2][0];
+            $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$arrayDatos[2][1].'&IdPropietario='.$arrayDatos[2][0];
             $nombre_archivo = $arrayDatos[2][2];
-            $url_archivo = "http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=123654&IdOrigenImpresion=140&IdPropietario=10906";
             $directorio_destino = "archivos/".$_SESSION["pinC"]."/";
             // Verificar si el directorio existe, si no, crearlo
             if (!file_exists($directorio_destino)) {
