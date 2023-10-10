@@ -991,74 +991,101 @@ function cargarVacacionesEmpleado(){
 
 
    $seccionvcn='
-   
    <section class="">
-   <nav>
-       <div class="nav nav-tabs mt-4 " id="nav-tab" role="tablist">
-           <button class="nav-link" id="nav-graficos-tab" data-bs-toggle="tab"
-               data-bs-target="#nav-graficos" type="button" role="tab" aria-controls="nav-graficos"
-               aria-selected="false">Gráficos</button>
-           <button class="nav-link active" id="nav-resumen-tab" data-bs-toggle="tab"
-               data-bs-target="#nav-resumen" type="button" role="tab" aria-controls="nav-resumen"
-               aria-selected="true" aria-expanded="true">Resumen</button>
-
-           <button class="nav-link" id="nav-festivos-tab" data-bs-toggle="tab"
-               data-bs-target="#nav-festivos" type="button" role="tab" aria-controls="nav-festivos"
-               aria-selected="false">Festivos</button>
-       </div>
-   </nav>
-   <div class="tab-content mt-2 p-3" id="nav-tabContent">
-       <!-- Contenido de Resumen. -->
-       <div class="tab-pane fade show active" id="nav-resumen" role="tabpanel"
-           aria-labelledby="nav-resumen-tab">
-           <div id="resumen">
-
-           </div>
-
-
-        
-       </div>
-       
-       <!-- Contenido de Festivos. -->
-       <div class="tab-pane fade" id="nav-festivos" role="tabpanel"
-           aria-labelledby="nav-festivos-tab">
-           <div id="festivos">
-
-           </div>
-       </div>
-       <!-- Contenido de Gráficos. -->
-      
-       <canvas class="tab-pane fade" id="nav-graficos" role="tabpanel"
-           aria-labelledby="nav-graficos-tab"></canvas>
-   </div>
-
-
-
-
-   <form class="formulario_Dinamico ">
-
-       <button class="btn btn-primary floating-btn">
-           <i class="bi bi-tsunami"></i>
-       </button>
-       <button class="btn btn-primary floating2-btn">
-           <i class="bi bi-calendar"></i>
-       </button>
-
-
-
-       <div class="container mt-4">
-           <div class="row justify-content-center">
-               <button class="btn btn-primary col-2">
-                   <i class="bi bi-house-door"></i> Inicio
-               </button>
-           </div>
-       </div>
-   </form>
-</section>
-             
-            
-   ';
-
+                          <nav>
+                              <div class="nav nav-tabs mt-4 " id="nav-tab" role="tablist">
+                                  <button class="nav-link" id="nav-graficos-tab" data-bs-toggle="tab"
+                                      data-bs-target="#nav-graficos" type="button" role="tab" aria-controls="nav-graficos"
+                                      aria-selected="false">Gráficos</button>
+                                  <button class="nav-link active" id="nav-resumen-tab" data-bs-toggle="tab"
+                                      data-bs-target="#nav-resumen" type="button" role="tab" aria-controls="nav-resumen"
+                                      aria-selected="true" aria-expanded="true">Resumen</button>
+  
+                                  <button class="nav-link" id="nav-festivos-tab" data-bs-toggle="tab"
+                                      data-bs-target="#nav-festivos" type="button" role="tab" aria-controls="nav-festivos"
+                                      aria-selected="false">Festivos</button>
+                                      
+                                      <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Seleccionar año</button>
+                              </div>
+                          </nav>
+                          <div class="tab-content mt-2 p-3" id="nav-tabContent">
+                              <!-- Contenido de Resumen. -->
+                              <div class="tab-pane fade show active" id="nav-resumen" role="tabpanel"
+                                  aria-labelledby="nav-resumen-tab">
+                                  <div id="resumen">
+  
+                                  </div>
+  
+  
+                               
+                              </div>
+                              
+                              <!-- Contenido de Festivos. -->
+                              <div class="tab-pane fade" id="nav-festivos" role="tabpanel"
+                                  aria-labelledby="nav-festivos-tab">
+                                  <div id="festivos">
+  
+                                  </div>
+                              </div>
+                            
+                              <!-- Contenido de Gráficos. -->
+                             
+                              <canvas class="tab-pane fade" id="nav-graficos" role="tabpanel"
+                                  aria-labelledby="nav-graficos-tab"></canvas>
+                          </div>
+  
+  
+                          <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+                              <div class="offcanvas-header">
+                                  <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Seleccione el año deseado</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                              </div>
+                              <div class="offcanvas-body">
+                                  
+                                  <div>
+                                      <select class="form-select" id="selectYear">
+                                          <option value="2022">2022</option>
+                                          <option value="2023">2023</option>
+                                          <option value="2024">2024</option>
+                                          <!-- Agrega más opciones según tus necesidades -->
+                                      </select>
+                                  </div>
+                                  <div class="input-group">
+                                      <input type="text" class="form-control" placeholder="Buscar..."
+                                          aria-label="Buscar..." id="filtro_txt">
+                                      <div class="input-group-append">
+                                          <button class="btn btn-outline-secondary" type="button"
+                                              onclick="aplicafiltros()"><img src="Img/lupa.png"
+                                                  width="17px"></button>
+                                      </div>
+                                  </div>
+                                  <button onclick="dibuja_pagina([-1,-1])" style="color:black;"
+                                  class="dropdown-item mt-2"><b>Cerrar Sesión</b></button>
+                                
+                              </div>
+                          </div>
+  
+                          <form class="formulario_Dinamico ">
+  
+                              <button class="btn btn-primary floating-btn">
+                                  <i class="bi bi-tsunami"></i>
+                              </button>
+                              <button class="btn btn-primary floating2-btn">
+                                  <i class="bi bi-calendar"></i>
+                              </button>
+  
+  
+  
+                              <div class="container mt-4">
+                                  <div class="row justify-content-center">
+                                      <button class="btn btn-primary col-2" onclick="window.location.href=\'inicio.html\'">
+                                          <i class="bi bi-house-door"></i> Inicio
+                                      </button>
+                                  </div>
+                              </div>
+                          </form>
+                      </section>
+  ';
 return $seccionvcn;
 
 }

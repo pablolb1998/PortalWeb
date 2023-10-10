@@ -40,6 +40,8 @@
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/vacaciones.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+
     <!--Funciones-->
     <script>
 
@@ -285,175 +287,195 @@
                 this.value = '';
             }
         });
+        
 
         function cargarScriptsVacaciones() {
 
 
-            var dias = [15, 10, 5, 5, 5];
-            // array resumen
-            var resumen = [
-                {
-                    estado: '0',
-                    fechaInicio: new Date('2023-10-01'),
-                    fechaFinalizacion: new Date('')
+           
+
+
+        var dias = [15, 10, 5, 5, 5];
+         // array resumen
+   
+    var resumen = {
+            '2022': [ {
+            estado: '0',
+            fechaInicio: new Date('2022-10-01'),
+            fechaFinalizacion: new Date('')
+        }
+    ],
+        '2023': [
+            {
+                estado: '1',
+            fechaInicio: new Date('2023-09-15'),
+            fechaFinalizacion: new Date('2023-09-20')
+        },
+        {
+            estado: '3',
+            fechaInicio: new Date('2023-09-15'),
+            fechaFinalizacion: new Date('2023-09-20')
+        }
+    
+    ]};
+        
+        
+   
+
+      
+    // array de festivos
+
+    var festivos = {
+            '2022': [ {
+            estado: '4',
+            tipo:'Local',
+            fechaInicio: new Date('2022-10-01'),
+            fechaFinalizacion: new Date('2022-10-05')
+        }
+    ],
+        '2023': [
+            {
+            estado: '5',
+            tipo:'Reconocida',
+            fechaInicio: new Date('2023-09-15'),
+            fechaFinalizacion: new Date('')
+        },
+        {
+            estado: '4',
+            tipo:'Regional',
+            fechaInicio: new Date('2023-09-20'),
+            fechaFinalizacion: new Date('2023-09-30')
+        }
+    
+    ]};
+        
+        
+        
+
+
+
+        // DiasTotales marron el valor 0
+        // DiasDisfrutados azul el 1 
+        // DiasDenegados rojo el 2 
+        // DiasConcedidos verde el 3 
+        // DiasPendientes amarillo el 4
+
+        // Resumen
+        //         0 pendientes amarillo
+        //         1 concedidos verde
+        //         2 denegado rojo
+        //         3 disfrutadas azul
+
+
+        //         festivos
+        //         4 festivos purple
+        //         5 vacaciones verde
+
+
+        // Un array con días totales, concedidos y disfrutados
+        function generarGrafico() {
+            var ctx = document.getElementById('nav-graficos').getContext('2d');
+
+
+
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Días Totales', 'Días Disfrutados', 'Días Denegados', 'Días Concedidos', 'Dias Pendientes'],
+                    datasets: [{
+                        label: 'Días de Vacaciones',
+                        data: dias,
+                        backgroundColor: [
+                            'rgba(139, 69, 19, 0.2)', // Color para días totales marron
+                            'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
+                            'rgba(255, 99, 132, 0.2)',// Color para días denegados rojo
+                            'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
+                            'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
+
+
+
+
+                        ],
+                        borderColor: [
+                            'rgba(139, 69, 19, 0.2)', // Color para días totales marron
+                            'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
+                            'rgba(255, 99, 132, 0.2)',// Color para días denegados rojo
+                            'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
+                            'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
+                        ],
+                        borderWidth: 1
+                    }]
                 },
-                {
-                    estado: '1',
-                    fechaInicio: new Date('2023-09-15'),
-                    fechaFinalizacion: new Date('2023-09-20')
-                },
-                {
-                    estado: '3',
-                    fechaInicio: new Date('2023-09-15'),
-                    fechaFinalizacion: new Date('2023-09-20')
-                }
-            ];
-
-
-
-
-            // array de festivos
-            var festivos = [
-                {
-                    estado: '4',
-                    tipo: 'Local',
-                    fechaInicio: new Date('2023-10-01'),
-                    fechaFinalizacion: new Date('2023-10-05')
-                },
-                {
-                    estado: '5',
-                    tipo: 'Reconocida',
-                    fechaInicio: new Date('2023-09-15'),
-                    fechaFinalizacion: new Date('')
-                },
-                {
-                    estado: '4',
-                    tipo: 'Regional',
-                    fechaInicio: new Date('2023-09-25'),
-                    fechaFinalizacion: new Date('2023-09-30')
-                }
-            ];
-
-
-            // DiasTotales marron el valor 0
-            // DiasDisfrutados azul el 1 
-            // DiasDenegados rojo el 2 
-            // DiasConcedidos verde el 3 
-            // DiasPendientes amarillo el 4
-
-            // Resumen
-            //         0 pendientes amarillo
-            //         1 concedidos verde
-            //         2 denegado rojo
-            //         3 disfrutadas azul
-
-
-            //         festivos
-            //         4 festivos purple
-            //         5 vacaciones verde
-
-
-            // Un array con días totales, concedidos y disfrutados
-            function generarGrafico() {
-                var ctx = document.getElementById('nav-graficos').getContext('2d');
-
-
-
-                var myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Días Totales', 'Días Disfrutados', 'Días Denegados', 'Días Concedidos', 'Dias Pendientes'],
-                        datasets: [{
-                            label: 'Días de Vacaciones',
-                            data: dias,
-                            backgroundColor: [
-                                'rgba(139, 69, 19, 0.2)', // Color para días totales marron
-                                'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
-                                'rgba(255, 99, 132, 0.2)',// Color para días denegados rojo
-                                'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
-                                'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
-
-
-
-
-                            ],
-                            borderColor: [
-                                'rgba(139, 69, 19, 0.2)', // Color para días totales marron
-                                'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
-                                'rgba(255, 99, 132, 0.2)',// Color para días denegados rojo
-                                'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
-                                'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
-                            ],
-                            borderWidth: 1
-                        }]
+                options: {
+                    animation: {
+                        duration: 0 // Duración de la animación en milisegundos (0 para desactivar)
                     },
-                    options: {
-                        animation: {
-                            duration: 0 // Duración de la animación en milisegundos (0 para desactivar)
-                        },
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
                         }
                     }
-                });
-            }
-            // Arreglo de resumen
+                }
+            });
+        }
+         // Arreglo de resumen
+ 
+        function mostrarDiasResumen() {
+    // Obtener el elemento con el id "resumen"
+    var miresumen = document.getElementById("resumen");
 
-            function mostrarDiasResumen() {
-                // Obtener el elemento con el id "resumen"
-                var miresumen = document.getElementById("resumen");
+    // Vaciar el contenido previo del elemento
+    miresumen.innerHTML = "";
 
-                // Vaciar el contenido previo del elemento
-                miresumen.innerHTML = "";
+    var selectedYear = document.getElementById("selectYear").value;
+    var resumenDelAnio = resumen[selectedYear];
 
+    if (resumenDelAnio) { 
 
+    // Recorrer el arreglo resumen y mostrar cada elemento
+    for (var i = 0; i < resumenDelAnio.length; i++) {
+        var muestra = resumenDelAnio[i];
 
-                // Recorrer el arreglo resumen y mostrar cada elemento
-                for (var i = 0; i < resumen.length; i++) {
-                    var muestra = resumen[i];
+        // Formatear las fechas para mostrarlas en el formato deseado
+        var fechaInicio = muestra.fechaInicio.toLocaleDateString();
+        var fechaFinalizacion = muestra.fechaFinalizacion.toLocaleDateString();
 
-                    // Formatear las fechas para mostrarlas en el formato deseado
-                    var fechaInicio = muestra.fechaInicio.toLocaleDateString();
-                    var fechaFinalizacion = muestra.fechaFinalizacion.toLocaleDateString();
+        // Definir el color según el estado
+        var color;
+        var estadoNombre;
+        switch (muestra.estado) {
+            case '0':
+                color = 'yellow';
+                estadoNombre = 'Pendiente'
+                break;
+            case '1':
+                color = 'green';
+                estadoNombre = 'Concedido'
+                break;
+            case '2':
+                color = 'red';
+                estadoNombre = 'Denegado'
+                break;
+            case '3':
+                color = 'blue';
+                estadoNombre = 'Disfrutado'
+                break;
+            // Agrega más casos según tus necesidades
+            default:
+                color = 'black'; // Color predeterminado si no coincide ningún caso
+                break;
+        }
 
-                    // Definir el color según el estado
-                    var color;
-                    var estadoNombre;
-                    switch (muestra.estado) {
-                        case '0':
-                            color = 'yellow';
-                            estadoNombre = 'Pendiente'
-                            break;
-                        case '1':
-                            color = 'green';
-                            estadoNombre = 'Concedido'
-                            break;
-                        case '2':
-                            color = 'red';
-                            estadoNombre = 'Denegado'
-                            break;
-                        case '3':
-                            color = 'blue';
-                            estadoNombre = 'Disfrutado'
-                            break;
-                        // Agrega más casos según tus necesidades
-                        default:
-                            color = 'black'; // Color predeterminado si no coincide ningún caso
-                            break;
-                    }
-
-                    // Calcular los días entre las fechas
-                    var diferenciaTiempo = muestra.fechaFinalizacion - muestra.fechaInicio;
-                    var diasEntreFechas = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
-                    var fecha = new Date();
-                    var añoActual = fecha.getFullYear();
-                    if (isNaN(muestra.fechaFinalizacion.getTime())) {
-                        // Crear un elemento div para cada resumen
-                        var resumenElement = document.createElement("div");
-                        resumenElement.innerHTML = `
+        // Calcular los días entre las fechas
+        var diferenciaTiempo = muestra.fechaFinalizacion - muestra.fechaInicio;
+        var diasEntreFechas = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
+        var fecha = new Date();
+        var añoActual = fecha.getFullYear();
+        if (isNaN(muestra.fechaFinalizacion.getTime())) {
+        // Crear un elemento div para cada resumen
+        var resumenElement = document.createElement("div");
+        resumenElement.innerHTML = `
         <div class="ms-2 border-bottom">
   <div class="row col-12 mt-3">
     <div class="col-9">
@@ -468,12 +490,12 @@
   </div>
 </div>`;
 
-                        // Agregar el elemento div al contenedor "resumen"
-                        miresumen.appendChild(resumenElement);
-                    }
-                    else {
-                        var resumenElement = document.createElement("div");
-                        resumenElement.innerHTML = `
+        // Agregar el elemento div al contenedor "resumen"
+        miresumen.appendChild(resumenElement);
+        }
+        else{
+            var resumenElement = document.createElement("div");
+        resumenElement.innerHTML = `
         <div class="ms-2 border-bottom">
   <div class="row col-12 mt-3">
     <div class="col-9">
@@ -488,70 +510,77 @@
   </div>
 </div>`;
 
-                        // Agregar el elemento div al contenedor "resumen"
-                        miresumen.appendChild(resumenElement);
+        // Agregar el elemento div al contenedor "resumen"
+        miresumen.appendChild(resumenElement);
+            
+        }
 
-                    }
+    }
+}
+}
 
-                }
+
+
+
+
+function mostrarDiasFestivos() {
+    // Obtener el elemento con el id "festivos"
+    var misFestivos = document.getElementById("festivos");
+
+    // Vaciar el contenido previo del elemento
+    misFestivos.innerHTML = "";
+    var selectedYear = document.getElementById("selectYear").value;
+    var festivosDelAnio = festivos[selectedYear];
+
+    if (festivosDelAnio) { 
+
+
+    // Recorrer el arreglo festivos y mostrar cada elemento
+    for (var i = 0; i < festivosDelAnio.length; i++) {
+        var muestra = festivosDelAnio[i];
+
+        // Formatear las fechas para mostrarlas en el formato deseado
+        var fechaInicio = muestra.fechaInicio.toLocaleDateString();
+        var fechaFinalizacion = muestra.fechaFinalizacion.toLocaleDateString();
+
+        // Definir el color según el estado
+        var color;
+        var estadoNombre;
+        switch (muestra.estado) {
+            case '4': switch (muestra.tipo) {
+                case "Local":
+                 color = 'purple';
+                 estadoNombre = 'Festivo'
+                    break;
+                case "Regional":
+                color = 'orangered';
+                estadoNombre = 'Festivo'
+                    break;
             }
+               
+               
+                break;
+            case '5':
+                color = 'green';
+                estadoNombre = 'Vacaciones'
+                break;
 
+            // Agrega más casos según tus necesidades
+            default:
+                colorFestivo = 'black'; // Color predeterminado si no coincide ningún caso
+                
+                break;
+        }
 
+        // Calcular los días entre las fechas
+        var diferenciaTiempo = muestra.fechaFinalizacion - muestra.fechaInicio;
+        var diasEntreFechas = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
 
+        // Crear un elemento div para cada festivo
+        if (isNaN(muestra.fechaFinalizacion.getTime())) {
+            var festivoElement = document.createElement("div");
 
-
-            function mostrarDiasFestivos() {
-                // Obtener el elemento con el id "festivos"
-                var misFestivos = document.getElementById("festivos");
-
-                // Vaciar el contenido previo del elemento
-                misFestivos.innerHTML = "";
-
-
-                // Recorrer el arreglo festivos y mostrar cada elemento
-                for (var i = 0; i < festivos.length; i++) {
-                    var muestra = festivos[i];
-
-                    // Formatear las fechas para mostrarlas en el formato deseado
-                    var fechaInicio = muestra.fechaInicio.toLocaleDateString();
-                    var fechaFinalizacion = muestra.fechaFinalizacion.toLocaleDateString();
-
-                    // Definir el color según el estado
-                    var color;
-                    var estadoNombre;
-                    switch (muestra.estado) {
-                        case '4': switch (muestra.tipo) {
-                            case "Local":
-                                color = 'purple';
-                                estadoNombre = 'Festivo'
-                                break;
-                            case "Regional":
-                                color = 'orangered';
-                                break;
-                        }
-
-
-                            break;
-                        case '5':
-                            color = 'green';
-                            estadoNombre = 'Vacaciones'
-                            break;
-
-                        // Agrega más casos según tus necesidades
-                        default:
-                            colorFestivo = 'black'; // Color predeterminado si no coincide ningún caso
-                            break;
-                    }
-
-                    // Calcular los días entre las fechas
-                    var diferenciaTiempo = muestra.fechaFinalizacion - muestra.fechaInicio;
-                    var diasEntreFechas = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
-
-                    // Crear un elemento div para cada festivo
-                    if (isNaN(muestra.fechaFinalizacion.getTime())) {
-                        var festivoElement = document.createElement("div");
-
-                        festivoElement.innerHTML = `
+        festivoElement.innerHTML = `
                     <div class="ms-2 border-bottom">
             <div class="row col-12 mt-3 ">
                 <div class="col-9">
@@ -568,12 +597,12 @@
             
             
         `;
-                        // Agregar el elemento div al contenedor "festivos"
-                        misFestivos.appendChild(festivoElement);
-                    } else {
-                        var festivoElement2 = document.createElement("div");
+        // Agregar el elemento div al contenedor "festivos"
+        misFestivos.appendChild(festivoElement);
+}else{
+    var festivoElement2 = document.createElement("div");
 
-                        festivoElement2.innerHTML = `
+        festivoElement2.innerHTML = `
         <div class="ms-2 border-bottom">
         <div class="row col-12 mt-3 ">
         <div class="col-9">
@@ -587,39 +616,79 @@
         <div class="mb-3 mt-1">  ${fechaInicio} - ${fechaFinalizacion}</div>
         </div>
         </div>`
-                        misFestivos.appendChild(festivoElement2);
-                    }
-                }
+        misFestivos.appendChild(festivoElement2);
+}
+    }
+
+}
+
+    }
+
+
+
+
+
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Simular un clic en el botón de graficos al cargar la página
+            var graficosButton = document.getElementById('nav-graficos-tab');
+            if (graficosButton) {
+                graficosButton.click();
             }
+        });
+$(document).ready(function () {
+  var festivosButton = $('#nav-festivos-tab');
 
+  // Obtener el elemento de selección de año
+  var selectYear = $('#selectYear'); // Asegúrate de que este sea el ID correcto
 
+  // Obtener la fecha actual
+  var fechaActual = new Date();
+  var añoActual = fechaActual.getFullYear(); // Obtener el año actual
 
+  // Función para actualizar el texto del botón
+  function actualizarTextoBoton() {
+    var añoSeleccionado = selectYear.val();
+    festivosButton.text('Festivos ' + añoSeleccionado);
+  }
 
+  // Agregar el nombre con la fecha al lado del botón
+  festivosButton.text('Festivos ' + añoActual);
 
-           
+  // Agregar un evento change al elemento de selección de año
+  selectYear.on('change', actualizarTextoBoton);
+});
+           $('#nav-graficos-tab').on('click', function (e) {
+            e.preventDefault();
+            
+            generarGrafico();
+          
+            
+        });
 
-            document.addEventListener('DOMContentLoaded', function () {
-                // Obtener el elemento del botón "Festivos"
-                var festivosButton = document.getElementById('nav-festivos-tab');
+        // Evento de clic en la pestaña "Resumen"
+        $('#nav-resumen-tab').on('click', function (e) {
+            e.preventDefault();
+            mostrarDiasResumen();
+        
+        });
 
-                // Obtener la fecha actual
-                var fechaActual = new Date();
-                var añoActual = fechaActual.getFullYear(); // Obtener el año actual
+        // Evento de clic en la pestaña "Festivos"
+        $('#nav-festivos-tab').on('click', function (e) {
+            e.preventDefault();
+            mostrarDiasFestivos();
+          
+        });
+        $('.offcanvas').on('hidden.bs.offcanvas', function () {
+            mostrarDiasFestivos();
+  });
 
-                // Agregar el nombre con la fecha al lado del botón
-                festivosButton.innerHTML = 'Festivos ' + añoActual;
-            });
-            document.getElementById('nav-resumen-tab').addEventListener('click', function () {
-                mostrarDiasResumen();
-            });
+  $('.offcanvas').on('hidden.bs.offcanvas', function () {
 
-            document.getElementById('nav-graficos-tab').addEventListener('click', function () {
-
-                generarGrafico();
-            });
-            document.getElementById('nav-festivos-tab').addEventListener('click', function () {
-                mostrarDiasFestivos();
-            });
+mostrarDiasResumen();
+mostrarDiasFestivos();
+});
         }
 
         //fin del codigo a optimizar
@@ -673,10 +742,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.4.js"
         integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
-
+    
 
     <script>
 

@@ -31,7 +31,7 @@
 
 
 
-    </body>
+ 
 
 
 
@@ -225,17 +225,19 @@
 
 
                                     </h3>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Seleccionar año</button>
 
                                 </div>
                             </div>
                         </nav>
+
                     </div>
                 </div>
             </div>
         </header>
 
 
-
+    
 
 
         <!-- Plantilla Seccion de Documentos -->
@@ -261,6 +263,8 @@
                                 <button class="nav-link" id="nav-festivos-tab" data-bs-toggle="tab"
                                     data-bs-target="#nav-festivos" type="button" role="tab" aria-controls="nav-festivos"
                                     aria-selected="false">Festivos</button>
+                                    
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Seleccionar año</button>
                             </div>
                         </nav>
                         <div class="tab-content mt-2 p-3" id="nav-tabContent">
@@ -282,6 +286,7 @@
 
                                 </div>
                             </div>
+                          
                             <!-- Contenido de Gráficos. -->
                            
                             <canvas class="tab-pane fade" id="nav-graficos" role="tabpanel"
@@ -289,7 +294,35 @@
                         </div>
 
 
-
+                        <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+                            <div class="offcanvas-header">
+                                <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Seleccione el año deseado</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                            </div>
+                            <div class="offcanvas-body">
+                                
+                                <div>
+                                    <select class="form-select" id="selectYear">
+                                        <option value="2022">2022</option>
+                                        <option value="2023">2023</option>
+                                        <option value="2024">2024</option>
+                                        <!-- Agrega más opciones según tus necesidades -->
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Buscar..."
+                                        aria-label="Buscar..." id="filtro_txt">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onclick="aplicafiltros()"><img src="Img/lupa.png"
+                                                width="17px"></button>
+                                    </div>
+                                </div>
+                                <button onclick="dibuja_pagina([-1,-1])" style="color:black;"
+                                class="dropdown-item mt-2"><b>Cerrar Sesión</b></button>
+                              
+                            </div>
+                        </div>
 
                         <form class="formulario_Dinamico ">
 
@@ -316,23 +349,26 @@
         </div>A:2idc :15pin :123654Estado:4.1tipo:ip :192.168.204.111bbdd :OnixInteco
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+
+
     <script>
 
 
 
         var dias = [15, 10, 5, 5, 5];
          // array resumen
-        var resumen = [
-        {
+   
+    var resumen = {
+            '2022': [ {
             estado: '0',
-            fechaInicio: new Date('2023-10-01'),
+            fechaInicio: new Date('2022-10-01'),
             fechaFinalizacion: new Date('')
-        },
-        {
-            estado: '1',
+        }
+    ],
+        '2023': [
+            {
+                estado: '1',
             fechaInicio: new Date('2023-09-15'),
             fechaFinalizacion: new Date('2023-09-20')
         },
@@ -341,20 +377,25 @@
             fechaInicio: new Date('2023-09-15'),
             fechaFinalizacion: new Date('2023-09-20')
         }
-    ];
+    
+    ]};
+        
         
    
 
       
     // array de festivos
-    var festivos = [
-        {
+
+    var festivos = {
+            '2022': [ {
             estado: '4',
             tipo:'Local',
-            fechaInicio: new Date('2023-10-01'),
-            fechaFinalizacion: new Date('2023-10-05')
-        },
-        {
+            fechaInicio: new Date('2022-10-01'),
+            fechaFinalizacion: new Date('2022-10-05')
+        }
+    ],
+        '2023': [
+            {
             estado: '5',
             tipo:'Reconocida',
             fechaInicio: new Date('2023-09-15'),
@@ -363,10 +404,15 @@
         {
             estado: '4',
             tipo:'Regional',
-            fechaInicio: new Date('2023-09-25'),
+            fechaInicio: new Date('2023-09-20'),
             fechaFinalizacion: new Date('2023-09-30')
         }
-    ];
+    
+    ]};
+        
+        
+        
+
 
 
         // DiasTotales marron el valor 0
@@ -443,11 +489,14 @@
     // Vaciar el contenido previo del elemento
     miresumen.innerHTML = "";
 
-   
+    var selectedYear = document.getElementById("selectYear").value;
+    var resumenDelAnio = resumen[selectedYear];
+
+    if (resumenDelAnio) { 
 
     // Recorrer el arreglo resumen y mostrar cada elemento
-    for (var i = 0; i < resumen.length; i++) {
-        var muestra = resumen[i];
+    for (var i = 0; i < resumenDelAnio.length; i++) {
+        var muestra = resumenDelAnio[i];
 
         // Formatear las fechas para mostrarlas en el formato deseado
         var fechaInicio = muestra.fechaInicio.toLocaleDateString();
@@ -529,6 +578,7 @@
 
     }
 }
+}
 
 
 
@@ -540,11 +590,15 @@ function mostrarDiasFestivos() {
 
     // Vaciar el contenido previo del elemento
     misFestivos.innerHTML = "";
+    var selectedYear = document.getElementById("selectYear").value;
+    var festivosDelAnio = festivos[selectedYear];
+
+    if (festivosDelAnio) { 
 
 
     // Recorrer el arreglo festivos y mostrar cada elemento
-    for (var i = 0; i < festivos.length; i++) {
-        var muestra = festivos[i];
+    for (var i = 0; i < festivosDelAnio.length; i++) {
+        var muestra = festivosDelAnio[i];
 
         // Formatear las fechas para mostrarlas en el formato deseado
         var fechaInicio = muestra.fechaInicio.toLocaleDateString();
@@ -561,6 +615,7 @@ function mostrarDiasFestivos() {
                     break;
                 case "Regional":
                 color = 'orangered';
+                estadoNombre = 'Festivo'
                     break;
             }
                
@@ -574,6 +629,7 @@ function mostrarDiasFestivos() {
             // Agrega más casos según tus necesidades
             default:
                 colorFestivo = 'black'; // Color predeterminado si no coincide ningún caso
+                
                 break;
         }
 
@@ -624,7 +680,11 @@ function mostrarDiasFestivos() {
         misFestivos.appendChild(festivoElement2);
 }
     }
+
 }
+
+    }
+
 
 
 
@@ -638,17 +698,28 @@ function mostrarDiasFestivos() {
                 graficosButton.click();
             }
         });
-
+//Para poner el año en Festivos <año>
         document.addEventListener('DOMContentLoaded', function () {
-        // Obtener el elemento del botón "Festivos"
-        var festivosButton = document.getElementById('nav-festivos-tab');
+            var festivosButton = document.getElementById('nav-festivos-tab');
 
-        // Obtener la fecha actual
-        var fechaActual = new Date();
-        var añoActual = fechaActual.getFullYear(); // Obtener el año actual
+// Obtener el elemento de selección de año
+var selectYear = document.getElementById('selectYear'); // Asegúrate de que este sea el ID correcto
 
-        // Agregar el nombre con la fecha al lado del botón
-        festivosButton.innerHTML = 'Festivos ' + añoActual;
+// Obtener la fecha actual
+var fechaActual = new Date();
+var añoActual = fechaActual.getFullYear(); // Obtener el año actual
+
+// Función para actualizar el texto del botón
+function actualizarTextoBoton() {
+  var añoSeleccionado = selectYear.value;
+  festivosButton.innerHTML = 'Festivos ' + añoSeleccionado;
+}
+
+// Agregar el nombre con la fecha al lado del botón
+festivosButton.innerHTML = 'Festivos ' + añoActual;
+
+// Agregar un evento change al elemento de selección de año
+selectYear.addEventListener('change', actualizarTextoBoton);
     });
         document.getElementById('nav-resumen-tab').addEventListener('click', function () {
             mostrarDiasResumen();
@@ -661,6 +732,13 @@ function mostrarDiasFestivos() {
         document.getElementById('nav-festivos-tab').addEventListener('click', function () {
             mostrarDiasFestivos();
         });
+
+        $('.offcanvas').on('hidden.bs.offcanvas', function () {
+
+            mostrarDiasResumen();
+            mostrarDiasFestivos();
+  });
+        
 
         // $(document).ready(function () {
         // // Mostrar el gráfico al cargar la página
@@ -698,6 +776,7 @@ function mostrarDiasFestivos() {
 
       
     </script>
+    
 </body>
 
 </html>
