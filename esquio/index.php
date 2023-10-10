@@ -27,7 +27,12 @@ if(isset($_GET["IdD"])){
         
     }
 }
-$ruta = "";
+$fechaCaducidad = time() + (365 * 24 * 60 * 60); // 1 año desde la ultima conexion en segundos
+setcookie("pinCPortalE", $datosConn["pinC"], $fechaCaducidad, "/");
+if(isset($datosConn["imgLogo"])){
+    setcookie("LogoUsuarioPortalE",  $datosConn["imgLogo"] , $fechaCaducidad, "/");
+}
+setcookie("TipoPortalE",  $datosConn["TipoPortal"] , $fechaCaducidad, "/");
 header('Location:../Index.html');
 exit;
 ?>
