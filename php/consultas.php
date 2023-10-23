@@ -124,13 +124,14 @@ function extraerFiltroDoc_Parcial($tipoDoc = null,$ids = null,$c = null){
     
 }
 
-function ExtraerDocumento_Por_CIF($Tipo = null,$Id = null,$cif = null){
-    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+function ExtraerDocumento_Por_CIF($Id,$Tipo,$Ip,$bd){
+    $conn = ConexionBD($Ip,$bd);
     //Estraer los documentos
     $DocCif = array();
-    $sql = "SELECT PinDescargas,OrigenImpresion,id
-     FROM dbo.vw_PortalCliente_Documentos WHERE tipo=? AND CONVERT(VARCHAR(50),HashBytes('MD5', CAST(id AS VARCHAR(50))),2)=? AND cif=?;";
-    $parm = array($Tipo,$Id,$cif);
+
+    $sql = "SELECT codigo
+    FROM dbo.vw_PortalCliente_Documentos WHERE OrigenImpresion=? AND id=?;";
+    $parm = array($Tipo,$Id);
     $stmt = sqlsrv_query($conn, $sql, $parm);
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
@@ -143,7 +144,6 @@ function ExtraerDocumento_Por_CIF($Tipo = null,$Id = null,$cif = null){
     sqlsrv_close( $conn );
     
 }
-
 //funciones de extraer datos de la jornada, actualizar para juntarlos
 function comprueba_jornada_personal(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
