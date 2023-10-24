@@ -45,7 +45,7 @@ function pinta_contenido($estado){
             
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:
-                    $filename = "../html/secciones_Cliente.html";
+                    //$filename = "../html/secciones_Cliente.html";
                     break;
                 case 2:
                     //$filename = "../html/secciones_Empleado.html";
@@ -118,12 +118,12 @@ function pinta_contenido($estado){
             $titulo = "Nóminas";
             $cabecera = "../html/header.html";
             $filename = "../html/documentos.html";
-            break;  
+            break; 
         case 4.9:
-            $titulo = "Vacaciones";
-             $cabecera = "../html/header.html";
-            $filename = "../html/documentos.html";
-            break;  
+                $titulo = "Vacaciones";
+                 $cabecera = "../html/header.html";
+                $filename = "../html/documentos.html";
+                break;   
         case 5:
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:
@@ -172,6 +172,18 @@ function pinta_contenido($estado){
                         break;
                 }
             break;
+            case 8:
+               
+                switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
+                    case 1:
+                        
+                        $titulo = "Peticiones";
+                        $cabecera = "../html/header.html";
+                        $filename = "../html/documentos.html";
+                        break;
+                  
+                }
+            break;
         default:
             $filename = "../html/login.html";
             break;
@@ -185,7 +197,13 @@ function pinta_contenido($estado){
         //$fileheadertext = fread($fileheader, $filesizeheader);
         $fileheadertext = $_SESSION["Controlador"] -> miEstado -> header;
         $fileheadertext = str_replace("%NombreE%",$titulo.($_SESSION["Controlador"] -> miEstado -> cargarForm == 1 ? ' / Nueva':''),$fileheadertext);
+        if($_SESSION["Controlador"] -> miEstado -> Estado ==2){
+            $fileheadertext = str_replace('class="col-2"','class="col-2 d-none"',$fileheadertext);
+        }
     }
+    //cargar el nombre del usuario
+    $nombre_usu = '<hr size="1px" color="grey"/><li class="dropdown-item">'.$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo.'</li>';
+    $fileheadertext = str_replace('<li class="d-none" id="%NombreUsu%"></li>',$nombre_usu,$fileheadertext);
 
 
 
@@ -198,6 +216,7 @@ function pinta_contenido($estado){
         $filetext = $fileheadertext.cargarSeccionesDinamicas();
     }
     
+    
 
 
     // $footer = fopen("../html/footer.html", "r");
@@ -206,16 +225,32 @@ function pinta_contenido($estado){
     
 
     //optimizar aqui
-    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado, array(1, 2, 3, 4, 5, 6, 7)) || ($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 )) {
+    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado, array(1, 2, 3, 4, 5, 6, 7,8)) || ($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 )) {
         if ($_SESSION["Controlador"] -> miEstado -> Estado == 1){
             //Pestaña de sociedades del portal del comercial
             return $filetext.muestra_sociedades();
-        }elseif(in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7)) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
+
+        }elseif(in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7,8)) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
             //Documentos portal del comercial
+            $btnBuscar = '<li><div class="input-group">
+            <input type="text" class="form-control" placeholder="Buscar..." aria-label="Buscar..." id="filtro_txt" >
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" onclick="%FuncionFiltrar%"><img src="Img/lupa.png" width="17px"></button>
+            </div>
+          </div></li>';
+            
+            $filetext = str_replace('<li class="d-none" id="%btnBuscar%"></li>',$btnBuscar,$filetext);
             $filetext = str_replace('<span id="filtros_dinamicos">',cargaFiltros(),$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicafiltros()',$filetext);
             return $filetext.muestra_documentos();
-        }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 2 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
+        }
+        // elseif($_SESSION["Controlador"] -> miEstado -> Estado == 8 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null){
+          
+        //     return $filetext.DibujaLineas_PortalCliente();
+        // }
+        
+       
+        elseif($_SESSION["Controlador"] -> miEstado -> Estado == 2 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
             // elegir la pestaña de la jornada correspondiente switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
             switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
                 case 0:
@@ -238,10 +273,11 @@ function pinta_contenido($estado){
                 ["idTipoDoc" => 5,
                 "Descripcion" => "Incidencias"],
                 ["idTipoDoc" => 6,
-                "Descripcion" => "Material"]
+                "Descripcion" => "Material"],
+             
             ];
         
-            // funcion para reindexarlo 
+            // funcion para reinedxarlo 
             
             $txt_filtros = '<span id="filtros_dinamicos">';
             if(count($arrayFiltros)>0){
@@ -252,16 +288,18 @@ function pinta_contenido($estado){
             return $txt_filtros;
 
 
-        }
-        //Pestaña de Vacaciones del empleado
+        } //Pestaña de Vacaciones del empleado
         elseif($_SESSION["Controlador"] -> miEstado -> Estado == 4.9 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null){
           
             return $filetext.cargarVacacionesEmpleado();
-        } elseif($_SESSION["Controlador"] -> miEstado -> Estado == 4.9 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
-          
-            return $filetext.cargarFormVacacionesEmpleado();
         }
-        elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null && $_SESSION["Controlador"] -> miEstado -> cargarFormFirma == null ){
+        elseif($_SESSION["Controlador"] -> miEstado -> Estado == 4.9 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
+          
+            return $filetext.cargarSeleccionVacacionesEmpleado();
+        }
+     
+        
+        elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null && $_SESSION["Controlador"] -> miEstado -> cargarFormFirma == null && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Pestañas de navegacion
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
 
@@ -279,7 +317,7 @@ function pinta_contenido($estado){
                 //     "Descripcion" => "Material"]
                 // ];
             
-                // // funcion para reindexarlo 
+                // // funcion para reinedxarlo 
                 
                 // $txt_filtros = '<span id="filtros_dinamicos">';
                 // if(count($arrayFiltros)>0){
@@ -302,9 +340,7 @@ function pinta_contenido($estado){
             return $filetext.cargaFormularioDinamico();
         }elseif ($_SESSION["Controlador"] -> miEstado -> Estado == 4.4 && $_SESSION["Controlador"] -> miEstado -> cargarFormFirma == 1 ) {
             return $filetext.cargarFormularioFirma();
-        }
-        
-        elseif($_SESSION["Controlador"] -> miEstado -> Estado == 5 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
+        }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 5 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Pestaña de jornada
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
             try {
@@ -353,7 +389,7 @@ function pinta_contenido($estado){
             $filetext = str_replace('<span id="filtros_dinamicos">',$filtrosCalendario,$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicaFiltrosCalendario()',$filetext);
             return $filetext.'<div id="calendar"></div></div></div></div>
-            <button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="img/Portal_Empleado_Nuevo2.png"></button>';    
+            <button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
         
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
         //selección de el tipo de documneto
@@ -364,16 +400,15 @@ function pinta_contenido($estado){
         }
 
     } else {
+        if($_SESSION['Controlador'] -> miEstado -> tipo_App == 1){
+            $filetext = str_replace("%NombrePortal%",'Area del Cliente',$filetext);
+            $filetext = str_replace("%TipoUsuario%",'cliente',$filetext);
+        }else{
+            $filetext = str_replace("%NombrePortal%",'Portal del Empleado',$filetext);
+            $filetext = str_replace("%TipoUsuario%",'empleado',$filetext);
+        }
         if(isset($_SESSION["imgLogo"])){
             $filetext = str_replace("%logoImg%",$_SESSION["imgLogo"],$filetext);
-            if($_SESSION['Controlador'] -> miEstado -> tipo_App == 1){
-                $filetext = str_replace("%NombrePortal%",'Portal del Cliente',$filetext);
-                $filetext = str_replace("%TipoUsuario%",'cliente',$filetext);
-            }else{
-                $filetext = str_replace("%NombrePortal%",'Portal del Empleado',$filetext);
-                $filetext = str_replace("%TipoUsuario%",'empleado',$filetext);
-            }
-
         }else{
             $filetext = str_replace("%logoImg%",'https://esquio.es/wp-content/uploads/elementor/thumbs/logo-esquio-pq0g3tu6khq6p3k32wrm4q6iwu2nqga9msxptholvk.png',$filetext);
         }
@@ -414,9 +449,11 @@ function muestra_sociedades(){
 //dibujar los documentos del portal del comercial segun la pestaña
 function muestra_documentos(){
     //optimizar al cambiar la manera de almacenar los documentos y los filtros "array_filter()"
-    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7))) {
+    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7,8))) {
         $arrayDoc = array();
         $tipoDocf = 0;
+        $acciones_globales = '';
+     
         switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
             case 4 :
                 $tipoDocf = 1;
@@ -430,10 +467,66 @@ function muestra_documentos(){
             case 7 :
                 $tipoDocf = 4; 
                 break;
+            case 8 :
+                    $tipoDocf = 5; 
+                    break;
             default:
                 $tipoDocf = 0;
                 break;
         }
+        // estas con esto 
+        // tres estados de validar
+        // si y no 
+        // la fecha despues 7 dias que se valide automaticamente 
+        // segun el estado que se muestre o no la opcion
+
+        // funcion para aplicar un filtro a cada elemento del array
+        $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
+            return $docF["tipo"] == $tipoDocf;
+        });
+
+        
+       
+        // funcion para reinedxarlo 
+        $arrayDoc = array_values($arrayDoc);
+        //print_r($arrayDoc);
+        $nuevoArrayCodigos = array();
+        if(count($arrayDoc)>0){
+
+
+            for($dc = 0; ($dc < count($arrayDoc)) && ($dc < $_SESSION["Controlador"] -> miEstado -> puntero_posicion) ; $dc++ )    {
+                $valor = $arrayDoc[$dc]; 
+                $codigo1 = $valor["codigo"];
+
+             
+
+                $nuevoArrayCodigos[] = $codigo1;
+             
+
+            }
+        
+        }
+        // <dotlottie-player class="" id="patata" autoplay  loop mode="normal"
+        // src="plus.lottie"
+        // style="width: 80px; "></dotlottie-player>
+        // <img src="Img/Portal_Empleado_Nuevo2.png">
+        
+       
+        if($_SESSION["Controlador"] -> miEstado -> acciones["validar"] == 1){
+            $acciones_globales .= '
+           
+           
+            
+
+            
+            
+           
+           
+          
+          ';    
+        }
+       
+
         // funcion para aplicar un filtro a cada elemento del array
         $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
             return $docF["tipo"] == $tipoDocf;
@@ -441,8 +534,9 @@ function muestra_documentos(){
 
         //filtro por tipo 1 de filtro es decir string 
         if($_SESSION["Controlador"] -> miEstado -> CadenaFiltro !== null && $_SESSION["Controlador"] -> miEstado -> tipofiltro == 1){
+           
             $arrayDoc = array_filter($arrayDoc, function ($docF) use($arrayDoc) {
-                return str_contains($docF["Descripcion"],$_SESSION["Controlador"] -> miEstado -> CadenaFiltro);
+                return str_contains(strtolower($docF["Descripcion"]),strtolower($_SESSION["Controlador"] -> miEstado -> CadenaFiltro));
             });
         }
         
@@ -464,7 +558,10 @@ function muestra_documentos(){
 
             $listaDoc .=  "<tbody id='myTable'>";
 
-            for($dc = 0; ($dc < count($arrayDoc)) && ($dc < $_SESSION["Controlador"] -> miEstado -> puntero_posicion) ; $dc++ ){
+            for($dc = 0; ($dc < count($arrayDoc)) && ($dc < $_SESSION["Controlador"] -> miEstado -> puntero_posicion) ; $dc++ )    {
+
+
+                
                 $valor = $arrayDoc[$dc]; 
                 $id = $valor["id"];
                 $codigo = $valor["codigo"];
@@ -475,23 +572,193 @@ function muestra_documentos(){
                 $newDate = $valor['Fecha'] -> format('d/m/Y');
                 $estado = $valor["Estado"];
                 $color = $valor["color"];
+                // $nombre = $valor["nombre"];
+              
+                // $fechaActual = new DateTime();
+                   //comparar con esta fecha
+                $fechaActual = DateTime::createFromFormat('d/m/Y', '18/07/2017');
 
+                $fechaActualTimestamp = $fechaActual->getTimestamp();
+                $newDateTimestamp = $valor['Fecha']->getTimestamp();
+                $diferenciaDias = floor(($fechaActualTimestamp - $newDateTimestamp) / 86400); // 86400 segundos en un día
+                
+          
                 //optimizar/cambiar
                 if (strlen($descripcion) <= 0) {
                     $descripcion = "Sin descripción";
                 }
-
+               
                 if($newDate==date("d/m/Y")){
+                  
                     $listaDoc .= "<tr style='background-color:#B0CDFF54' data-tipo-servicio='$estado' id='$estado'>";
+              
                 }else{
                     $listaDoc .= "<tr data-tipo-servicio='$estado' id='$estado'>";
+                    
+                    
+                    
                 }
-                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $codigo . ' - ' . $newDate . '<br><details><summary></summary>';
+               
+                $listaDoc .= '<td class="col-8 "><div class="Identificador " name="Identificador">' . $codigo . ' - ' . $newDate . '<br><details><summary></summary>';
+               
+              
+             
+               
+          
+
                 $listaDoc .='<p><b style="color:'.$color.';">' . $estado . '</b><br>';
-                $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td>';
-                $listaDoc .= '<td class="col-5"><div class="precio" name="precio" ><b id="importe_documento" style="float:right;color:'.$color.';">' . $importe;
-                $listaDoc .= '</b><br><a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=' . $PinDescargas .'&IdOrigenImpresion='.$Origen_impresion.'&IdPropietario='. $id. '" target="_blank">';
-                $listaDoc .= '<img class="pdf_icono" src="img/descargar-pdf.png"></a></div></td></tr>'; 
+                
+              
+
+                $listaDoc .= '<span class="descripcion_doc ">'.$descripcion .'</span></p></details></div></td>';
+                $listaDoc .= '<td class="col-4"><div class="precio" name="precio" >';
+              
+               
+                
+                
+                $listaDoc .= '<b id="importe_documento" style="float:right;color:'.$color.';">' . $importe.'</b><br>';
+               
+               
+                
+                //modal de peticion
+                $listaDoc .= '
+                <button style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#añadirPeticion" data-bs-toggle="tooltip"   title="Añadir Petición">
+                <img src="Img/Portal_Empleado_Nuevo2.png">
+                </button>
+                <div class="modal fade" id="añadirPeticion" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel2">Añadir Petición </h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <form>
+                      <div class="mb-3">
+                      
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="togglePeticionSwitch" checked >
+                        <label class="form-check-label2" for="togglePeticionSwitch">Mejora</label>
+                      </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    ¿Quien realiza la petición?
+                    </button>
+                    <ul class="dropdown-menu">
+                    <input   id="nombreInput" class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar">';
+     
+                    $listaDoc .= '<ul>';
+                    foreach ($nuevoArrayCodigos as $codigo) {
+                        $listaDoc .= '<li><button  class="btn  btn-primary lista">' . $codigo . '</button></li>';
+                    }
+                    $listaDoc .= '</ul> </ul>
+                    </div>';
+                   
+                    
+                  
+                    $listaDoc .= '
+                    
+                        <div class="mb-3">
+                          <label for="message-text" class="col-form-label">Descripción:</label>
+                          <textarea class="form-control" id="message-text"></textarea>
+                        </div>
+                      
+                      </form>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                      <button type="button" class="btn btn-primary" id="saveButton">Enviar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>';
+                // if(){
+                //     $listaDoc .= '<img class="pdf_icono" src="Img/descarga_generica.png">';
+
+                // } 
+                if ($diferenciaDias>7) {
+                    $listaDoc .= 'Comprobada';
+
+                } else {
+                  
+                if($estado=="Finalizada"){
+                    
+                    $listaDoc .= 'Finalizada';
+                    //modal de validar tarea
+               $listaDoc .= '
+               
+               <button type="button" class="btn btn-primary mb-0" style="float:right;  padding: 0;" data-bs-toggle="modal" data-bs-target="#validarTarea'.$codigo.'" data-bs-toggle="tooltip" data-bs-placement="right" title="Validar Tarea"> <dotlottie-player class="" id="patata" autoplay  loop mode="normal"
+               src="validacion.lottie"
+               style="width: 80px; "></dotlottie-player></button>
+
+               <div class="modal fade" id="validarTarea'.$codigo.'" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel">Validación de Tarea '.$codigo.' </h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <form>
+                          <div class="mb-3">
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="toggleValidationSwitch" checked >
+                            <label class="form-check-label" for="toggleValidationSwitch">Validar</label>
+                          </div>
+                        </div>
+                         
+                            <div class="mb-3">
+                              <label for="message-text" class="col-form-label">Descripción:</label>
+                              <textarea class="form-control" id="message-text"></textarea>
+                            </div>
+                          
+                          </form>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                          <button type="button" class="btn btn-primary" id="saveButton">Enviar</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>';
+                  
+                  $listaDoc .= $acciones_globales;
+                
+                   
+
+                    
+                    
+                }
+                if($estado=="Comprobada"){
+                    $listaDoc .= 'Comprobada';
+
+                }
+                if($estado==null){
+                    $listaDoc .= "En Creación";
+                }
+                }
+          
+              
+                
+             
+               
+              
+               
+                    $listaDoc .= '<a onclick="dibuja_pagina([0,4,['.$id.','.$Origen_impresion.",'".$codigo.".pdf'".']])" >';
+                   
+               
+               
+               
+
+                if ($Origen_impresion==null){
+                    $listaDoc .= '<br></a></div></td></tr>';  
+                }
+                else{
+                    $listaDoc .= '<img class="pdf_icono" src="Img/descarga_generica.png"></a></div></td></tr>';
+                }
+               
                 }
                 $listaDoc .= "</tbody></table></span>";
                 $listaDoc .= "<div class='container text-center'>";
@@ -510,6 +777,8 @@ function muestra_documentos(){
     }
 }
 
+
+
 //Dibujar las lineas de cualquier  del portal de empleado
 function DibujaLineas_PortalEmpleado(){
     //optimizar al cambiar la manera de almacenar los documentos y los filtros "array_filter()"
@@ -521,11 +790,12 @@ function DibujaLineas_PortalEmpleado(){
             $acciones_linea .= '<button onclick="dibuja_pagina([4.4,%IdProp%])"    style="all: initial;cursor: pointer;"><img class="pdf_icono" src="%ImgArchivos%"></button>';    
         }
         if($_SESSION["Controlador"] -> miEstado -> acciones["observaciones"] == 1 ){
-            $acciones_linea .= '<a href="#" target="_blank"><img class="pdf_icono" src="img/Observaciones.png"></a>';    
+            $acciones_linea .= '<a href="#" target="_blank"><img class="pdf_icono" src="Img/Observaciones.png"></a>';    
         }
         if($_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"] == 1){
-            $acciones_globales .= '<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="img/Portal_Empleado_Nuevo2.png"></button>';    
+            $acciones_globales .= '<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
         }
+       
         if($_SESSION["Controlador"] -> miEstado -> Estado == 4.4){
             $acciones_linea = '<a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin='.$_SESSION["pinC"].'&IdArchivo=%IdProp%" target="_blank">
             <img class="pdf_icono" src="%imgTipoArchivo%"></a>';
@@ -554,12 +824,11 @@ function DibujaLineas_PortalEmpleado(){
             case 4.8:
                 $tipoDocf = 7;
                 break;
-            case 4.9:
-                $tipoDocf = 8;
-                break;
             case 7 :
                 $tipoDocf = 4; 
                 break;
+           
+
             default:
                 $tipoDocf = 1;
                 break;
@@ -627,31 +896,31 @@ function DibujaLineas_PortalEmpleado(){
                 //elegir el color de la carpeta segun tenga archivos
                 if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
                     $imgRutaCarpeta = '';
-                    $imgRutaCarpeta = 'img/Documentos2.png';
+                    $imgRutaCarpeta = 'Img/Documentos2.png';
                     //print_r($carperta);
                     if(isset($valor["NumeroArchivos"]) && $valor["NumeroArchivos"]>0){
-                        $imgRutaCarpeta = 'img/Documentos_verde2.png';
+                        $imgRutaCarpeta = 'Img/Documentos_verde2.png';
                     }
                     $acciones_linea_pintar = str_replace('%ImgArchivos%',$imgRutaCarpeta,$acciones_linea_pintar);
                 }
                 // incluir la accion de abrir el formulario de firma
                 if(isset($valor["Firmable"]) && $valor["Firmable"] == 1 ){
                     $acciones_linea_pintar .= '<button onclick="dibuja_pagina([0,6,'.$valor["id"].'])"  style="all: initial;cursor: pointer;" >
-                                        <img  src="img/firma2.png"></button>';
+                                        <img  src="Img/firma2.png"></button>';
                 }
                 //elegir el icono
                 if( $_SESSION["Controlador"] -> miEstado -> Estado == 4.4 ){
-                    $imgExtension = 'img/descarga_generica.png';
+                    $imgExtension = 'Img/descarga_generica.png';
                     $file_name = $valor["Documento"];
                     $temp = explode('.',$file_name);
                     $extension = end($temp);
                     
                     if($extension == 'pdf'){
-                        $imgExtension = 'img/descarga_pdf.png';
+                        $imgExtension = 'Img/descarga_pdf.png';
                     }elseif($extension == 'docx'){
-                        $imgExtension = 'img/descarga_word.png';
+                        $imgExtension = 'Img/descarga_word.png';
                     }elseif($extension == 'xlsx'){
-                        $imgExtension = 'img/descarga_excell.png';
+                        $imgExtension = 'Img/descarga_excell.png';
                     }
                     $acciones_linea_pintar = str_replace('%imgTipoArchivo%',$imgExtension,$acciones_linea_pintar);
                 }
@@ -689,7 +958,6 @@ function DibujaLineas_PortalEmpleado(){
 
 function cargaFiltros(){
     $arrayFiltros = array();
-
     $tipoDocf = 0;
         switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
             case 4 :
@@ -715,11 +983,8 @@ function cargaFiltros(){
     });
 
     // funcion para reinedxarlo 
-   
     $arrayFiltros = array_values($arrayFiltros);
-    
-    
-    $txt_filtros .= '<span id="filtros_dinamicos">';
+    $txt_filtros = '<span id="filtros_dinamicos">';
     if(count($arrayFiltros)>0){
         foreach($arrayFiltros as $valor){ 
             $txt_filtros .= '<button onclick="aplicafiltros('."'".$valor["Estado"]."'".')" style="color:black;" class="dropdown-item" id="'.$valor["Estado"].'" >'.$valor["Filtro"].'</button>';
@@ -782,7 +1047,7 @@ function cargarJornadaHistorico(){
             $listaJ .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $dia. '<br><details><summary></summary>';
             $listaJ .='<p><b style="color:'.'Blue'.';">' . $hora . '</b><br>';
             $listaJ .= '<span class="descripcion_doc">'.$hora .'</span></p></details></div></td></b>';
-            $listaJ .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;color:'.'Blue'.';">'. $duracion;
+            $listaJ .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;color:'.'Blue'.';"><b>'. $duracion.'</b>';
             $listaJ .= '</p></div></td></tr>'; 
         }
         $listaJ .= "</tbody></table></span>";
@@ -900,24 +1165,29 @@ function cargaFormularioDinamico(){
 
 function cargarSeccionesDinamicas(){
     //fragmento comun
+    $rutaImg="";
     $pestanaSecciones = "";
     $pestanaSecciones .= '<br><br><div class="row h-75 justify-content-center">';
     $pestanaSecciones .= '<div class="col-12 col-md-9">';
     $pestanaSecciones .= '<div class="card shadow-2-strong shadow">';
     $pestanaSecciones .= '<div class="button-container  justify-content-center pb-5 ">';
+    if($_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
+        $rutaImg="PortalEmpleado/PestanaMenu/";
+    }
+
+    
     if ($_SESSION["Controlador"] -> miEstado -> Estado == 2) {
-        $pestanaSecciones .= '<div class="row col-12 col-lg-6 offset-lg-3">';
+        $pestanaSecciones .= '<div class="row col-12 col-lg-6 offset-lg-3 justify-content-center">';
     } else {
         $pestanaSecciones .= '<div class="row  justify-content-center col-10 offset-1">';
     }
     
-    
-
-    //Portal Empleado Menu principal
+   
+    //cargar secciones con acceso
     $arraySecciones = array_filter($_SESSION["Controlador"] -> miEstado -> permisosSecciones, function ($seccion) {
-        return ($seccion["OrdenEstado"] == $_SESSION["Controlador"] -> miEstado -> Estado && $seccion["TipoApp"] == $_SESSION["Controlador"] -> miEstado -> tipo_App);
+        return ($seccion["OrdenEstado"] == $_SESSION["Controlador"] -> miEstado -> Estado);
     });
-    
+   
     if(count($arraySecciones)>0){
         foreach($arraySecciones as $seccion){
             
@@ -925,14 +1195,14 @@ function cargarSeccionesDinamicas(){
                 $pestanaSecciones .= '<div class=" col-12 col-sm-6 mt-5" id="pestanaEnJornada" style="display: none;">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
                 $pestanaSecciones .=  'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .=  '<img class="img-fluid" src="img/PortalEmpleado/Pestanamenu/portal-empleado-jornada-entrada-f.png" />';
+                $pestanaSecciones .=  '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-entrada-f.png" />';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
               
                 $pestanaSecciones .=  '<div class=" col-12 col-sm-6 mt-5" id="pestanaFueraJornada" style="display: none;">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
                 $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .= '<img class="img-fluid" src="img/PortalEmpleado/Pestanamenu/portal-empleado-jornada-salida-f2.png"/>';
+                $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-salida-f2.png"/>';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
                 
@@ -940,7 +1210,7 @@ function cargarSeccionesDinamicas(){
                 $pestanaSecciones .= '<div class="'.$seccion['EstiloPestaña'].'">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina(['.$seccion['ValorAccion'].'])"';
                 $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .= '<img class="img-fluid" src="img/PortalEmpleado/Pestanamenu/'.$seccion['Imagen'].'"/>';
+                $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.''.$seccion['Imagen'].'"/>';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
             }
@@ -950,6 +1220,16 @@ function cargarSeccionesDinamicas(){
     }else{
         $pestanaSecciones = "No tienes permisos para acceder a la siguiente pestaña";
     }
+    //Pestaña azul de tareas añadida para probar
+    // if($_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
+        
+    //     $pestanaSecciones .= '<div class="'."col-6 col-sm-4 mt-5".'">';
+    //             $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([9])"';
+    //             $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
+    //             $pestanaSecciones .= '<img class="img-fluid" src="Img/tareas-portal-cliente_azul.png"/>';
+    //             $pestanaSecciones .= '</button>';
+    //             $pestanaSecciones .= '</div>';
+    // }
     
 
     //cierre fragmento comun
@@ -987,161 +1267,148 @@ function cargarSeleccionDocumentosCalendario(){
     return $seccionbtn;
     
 }
+
 function cargarVacacionesEmpleado(){
 
 
-   $seccionvcn='
-   <section class="">
-                          <nav>
-                              <div class="nav nav-tabs mt-4 " id="nav-tab" role="tablist">
-                                  <button class="nav-link" id="nav-graficos-tab" data-bs-toggle="tab"
-                                      data-bs-target="#nav-graficos" type="button" role="tab" aria-controls="nav-graficos"
-                                      aria-selected="false">Gráficos</button>
-                                  <button class="nav-link active" id="nav-resumen-tab" data-bs-toggle="tab"
-                                      data-bs-target="#nav-resumen" type="button" role="tab" aria-controls="nav-resumen"
-                                      aria-selected="true" aria-expanded="true">Resumen</button>
-  
-                                  <button class="nav-link" id="nav-festivos-tab" data-bs-toggle="tab"
-                                      data-bs-target="#nav-festivos" type="button" role="tab" aria-controls="nav-festivos"
-                                      aria-selected="false">Festivos</button>
-                                      
-                                      <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Seleccionar año</button>
-                              </div>
-                          </nav>
-                          <div class="tab-content mt-2 p-3" id="nav-tabContent">
-                              <!-- Contenido de Resumen. -->
-                              <div class="tab-pane fade show active" id="nav-resumen" role="tabpanel"
-                                  aria-labelledby="nav-resumen-tab">
-                                  <div id="resumen">
-  
-                                  </div>
-  
-  
-                               
-                              </div>
-                              
-                              <!-- Contenido de Festivos. -->
-                              <div class="tab-pane fade" id="nav-festivos" role="tabpanel"
-                                  aria-labelledby="nav-festivos-tab">
-                                  <div id="festivos">
-  
-                                  </div>
-                              </div>
-                            
-                              <!-- Contenido de Gráficos. -->
-                             
-                              <canvas class="tab-pane fade" id="nav-graficos" role="tabpanel"
-                                  aria-labelledby="nav-graficos-tab"></canvas>
-                          </div>
-  
-  
-                          <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
-                              <div class="offcanvas-header">
-                                  <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Seleccione el año deseado</h5>
-                                  <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                              </div>
-                              <div class="offcanvas-body">
-                                  
-                                  <div>
-                                      <select class="form-select" id="selectYear">
-                                          <option value="2022">2022</option>
-                                          <option value="2023">2023</option>
-                                          <option value="2024">2024</option>
-                                          <!-- Agrega más opciones según tus necesidades -->
-                                      </select>
-                                  </div>
-                                  <div class="input-group">
-                                      <input type="text" class="form-control" placeholder="Buscar..."
-                                          aria-label="Buscar..." id="filtro_txt">
-                                      <div class="input-group-append">
-                                          <button class="btn btn-outline-secondary" type="button"
-                                              onclick="aplicafiltros()"><img src="Img/lupa.png"
-                                                  width="17px"></button>
-                                      </div>
-                                  </div>
-                                  <button onclick="dibuja_pagina([-1,-1])" style="color:black;"
-                                  class="dropdown-item mt-2"><b>Cerrar Sesión</b></button>
+    $seccionvcn='
+    <section class="">
+                           <nav>
+                               <div class="nav nav-tabs mt-4 " id="nav-tab" role="tablist">
+                                   <button class="nav-link" id="nav-graficos-tab" data-bs-toggle="tab"
+                                       data-bs-target="#nav-graficos" type="button" role="tab" aria-controls="nav-graficos"
+                                       aria-selected="false">Gráficos</button>
+                                   <button class="nav-link active" id="nav-resumen-tab" data-bs-toggle="tab"
+                                       data-bs-target="#nav-resumen" type="button" role="tab" aria-controls="nav-resumen"
+                                       aria-selected="true" aria-expanded="true">Resumen</button>
+   
+                                   <button class="nav-link" id="nav-festivos-tab" data-bs-toggle="tab"
+                                       data-bs-target="#nav-festivos" type="button" role="tab" aria-controls="nav-festivos"
+                                       aria-selected="false">Festivos</button>
+                                       
+                                       <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Seleccionar año</button>
+                               </div>
+                           </nav>
+                           <div class="tab-content mt-2 p-3" id="nav-tabContent">
+                               <!-- Contenido de Resumen. -->
+                               <div class="tab-pane fade show active" id="nav-resumen" role="tabpanel"
+                                   aria-labelledby="nav-resumen-tab">
+                                   <div id="resumen">
+   
+                                   </div>
+   
+   
                                 
-                              </div>
-                          </div>
-  
-                          <form class="formulario_Dinamico ">
-  
-                              <button class="btn btn-primary floating-btn">
-                                  <i class="bi bi-tsunami"></i>
-                              </button>
-                              <button class="btn btn-primary floating2-btn">
-                                  <i class="bi bi-calendar"></i>
-                              </button>
-  
-  
-  
-                              <div class="container mt-4">
-                                  <div class="row justify-content-center">
-                                      <button class="btn btn-primary col-2" onclick="window.location.href=\'inicio.html\'">
-                                          <i class="bi bi-house-door"></i> Inicio
-                                      </button>
-                                  </div>
-                              </div>
-                          </form>
-                      </section>
-  ';
+                               </div>
+                               
+                               <!-- Contenido de Festivos. -->
+                               <div class="tab-pane fade" id="nav-festivos" role="tabpanel"
+                                   aria-labelledby="nav-festivos-tab">
+                                   <div id="festivos">
+   
+                                   </div>
+                               </div>
+                             
+                               <!-- Contenido de Gráficos. -->
+                              
+                               <canvas class="tab-pane fade" id="nav-graficos" role="tabpanel"
+                                   aria-labelledby="nav-graficos-tab"></canvas>
+                           </div>
+   
+   
+                           <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+                               <div class="offcanvas-header">
+                                   <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Seleccione el año deseado</h5>
+                                   <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                               </div>
+                               <div class="offcanvas-body">
+                                   
+                                   <div>
+                                       <select class="form-select" id="selectYear">
+                                           <option value="2022">2022</option>
+                                           <option value="2023">2023</option>
+                                           <option value="2024">2024</option>
+                                           <!-- Agrega más opciones según tus necesidades -->
+                                       </select>
+                                   </div>
+                                   <div class="input-group">
+                                       <input type="text" class="form-control" placeholder="Buscar..."
+                                           aria-label="Buscar..." id="filtro_txt">
+                                       <div class="input-group-append">
+                                           <button class="btn btn-outline-secondary" type="button"
+                                               onclick="aplicafiltros()"><img src="Img/lupa.png"
+                                                   width="17px"></button>
+                                       </div>
+                                   </div>
+                                   <button onclick="dibuja_pagina([-1,-1])" style="color:black;"
+                                   class="dropdown-item mt-2"><b>Cerrar Sesión</b></button>
+                                 
+                               </div>
+                           </div>
+   
+                           <form class="formulario_Dinamico ">
+   
+                               <button class="btn btn-primary floating-btn" onclick="dibuja_pagina([0,3])">
+                                   <i class="bi bi-tsunami"></i>
+                               </button>
+                               <button class="btn btn-primary floating2-btn">
+                                   <i class="bi bi-calendar"></i>
+                               </button>
+   
+   
+   
+                               <div class="container mt-4">
+                                   <div class="row justify-content-center">
+                                       <button class="btn btn-primary col-2" onclick="window.location.href=\'inicio.html\'">
+                                           <i class="bi bi-house-door"></i> Inicio
+                                       </button>
+                                   </div>
+                               </div>
+                           </form>
+                       </section>
+   ';
+ return $seccionvcn;
+ 
+ }
+
+ function cargarSeleccionVacacionesEmpleado(){
+
+    $seleccionvcn =  '
+<section class="container">
+                        <label for="date" class="col-2   col-form-label">Seleccione año</label>
+                        <form  novalidate>
+
+                            <div class="row">
+                            <div class="col-5 ">
+                                <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+                                    <option selected></option>
+                                    <option value="1">2019</option>
+                                    <option value="2">2020</option>
+                                    <option value="3">2021</option>
+                                    <option value="4">2022</option>
+                                    <option value="5">2023</option>
+                                  </select>
+                            </div>
+                        </div>
+                      
+                      
+                        <div class="container mt-4">
+                            <div class="row justify-content-center">
+                              
+                                <button class="btn btn-primary col-2" onclick="window.location.href=\'inicio.html\'">
+                                    Cancelar
+                               </button>
+                               <button class="btn btn-primary col-2" onclick="window.location.href=\'inicio.html\'">
+                                Ver
+                           </button>
+                            </div>
+                        </div>
+
+                    </div>
+                        </form>
+                    </section>
+';
+
 return $seccionvcn;
 
-}
-
-function cargarFormVacacionesEmpleado(){
-
-    $seleccionvcn ='<div class="row  h-100 justify-content-center my-4">
-               <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
-                   <br>
-                   <div class="card shadow-2-strong shadow">
-   
-   
-   
-                       <section class="row justify-content-center col-10 col-md-6 col-sm-6 col-xs-6 offset-1 offset-lg-3 ">
-                           <label class="tipo">Tipo</label>
-                               <div class="mb-3  col-12  input-group-lg "  style="margin-left: 16px;">
-                                   
-                                   <div class="btn-group-vertical col-12 ">
-                                       <button type="button" class="btn btn-light  mb-2">Solicitud de Vacaciones</button>
-                                       <button type="button" class="btn btn-light col-6 mb-2">Asistencia</button>
-                                       <button type="button" class="btn btn-light col-6 mb-2">Material</button>
-                                       
-                                     </div>
-                                 
-                                              
-                                           
-                                       
-                                   
-                                   </div>
-                                       
-                               <form class="formulario_Dinamico ">
-                               
-                              
-                           
-                               
-                               <div class="row col-11 justify-content-center">
-                                   <button
-                                       class="col-5  offset-1   btn mt-3 " onclick="dibuja_pagina([0,3,0])"
-                                       onmouseover="this.style.backgroundColor=\'#d6d5d3\'"
-                                       onmouseout="this.style.backgroundColor=\'#ffffff\';">
-                                       Cancelar
-                                   </button>
-                                   <button class="col-5 offset-1 btn  mt-3 " onclick="" type="submit"
-                                       style="color:#0265bd; font-size: 20px; text-align: center;" onmouseover="this.style.backgroundColor=\'#d6d5d3\'"
-                                       onmouseout="this.style.backgroundColor=\'#ffffff\';"  id="save" >
-                                       Siguiente
-                                   </button></div><br>
-                           </form>
-           
-                   </div>
-               </div>
-           </div>
-   ';
-
-
-
-    return $seleccionvcn;
-
-}
+ }

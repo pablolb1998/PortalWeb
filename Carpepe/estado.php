@@ -20,8 +20,6 @@ class Estado{
     public $CadenaFiltro;
     public $tipofiltro;
 
-    //variables vacaciones
-    public $vacacionesEmpleado;
     
     //variables sociedad
     public $lista_sociedades = array();
@@ -42,6 +40,8 @@ class Estado{
     //datos navegacion archivos PE
     public $IdTipoPropietario;
     public $IdPropietario;
+     //variables vacaciones
+     public $vacacionesEmpleado;
     
     //generador formularios
     public $cargarForm;
