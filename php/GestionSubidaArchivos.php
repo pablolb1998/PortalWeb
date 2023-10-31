@@ -9,7 +9,7 @@ if(isset($_FILES["Archivo"])){
     //$tmp_name = $_FILES["Archivo"]["tmp_name"];
 
     ///funciona asi pero hay que cambiarlo con urgencia
-    if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], 'C:/xampp/htdocs/portaldecliente/inteco/subidasTemp/'.$_FILES["Archivo"]["name"] )) {
+    if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], 'C:/xampp/htdocs/portaldecliente/inteco/subidasTemp/'.$_FILES["Archivo"]["name"] )){
         echo 'C:/xampp/htdocs/portaldecliente/inteco/subidasTemp/'.$_FILES["Archivo"]["name"];
     } else {
         echo false;

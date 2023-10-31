@@ -167,6 +167,25 @@ function pinta_contenido($estado){
                         break;
                 }
             break;
+        case 8:
+            switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
+                case 1:    
+                    $titulo = "Peticiones";
+                    $cabecera = "../html/header.html";
+                    $filename = "../html/documentos.html";
+                    break;
+            }
+            break;
+        case 9:
+            switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
+                case 1:  
+                      
+                    $titulo = "Archivos";
+                    $cabecera = "../html/header.html";
+                    $filename = "../html/documentos.html";
+                    break;
+            }
+            break;
         default:
             $filename = "../html/login.html";
             break;
@@ -208,12 +227,12 @@ function pinta_contenido($estado){
     
 
     //optimizar aqui
-    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado, array(1, 2, 3, 4, 5, 6, 7)) || ($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 )) {
+    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado, array(1, 2, 3, 4, 5, 6, 7, 8, 9)) || ($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 )) {
         if ($_SESSION["Controlador"] -> miEstado -> Estado == 1){
             //Pestaña de sociedades del portal del comercial
             return $filetext.muestra_sociedades();
 
-        }elseif(in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7)) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
+        }elseif(in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7, 8, 9)) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
             //Documentos portal del comercial
             $btnBuscar = '<li><div class="input-group">
             <input type="text" class="form-control" placeholder="Buscar..." aria-label="Buscar..." id="filtro_txt" >
@@ -266,7 +285,6 @@ function pinta_contenido($estado){
         }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null && $_SESSION["Controlador"] -> miEstado -> cargarFormFirma == null && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Pestañas de navegacion
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
-
             ////////////////
                 // $arrayFiltros = [
                 //     ["idTipoDoc" => 1,
@@ -296,8 +314,6 @@ function pinta_contenido($estado){
 
                 //  $filetext = str_replace('<span id="filtros_dinamicos">',$txt_filtros,$filetext);
             /////////////////
-
-
             return $filetext.DibujaLineas_PortalEmpleado();
         }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Generar los formularios
@@ -365,7 +381,7 @@ function pinta_contenido($estado){
 
     } else {
         if($_SESSION['Controlador'] -> miEstado -> tipo_App == 1){
-            $filetext = str_replace("%NombrePortal%",'Area del Cliente',$filetext);
+            $filetext = str_replace("%NombrePortal%",'Área del Cliente',$filetext);
             $filetext = str_replace("%TipoUsuario%",'cliente',$filetext);
         }else{
             $filetext = str_replace("%NombrePortal%",'Portal del Empleado',$filetext);
@@ -390,7 +406,7 @@ function muestra_sociedades(){
 
     //**************************************************************************************/
         $tablaSociedades = "";
-        $tablaSociedades = "<form class='formulario'>";
+        $tablaSociedades = "<form class='formulario_sociedades'>";
         foreach ($_SESSION["Controlador"] -> miEstado -> lista_sociedades as $valor) {
             $id_sociedad = $valor["idSociedad"];
             $sociedad = $valor["NombreFiscal"];
@@ -404,7 +420,7 @@ function muestra_sociedades(){
 
         
         //cambie por la funcion dibuja pagina
-        $tablaSociedades .= "<input onclick='dibuja_pagina()' style='float:right; margin-bottom:1.3em;' class='btn btn-outline-primary' type='submit' name='enviar' value='Siguiente'>";
+        $tablaSociedades .= "<input  style='float:right; margin-bottom:1.3em;' class='btn btn-outline-primary' type='submit' name='enviar' value='Siguiente'>";
         $tablaSociedades .= "</form>";
         $tablaSociedades .= "<br>";
         return $tablaSociedades;
@@ -413,8 +429,81 @@ function muestra_sociedades(){
 //dibujar los documentos del portal del comercial segun la pestaña
 function muestra_documentos(){
     //optimizar al cambiar la manera de almacenar los documentos y los filtros "array_filter()"
-    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7))) {
-        $arrayDoc = array();
+    $arrayDoc = array();
+    $listaDoc = "";
+    $acciones_linea = '';
+    $acciones_globales = '';
+    if($_SESSION["Controlador"] -> miEstado -> acciones["descarga"] == 1 ){
+        $acciones_linea .= '<a onclick="dibuja_pagina([0,4,[%id%,%Origen_impresion%,'."'%codigo%.pdf'".'],'."'OPDF'".'])" ><img class="pdf_icono" src="Img/descarga_generica.png"></a>';
+    }
+    if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
+        $acciones_linea .= '<a onclick="dibuja_pagina([9,%id%])" style="all: initial;cursor: pointer;"><img class="pdf_icono" src="Img/Documentos2.png"></a>';
+    }
+    if($_SESSION["Controlador"] -> miEstado -> acciones["adjunto"] == 1 ){
+        $acciones_linea .= '<a onclick="dibuja_pagina([0,4,[%id%,'."'%codigo%'".'],'."'OA'".'])" style="all: initial;cursor: pointer;"><img class="pdf_icono" src="Img/descarga_generica.png"></a>';
+    }
+
+    if($_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"] == 1){
+        $acciones_globales .= '<button onclick="cargarModalValidacion(1,0,0)" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
+    }
+    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7, 8))) {
+        
+        if($_SESSION["Controlador"] -> miEstado -> acciones["modalValidaciones"] == 1 ){
+            //$acciones_linea .= '<a onclick="cargarModalValidacion(0,%id%,'."'%codigo%'".')" ><img class="pdf_icono" src="Img/bolsa-de-dinero.png"></a>';
+            // Optimizar pepe
+            $nuevoArrayCodigos = array('codigo','codigo2','codigo3');
+            $acciones_globales .= '<div class="modal fade" id="modalValidaciones" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="CabeceraModalSolicitud"></h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form class="formulario_modal">
+                  <div class="mb-3">
+                  
+                  <!--<div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="togglePeticionSwitch" checked >
+                    <label class="form-check-label2" for="togglePeticionSwitch" id="LabelPeticionSwitch"></label>
+                  </div>-->
+                </div>
+                
+                <div class="btn-group">
+                <!--<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                ¿Quien realiza la petición?
+                </button>
+                <ul class="dropdown-menu">
+                <input   id="nombreInput" class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar">-->';
+ 
+                // $acciones_globales .= '<ul>';
+                // foreach ($_SESSION["Controlador"] -> miEstado -> PersonasContacto as $pc) {
+                //     $acciones_globales .= '<li><button  class="btn btn-outline-secondary  lista">' . $pc['Nombre'] . '</button></li>';
+                // }
+                // $acciones_globales .= '</ul> </ul>
+                $acciones_globales .= '</div>';
+               
+                
+              
+                $acciones_globales .= '
+                
+                    <div class="mb-3">
+                      <label for="message-text" class="col-form-label">Descripción:</label>
+                      <textarea class="form-control" id="message-text" required></textarea>
+                    </div>
+                  
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary" id="SubmitModalForm">Solicitar</button>
+                </div>
+              </div>
+            </div>
+          </div>';
+        }
+        
+
         $tipoDocf = 0;
         switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
             case 4 :
@@ -429,35 +518,40 @@ function muestra_documentos(){
             case 7 :
                 $tipoDocf = 4; 
                 break;
+            case 8 :
+                $tipoDocf = 5; 
+                break;
             default:
                 $tipoDocf = 0;
                 break;
         }
         // funcion para aplicar un filtro a cada elemento del array
-        $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
-            return $docF["tipo"] == $tipoDocf;
-        });
-
-        //filtro por tipo 1 de filtro es decir string 
-        if($_SESSION["Controlador"] -> miEstado -> CadenaFiltro !== null && $_SESSION["Controlador"] -> miEstado -> tipofiltro == 1){
-           
-            $arrayDoc = array_filter($arrayDoc, function ($docF) use($arrayDoc) {
-                return str_contains(strtolower($docF["Descripcion"]),strtolower($_SESSION["Controlador"] -> miEstado -> CadenaFiltro));
+            $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
+                return $docF["tipo"] == $tipoDocf;
             });
-        }
+
+            //filtro por tipo 1 de filtro es decir string 
+            if($_SESSION["Controlador"] -> miEstado -> CadenaFiltro !== null && $_SESSION["Controlador"] -> miEstado -> tipofiltro == 1){
+            
+                $arrayDoc = array_filter($arrayDoc, function ($docF) use($arrayDoc) {
+                    return str_contains(strtolower($docF["Descripcion"]),strtolower($_SESSION["Controlador"] -> miEstado -> CadenaFiltro));
+                });
+            }
+            
+            //filtro por tipo 2 de filtro es estado del doc 
+            if($_SESSION["Controlador"] -> miEstado -> CadenaFiltro !== null && $_SESSION["Controlador"] -> miEstado -> tipofiltro == 2 ){
+                $arrayDoc = array_filter($arrayDoc, function ($docF) use($arrayDoc) {
+                    return $docF["Estado"] == $_SESSION["Controlador"] -> miEstado -> CadenaFiltro;
+                });
+            }
+            // funcion para reinedxarlo 
+            $arrayDoc = array_values($arrayDoc);
+       
+   
         
-        //filtro por tipo 2 de filtro es estado del doc 
-        if($_SESSION["Controlador"] -> miEstado -> CadenaFiltro !== null && $_SESSION["Controlador"] -> miEstado -> tipofiltro == 2 ){
-            $arrayDoc = array_filter($arrayDoc, function ($docF) use($arrayDoc) {
-                return $docF["Estado"] == $_SESSION["Controlador"] -> miEstado -> CadenaFiltro;
-            });
-        }
-
-        // funcion para reinedxarlo 
-        $arrayDoc = array_values($arrayDoc);
-        //print_r($arrayDoc);
-        $listaDoc = "";
+       
         $listaDoc .= "<section>";
+
         if(count($arrayDoc)>0){
 
             $listaDoc .=  "<table class='table table-striped table-bordered-bottom' id='cuerpo'>";
@@ -486,12 +580,17 @@ function muestra_documentos(){
                 }else{
                     $listaDoc .= "<tr data-tipo-servicio='$estado' id='$estado'>";
                 }
+
+                $acciones_mostrar = str_replace(['%id%','%Origen_impresion%','%codigo%'], [$id, $Origen_impresion,$codigo], $acciones_linea);;
+
+
                 $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $codigo . ' - ' . $newDate . '<br><details><summary></summary>';
                 $listaDoc .='<p><b style="color:'.$color.';">' . $estado . '</b><br>';
                 $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td>';
                 $listaDoc .= '<td class="col-5"><div class="precio" name="precio" ><b id="importe_documento" style="float:right;color:'.$color.';">' . $importe;
-                $listaDoc .= '</b><br><a onclick="dibuja_pagina([0,4,['.$id.','.$Origen_impresion.",'".$codigo.".pdf'".']])" >';
-                $listaDoc .= '<img class="pdf_icono" src="Img/descarga_generica.png"></a></div></td></tr>'; 
+                $listaDoc .= '</b><br>'.$acciones_mostrar.'</div></td></tr>';
+                //$listaDoc .= '</b><br><a onclick="dibuja_pagina([0,4,['.$id.','.$Origen_impresion.",'".$codigo.".pdf'".']])" >';
+                //$listaDoc .= '<img class="pdf_icono" src="Img/descarga_generica.png"></a></div></td></tr>'; 
                 }
                 $listaDoc .= "</tbody></table></span>";
                 $listaDoc .= "<div class='container text-center'>";
@@ -505,10 +604,72 @@ function muestra_documentos(){
             $listaDoc .= '<div class="d-flex justify-content-center mt-5 mb-5"> No hay elementos </div>';
         }
         
-        $listaDoc .= "</div></div></div></div></div></section></div></div></div>";
-        return $listaDoc;
+        
+        
+       
+    }else{
+        //mostrar los archivos con sus acciones propias
+
+        $arrayDoc = $_SESSION["Controlador"] -> miEstado -> ArchivosDocumento;
+        $arrayDoc = array_values($arrayDoc);
+        //print_r($arrayDoc);
+        //print_r($arrayDoc);
+        $listaDoc .= "<section>";
+
+        if(count($arrayDoc)>0){
+
+            $listaDoc .=  "<table class='table table-striped table-bordered-bottom' id='cuerpo'>";
+
+            $listaDoc .=  "<tbody id='myTable'>";
+
+            for($dc = 0; ($dc < count($arrayDoc)) && ($dc < $_SESSION["Controlador"] -> miEstado -> puntero_posicion) ; $dc++ ){
+                $valor = $arrayDoc[$dc]; 
+                $id = $valor["IdArchivo"];
+                $descripcion = $valor["Descripcion"];
+                $newDate = $valor['Fecha'] -> format('d/m/Y');
+                
+                //optimizar/cambiar
+                if (strlen($descripcion) <= 0) {
+                    $descripcion = "Sin Nombre";
+                }
+
+                if($newDate==date("d/m/Y")){
+                    $listaDoc .= "<tr  data-tipo-servicio='$id' id='$id'>";
+                }else{
+                    $listaDoc .= "<tr data-tipo-servicio='$id' id='$id'>";
+                }
+
+                $acciones_mostrar = str_replace(['%id%','%codigo%'], [$id,$descripcion], $acciones_linea);;
+
+
+                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $descripcion . '<br>';
+               
+                $listaDoc .= '<td class="col-5"><div class="precio" name="precio" ><b id="importe_documento" style="float:right;">' . $newDate;
+                $listaDoc .= '</b><br>'.$acciones_mostrar.'</div></td></tr>';
+                //$listaDoc .= '</b><br><a onclick="dibuja_pagina([0,4,['.$id.','.$Origen_impresion.",'".$codigo.".pdf'".']])" >';
+                //$listaDoc .= '<img class="pdf_icono" src="Img/descarga_generica.png"></a></div></td></tr>'; 
+                }
+                $listaDoc .= "</tbody></table></span>";
+                $listaDoc .= "<div class='container text-center'>";
+                $listaDoc .= "<div class='row'>";
+                $listaDoc .= "<div class='col'>";
+                //optimizar moverlo a un documento aparte
+                if (count($arrayDoc) > $_SESSION["Controlador"] -> miEstado -> puntero_posicion) {
+                    $listaDoc .= '<button type="button" class="btn btn-primary mb-3" onclick="dibuja_pagina([0,1])">Ver más...</button>';
+                }
+        }else{
+            $listaDoc .= '<div class="d-flex justify-content-center mt-5 mb-5"> No hay elementos </div>';
+        }
+
+
     }
+    $listaDoc .= "</div></div></div></div></div></section></div></div></div>";
+    $listaDoc .= $acciones_globales;
+    return $listaDoc;
 }
+
+
+
 
 //Dibujar las lineas de cualquier  del portal de empleado
 function DibujaLineas_PortalEmpleado(){
@@ -662,7 +823,7 @@ function DibujaLineas_PortalEmpleado(){
                 $listaDoc .='<p><b style="color:'.'Blue'.';">' . $descripcion2 . '</b><br>';
                 $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td></b>';
                 $listaDoc .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;"><h5>'. $FechaInicio.'<h5>';
-                $listaDoc .= '<div class="mt-1">' . $acciones_linea_pintar . '</a></div>';
+                $listaDoc .= '<div class="mt-1">' . $acciones_linea_pintar . '</div>';
                 $listaDoc .= '</div></td></tr>'; 
             }
             $listaDoc .= "</tbody></table></span>";
@@ -895,8 +1056,8 @@ function cargarSeccionesDinamicas(){
     //fragmento comun
     $rutaImg="";
     $pestanaSecciones = "";
-    $pestanaSecciones .= '<br><br><div class="row h-75 justify-content-center">';
-    $pestanaSecciones .= '<div class="col-12 col-md-9">';
+    $pestanaSecciones .= '<br><br><div class="row h-75 justify-content-center" id="no-margin">';
+    $pestanaSecciones .= '<div class="col-12 col-md-9"  id="no-padding">';
     $pestanaSecciones .= '<div class="card shadow-2-strong shadow">';
     $pestanaSecciones .= '<div class="button-container  justify-content-center pb-5 ">';
     if($_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
@@ -904,7 +1065,7 @@ function cargarSeccionesDinamicas(){
     }
     
     if ($_SESSION["Controlador"] -> miEstado -> Estado == 2) {
-        $pestanaSecciones .= '<div class="row col-12 col-lg-6 offset-lg-3 justify-content-center">';
+        $pestanaSecciones .= '<div class="row col-10 col-lg-6 offset-1 offset-lg-3  justify-content-center">';
     } else {
         $pestanaSecciones .= '<div class="row  justify-content-center col-10 offset-1">';
     }

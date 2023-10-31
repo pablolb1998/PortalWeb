@@ -22,34 +22,37 @@ if(isset($_POST['IdD']) && isset($_POST['TipoArchivo']) && isset($_POST['Pin']) 
     $texto = $ultimosCuatro.$primerosCuatro;
     
     if($texto == $_POST['ST']){
-        $nombre_archivo = ExtraerDocumento_Por_CIF($_POST['IdD'],$_POST['TipoArchivo'],$Ip,$datosBBDD[0]["BBDD"]);
-        $nombre_archivo = $nombre_archivo[0]['codigo'];
-        $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_POST['Pin'].'&IdOrigenImpresion='.$_POST['TipoArchivo'].'&IdPropietario='.$_POST['IdD'];
-        $directorio_destino = "archivos/".$_SESSION["pinC"]."/";
-        // Verificar si el directorio existe, si no, crearlo
-        if (!file_exists($directorio_destino)) {
-            mkdir($directorio_destino, 0755, true);
-        }
-        // Realiza la solicitud HTTP para obtener el contenido del archivo
-        $response = file_get_contents($url_archivo);
-        if ($response === false) {
-            $msgError = 'Error al obtener el archivo desde el servicio web.';
-        } else {
-            // Específica la ruta donde deseas guardar el archivo
-            $rutaGuardado = $directorio_destino.$nombre_archivo; // Reemplaza esto con la ruta y nombre deseado
-        
-            // Guarda el contenido en un archivo en el servidor
-            if (file_put_contents($rutaGuardado, $response) !== false) {
-                echo '../php/'.$rutaGuardado;
+        $nombre_archivo = ExtraerDocumento_Por_CIF($_POST['IdD'],$_POST['TipoArchivo'],$_POST['CIF'],$Ip,$datosBBDD[0]["BBDD"]);
+        if(isset($nombre_archivo) && $nombre_archivo!= null){
+            $nombre_archivo = $nombre_archivo[0]['codigo'];
+            $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_POST['Pin'].'&IdOrigenImpresion='.$_POST['TipoArchivo'].'&IdPropietario='.$_POST['IdD'];
+            $directorio_destino = "archivos/".$_POST['Pin']."/";
+            // Verificar si el directorio existe, si no, crearlo
+            if (!file_exists($directorio_destino)) {
+                mkdir($directorio_destino, 0755, true);
+            }
+            // Realiza la solicitud HTTP para obtener el contenido del archivo
+            $response = file_get_contents($url_archivo);
+            if ($response === false) {
+                
             } else {
-                echo 0;
+                // Específica la ruta donde deseas guardar el archivo
+                $rutaGuardado = $directorio_destino.$nombre_archivo.'.pdf'; // Reemplaza esto con la ruta y nombre deseado
+                
+                // Guarda el contenido en un archivo en el servidor
+                if (file_put_contents($rutaGuardado, $response) !== false) {
+                    echo '../php/'.$rutaGuardado;
+                    exit();
+                } 
             }
         }
     }
 
 }else{
-    echo 0;
+    
 }
+echo 0;
+//"http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=65814415D75C&IdOrigenImpresion=5&IdPropietario=3830;
 //http://localhost/portaldecliente/html/ObtenerDocumentoPC.html?IdD=3830&TipoArchivo=5&Pin=65814415D75C&ST=015106c7
 //A36642759
 //http://www.areadecliente.de/index.php?IdD=3820&TipoArchivo=5&Pin=65814415D75C&ST=015106c7

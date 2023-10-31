@@ -12,7 +12,7 @@ require_once "Clases/controlador.php";
 require_once 'Clases/estado.php';
 session_start();
 
-try {
+// try {
     if (!isset($_SESSION["Controlador"])) {
         $_SESSION["Controlador"] = new Controlador;
     }
@@ -25,9 +25,10 @@ try {
         }  
     }
     $respuestaJSON = json_encode(devuelveContenido());
-} catch (\Throwable $th) {
-    $respuestaJSON = json_encode(array("Error 404",null,0));
-}
+// } catch (\Throwable $th) {
+//     $mensajeDeError = $th->getMessage();
+//     $respuestaJSON = json_encode(array($mensajeDeError,null,0));
+// }
 
 // $respuestaJSON = json_encode(array($_SESSION["TipoPortal"],0,0));
 
