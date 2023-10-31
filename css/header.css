@@ -58,6 +58,21 @@
 body {
     overflow-x: hidden;
 }
+/*css del login*/
+
+.c_img{
+    border-top-left-radius:var(--bs-border-radius-pill) !important;
+    border-bottom-left-radius:var(--bs-border-radius-pill) !important;
+    border-right: 0px;
+}
+#ImgPwContainer{
+    border-top-right-radius:var(--bs-border-radius-pill) !important;
+    border-bottom-right-radius:var(--bs-border-radius-pill) !important;
+    background-color:white;
+    border-left: 0px;
+}
+
+
 
 /*css para eliminar el paddig por defecto de boostrap */
 /* @media screen and (min-width: 600px) { /* setting default row and cols values for non mobile screens */
