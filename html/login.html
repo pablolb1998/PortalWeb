@@ -28,10 +28,10 @@
                 <input type="text" class="form-control rounded-pill" placeholder="Usuario" id="user" required>
               </div>
               
-              <div class="input-group mb-3 input-group-lg rounded-pill">
+              <div class="input-group mb-3 input-group-lg "  >
                 <!-- <span class="input-group-text"><i class="fa fa-lock"></i></span> -->
-                <input class="form-control" id="password" type="password" placeholder="Contraseña" value="">
-                <span class="input-group-text">
+                <input class="form-control c_img" id="pw_text" type="password" placeholder="Contraseña" value="" required>
+                <span class="input-group-text" id="ImgPwContainer">
                   <i class="fa fa-eye" id="ImgPw" 
                  style="cursor: pointer"></i>
                  </span>
@@ -43,6 +43,10 @@
               </div> -->
               <button type="submit" class="col-6 btn btn-primary rounded-pill" id="btnForm">ENTRAR</button>
             </form>
+            <br>
+            <div class="row col-12">
+              <a class="col-12" href="html/alta_Usuario.html" target="_blank" rel="noopener noreferrer" style="text-align: left;text-decoration: none;">Crear usuario</a>
+              <a class="col-12" href="#" style="text-align: left;text-decoration: none;">Recuperar contraseña</a></div>
           </div>
         </div>
       </div>
