@@ -75,6 +75,7 @@ class Controlador
     function IniciarSesion($usr, $pass){
         //si no encuentra usuario devuelve false
         $datosSesion = comprueba_usuario($usr, $pass);
+        $IdTipoApp;
         if($datosSesion != false){
             $this -> miEstado -> nombre_descriptivo = $datosSesion[2];
             $this -> miEstado -> IdIdentidad = $datosSesion[4];
@@ -84,6 +85,8 @@ class Controlador
                     $this -> miEstado -> IdCliente = $datosSesion[0];
                     $this -> miEstado -> nombre_cliente = $datosSesion[1];
                     $this -> miEstado -> lista_sociedades = compruebaSociedades($this -> miEstado -> IdCliente);
+                    $this -> miEstado -> PersonasContacto = compruebaPersonasContaco();
+                    $IdTipoApp = 32;
             }elseif($this -> miEstado -> tipo_App == 2){
                 //PORTAL DEL EMPLEADO: Añadir variables de sesion al comprobar usuario
                 $this -> miEstado -> IdPersonal = $datosSesion[0];
@@ -92,7 +95,9 @@ class Controlador
                 $this -> miEstado -> Documentos = extraerDocPersonal_Masivo();
                 $this -> miEstado -> archivostiposAccesos = extraerArchivosTiposAccesos();
                 $this -> miEstado -> linkDocumentoSubido = null;
+                $IdTipoApp = 33;
             }
+            crearRegistroEntrada_SeguridadUnificada($this -> miEstado -> IdIdentidad,$IdTipoApp);
             return true;
         }else{
             return false;
@@ -100,11 +105,6 @@ class Controlador
         
     }
 
-
-    function ExtraerDoc_conCIF($Tipo = null,$Id = null,$cif = null){
-
-        ExtraerDocumento_Por_CIF($Tipo,$Id,$cif);
-    }
     //llama a la funcion que extrae los documentos y llena la clase estado con los mismos
     function cargaDocumentos_Parcial($tipoDoc = null){
         //optimizar para evitar conexión
@@ -235,35 +235,57 @@ class Controlador
     function cargarPermisosAcciones(){
         //Resetear el acceso a las acciones
         $this -> miEstado -> acciones["archivos"] = 0;
+        $this -> miEstado -> acciones["adjunto"] = 0;
+        $this -> miEstado -> acciones["descarga"] = 0;
         $this -> miEstado -> acciones["anadirLinea"] = 0;
-        switch ($this -> miEstado -> Estado) {   
-            case 4.1 :
-                $this -> miEstado -> acciones["archivos"] = 1;
-                $this -> miEstado -> acciones["anadirLinea"] = 1;
-                break;
-            case 4.3 :
-                $this -> miEstado -> acciones["archivos"] = 1;
-                break;
-            case 4.4 :
-                $this -> miEstado -> acciones["anadirLinea"] = 1;
-                break;
-            case 4.5:
-                $this -> miEstado -> acciones["archivos"] = 1;
-                $this -> miEstado -> acciones["anadirLinea"] = 1;
-                break;
-            case 4.6:
-                $this -> miEstado -> acciones["archivos"] = 1;
-                $this -> miEstado -> acciones["anadirLinea"] = 1;
-                break;
-            case 4.7:
-                $this -> miEstado -> acciones["archivos"] = 1;
-                $this -> miEstado -> acciones["anadirLinea"] = 1;
-                break;
-            case 4.8:
-                break;
-            default:
-                $this -> miEstado -> IdTipoPropietario = null;
-                break;
+        $this -> miEstado -> acciones["modalValidaciones"] = 0;
+        if($this -> miEstado -> tipo_App == 2){
+            //Portal del empleado
+            switch ($this -> miEstado -> Estado) {   
+                case 4.1 :
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    break;
+                case 4.3 :
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    break;
+                case 4.4 :
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    break;
+                case 4.5:
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    break;
+                case 4.6:
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    break;
+                case 4.7:
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    break;
+                case 4.8:
+                    break;
+                default:
+                    $this -> miEstado -> IdTipoPropietario = null;
+                    break;
+            }
+        }else{
+            //Poeral del comercial
+            switch ($this -> miEstado -> Estado) { 
+                case 8 :
+                    $this -> miEstado -> acciones["modalValidaciones"] = 1;
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> IdTipoPropietario = null;
+                    break;
+                case 9 :
+                    $this -> miEstado -> acciones["adjunto"] = 1;
+                    break;
+                default:
+                    $this -> miEstado -> acciones["descarga"] = 1;
+                    break;
+            }
         }
 
     }
@@ -284,7 +306,7 @@ class Controlador
     //funciones de para generar el contenido
     // optimizar el navegar pestañas
     function generarContenido($arrayDatos = array()){
-       
+
         $arrayAuxiliarHtml = array();
         $msgError = "" ;
         $abrirNuebaPestaña = 0;
@@ -324,29 +346,30 @@ class Controlador
         }elseif($this -> miEstado -> tipo_App == 1.5 && $c === 0.5 && !empty($arrayDatos)){ 
             //PORTAL CLIENTE DESCARGAR DOC
             //DESCARGAR DOCUMENTO MEDIANTE CIF
-            $DatosDoc = ExtraerDocumento_Por_CIF($_SESSION["tipoArchivo"],$_SESSION["IdDocumento"],$arrayDatos[0]);
-            if(count($DatosDoc)>0){
-                $valor = $DatosDoc[0]; 
-                $id = $valor["id"];
-                $PinDescargas = $valor["PinDescargas"];
-                $Origen_impresion = $valor["OrigenImpresion"];
-                $linkDescarga = 'http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=' . $PinDescargas .'&IdOrigenImpresion='. $Origen_impresion .'&IdPropietario='. $id;
-                return array($linkDescarga,0,1);
-                //session_abort();
-                die;
-            } else {
-                $msgError = "CIF Incorrecto";
-            }
+            // $DatosDoc = ExtraerDocumento_Por_CIF($_SESSION["tipoArchivo"],$_SESSION["IdDocumento"],$arrayDatos[0]);
+            // if(count($DatosDoc)>0){
+            //     $valor = $DatosDoc[0]; 
+            //     $id = $valor["id"];
+            //     $PinDescargas = $valor["PinDescargas"];
+            //     $Origen_impresion = $valor["OrigenImpresion"];
+            //     $linkDescarga = 'http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=' . $PinDescargas .'&IdOrigenImpresion='. $Origen_impresion .'&IdPropietario='. $id;
+            //     return array($linkDescarga,0,1);
+            //     //session_abort();
+            //     die;
+            // } else {
+            //     $msgError = "CIF Incorrecto";
+            // }
                 
 
         }elseif($c === 1 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1){
         //PORTAL CLIENTE coloca los datos de la sociedad seleccionada y navega a la siguiente pestaña
             $this -> setSociedad($arrayDatos[0]);
             $this -> navegarPestanas(2);
-        }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1) {
+        }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1  && $this -> miEstado -> tipo_App == 1) {
         //PORTAL CLIENTE la navegación va en funcion del tipo de documento 
             $nav = null;
             $this -> cargaDocumentos_Parcial($arrayDatos[0]);
+            //$msgError = "entre";
             switch ($arrayDatos[0]) {
                 case 1 :
                     $nav = 4;
@@ -360,11 +383,22 @@ class Controlador
                 case 4:
                     $nav = 7;
                     break;
+                case 5:
+                    $nav = 8;
+                    break;
                 default:
                     $nav = 3;
                     break;
             }
             $this -> navegarPestanas($nav);
+        
+        }elseif($c === 8 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1) {
+        //Portal del cliente navegacion a la pestaña de archivos de cada documento 
+                $this -> miEstado -> IdPropietario = $arrayDatos[1];
+                $this -> miEstado -> ArchivosDocumento = extraerArchivosCliente_Documento();
+            //print_r($arrayDatos[0]);
+            $this -> navegarPestanas($arrayDatos[0]);
+
         }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
         //PORTAL EMPLEADO la navegación Menu principal 
             $nav = null;
@@ -469,8 +503,6 @@ class Controlador
         }elseif($this -> miEstado -> Estado == 7  && $this -> miEstado -> tipo_App == 2 && !empty($arrayDatos) &&  $this -> miEstado -> cargarForm == 1){
         // navegacion al formulario correspondiente desde la pestaña de calendario
 
-
-
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 1 && in_array($this -> miEstado -> Estado, array(3,4,5,6,7)) && $this -> miEstado -> tipo_App == 1){
             //PORTAL CLIENTE
         //Sumar de 30  en 30 al puntero de mostrar documentos
@@ -490,13 +522,22 @@ class Controlador
             $this -> miEstado -> tipofiltro = 2;
             $this -> miEstado -> puntero_posicion += count($this -> miEstado -> Documentos);
             $this -> miEstado -> CadenaFiltro = $arrayDatos[2];
-        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 4 && in_array($this -> miEstado -> Estado, array(3,4,5,6,7)) && $this -> miEstado -> tipo_App == 1){
-        //PORTAL CLIENTE descargar documentos en local
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 4 && in_array($this -> miEstado -> Estado, array(3,4,5,6,7,9)) && $this -> miEstado -> tipo_App == 1){
+        //PORTAL CLIENTE descargar documentos en local cristal report o archivos subidos a onix
             // $arrayDatos[2][0] 
             // $arrayDatos[2][1] 
             //print_r($arrayDatos[2][2]);
-            $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$arrayDatos[2][1].'&IdPropietario='.$arrayDatos[2][0];
-            $nombre_archivo = $arrayDatos[2][2];
+            $nombre_archivo = "";
+            if($arrayDatos[3] == "OPDF"){
+                $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$arrayDatos[2][1].'&IdPropietario='.$arrayDatos[2][0];
+                $nombre_archivo = $arrayDatos[2][2];
+            }else{
+                $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin=".$_SESSION["pinC"].'&IdArchivo='.$arrayDatos[2][0];
+                $nombre_archivo = $arrayDatos[2][1];
+            }
+            
+
+            
             $directorio_destino = "archivos/".$_SESSION["pinC"]."/";
             // Verificar si el directorio existe, si no, crearlo
             if (!file_exists($directorio_destino)) {
@@ -519,6 +560,17 @@ class Controlador
                     $msgError = 'Error al guardar el archivo en el servidor.';
                 }
             }
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 1 && $this -> miEstado -> Estado==8){
+        //Portal del cliente insertar la solicitud correspondiente
+                //print_r("entre");
+                $solicitud = SolicitudTareas_Insert($arrayDatos[2][0]);
+
+                if($solicitud){
+                    $msgError = 'Solicitud subida correctamente';
+                }else{
+                    $msgError = 'No se ha podido realizar su solicitud';
+                }
+
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 2 && !isset($arrayDatos[2])){
         //Portal empleado cargar Formulario
             if($this -> miEstado -> Estado != 7){

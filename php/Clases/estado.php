@@ -15,6 +15,7 @@ class Estado{
     public $numero_total_documentos;
 
     public $Documentos = array();
+    public $ArchivosDocumento = array();
     public $FiltrosDoc = array();
     
     public $CadenaFiltro;
@@ -25,6 +26,7 @@ class Estado{
     public $lista_sociedades = array();
     public $id_sociedad;
     public $NombreSociedad;
+    public $PersonasContacto = array();
 
     //datos del cliente
     public $IdCliente;
