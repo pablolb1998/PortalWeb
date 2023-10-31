@@ -150,7 +150,30 @@ var calendar;
             calendar.removeAllEvents();
             calendar.addEventSource(filteredEvents);
     }
-    
+    //subir formularios Sociedades
+    // $(document).on("submit",".formulario_sociedades",function(event){
+    //     event.preventDefault();
+    //     let valArray = [];
+    //     $(".formulario_sociedades :input").each(function(){
+    //         valArray.push($(this).val());
+    //     })
+    //      //alert(valArray);
+    //     dibuja_pagina(valArray);
+    // });
+    $(document).on("submit", ".formulario_sociedades", function (event) {
+        event.preventDefault();
+        let valArray = [];
+
+        // Encuentra el radio button seleccionado
+        let selectedRadio = $(".formulario_sociedades input[name='radio_sociedad']:checked");
+
+        if (selectedRadio.length > 0) {
+            valArray.push(selectedRadio.val());
+        }
+
+        dibuja_pagina(valArray);
+    });
+
     //subir formularios estaticos
     $(document).on("submit",".formulario",function(event){
         event.preventDefault();
@@ -162,6 +185,15 @@ var calendar;
         dibuja_pagina(valArray);
     })
     
+    $(document).on("click","#SubmitModalForm",function(event){
+        $('#SubmitModalForm').modal('hide');
+        $('.modal-backdrop').hide();
+        let valArray = [];
+        $(".formulario_modal :input").each(function(){
+            valArray.push($(this).val());
+        })
+        dibuja_pagina([0,3,valArray]);
+    })
     //Subir los datos del formulario dinamico
     $(document).on("submit",".formulario_Dinamico",function(event){
         event.preventDefault();
@@ -220,19 +252,18 @@ var calendar;
 
     })
 
-    //Ajax para mostrar u ocultar la contraseña
+    //Jquery para mostrar u ocultar la contraseña
     $(document).on("click","#ImgPw",function(event){
         var btnPw = document.querySelector("#togglePassword");
-        var txtPw = document.querySelector("#password");
-
+        var txtPw = document.querySelector("#pw_text");
         //toogle
-        var tipoCampo = password.getAttribute("type") === "password" ? "text" : "password";
-        password.setAttribute("type", tipoCampo);
+        var tipoCampo = txtPw.getAttribute("type") === "password" ? "text" : "password";
+        txtPw.setAttribute("type", tipoCampo);
         // toggle the eye icon
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
 
-    })    
+    })
 
     //Jquery para dibujar el calendario
     function dibuja_calendario(){
@@ -266,7 +297,17 @@ var calendar;
        
     }
 
-
+    //funcion para llenar los modales con los datos correspondientes
+    function cargarModalValidacion(tipo,id,codigo){
+        if(tipo == 0){
+            document.getElementById("CabeceraModalSolicitud").innerHTML = 'Validar tarea '+codigo;
+            $('#modalValidaciones').modal('show');
+        }else{
+            document.getElementById("CabeceraModalSolicitud").innerHTML = 'Nueva solicitud de tarea';
+            $('#modalValidaciones').modal('show');
+        }
+        
+    }
     
 
  /********* ------------------------------------------------------------- ************/
