@@ -186,13 +186,56 @@ var calendar;
     })
     
     $(document).on("click","#SubmitModalForm",function(event){
-        $('#SubmitModalForm').modal('hide');
-        $('.modal-backdrop').hide();
-        let valArray = [];
-        $(".formulario_modal :input").each(function(){
-            valArray.push($(this).val());
-        })
-        dibuja_pagina([0,3,valArray]);
+        event.preventDefault();
+        if ($(".formulario_modal :file").length > 0 && $(".formulario_modal :file")[0].files.length > 0) {
+            var formulario = document.getElementsByClassName('formulario_modal');
+            var archivo = document.getElementById('Archivo').files[0];
+            var nombreArchivo = document.getElementById('Archivo').files[0].name;
+            var formData = new FormData();
+            
+            formData.append('Archivo', archivo);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'php/GestionSubidaArchivos.php', true);
+            xhr.onload = function() {
+
+            if (xhr.status === 200) {
+                
+                // Manejar la respuesta del servidor si es necesario
+                if(xhr.responseText != false){
+                    var IdAT = $("#TipoArchivo").val()
+                    let arrayValAdicional = {'Archivo' : xhr.responseText,
+                                                'Nombre' : nombreArchivo,
+                                            'IdAT' : IdAT};
+                    dibuja_pagina([0,3,arrayValAdicional]);
+                }else{
+                    alert("Error  0x80072f8f - 0x20000: Fallo al subir el archivo al servidor");
+                }
+            } else {
+                // Error en la solicitud
+                console.error('Error al subir el archivo.');
+            }
+            };
+
+            // Enviar el formulario con el archivo al servidor
+            xhr.send(formData);
+        }else{
+            $('#SubmitModalForm').modal('hide');
+            $('.modal-backdrop').hide();
+            let valArray = [];
+            $(".formulario_modal :input").each(function(){
+                valArray.push($(this).val());
+            })
+
+            $('body').css({
+            'overflow': 'auto',
+            'padding-right': '0'
+            });
+            
+
+            dibuja_pagina([0,3,valArray]);
+        }
+        
+        
     })
     //Subir los datos del formulario dinamico
     $(document).on("submit",".formulario_Dinamico",function(event){
@@ -209,7 +252,6 @@ var calendar;
         }
         
     })
-
 
     //Funcion como la mierda (PROVISIONAL);
     $(document).on("submit",".formulario_Dinamico_Archivos",function(event){
@@ -299,14 +341,16 @@ var calendar;
 
     //funcion para llenar los modales con los datos correspondientes
     function cargarModalValidacion(tipo,id,codigo){
+        let txtTitulo;
         if(tipo == 0){
-            document.getElementById("CabeceraModalSolicitud").innerHTML = 'Validar tarea '+codigo;
-            $('#modalValidaciones').modal('show');
+            txtTitulo = 'Validar tarea '+codigo;
+        }else if(tipo == 2){
+            txtTitulo = 'Adjuntar a tarea '+codigo;
         }else{
-            document.getElementById("CabeceraModalSolicitud").innerHTML = 'Nueva solicitud de tarea';
-            $('#modalValidaciones').modal('show');
+            txtTitulo = 'Nueva solicitud de tarea';
         }
-        
+        document.getElementById("CabeceraModalSolicitud").innerHTML = txtTitulo;
+        $('#modalValidaciones').modal('show');
     }
     
 
@@ -339,8 +383,8 @@ var calendar;
             <div class="modal-body" id="msgError">
             </div>
             <div class="modal-footer">
-              <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
-              <button type="button" class="btn btn-primary">Aceptar</button>
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button> 
+              <!-- <button type="button" class="btn btn-primary">Aceptar</button>-->
             </div>
           </div>
         </div>
