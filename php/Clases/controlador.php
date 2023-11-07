@@ -86,6 +86,7 @@ class Controlador
                     $this -> miEstado -> nombre_cliente = $datosSesion[1];
                     $this -> miEstado -> lista_sociedades = compruebaSociedades($this -> miEstado -> IdCliente);
                     $this -> miEstado -> PersonasContacto = compruebaPersonasContaco();
+                    $this -> miEstado -> archivostiposAccesos = extraerArchivosTiposAccesos();
                     $IdTipoApp = 32;
             }elseif($this -> miEstado -> tipo_App == 2){
                 //PORTAL DEL EMPLEADO: Añadir variables de sesion al comprobar usuario
@@ -108,52 +109,62 @@ class Controlador
     //llama a la funcion que extrae los documentos y llena la clase estado con los mismos
     function cargaDocumentos_Parcial($tipoDoc = null){
         //optimizar para evitar conexión
-        $doc = extraerDoc_parcial($tipoDoc, $this -> miEstado -> id_sociedad , $this -> miEstado -> IdCliente);
-        $filtros = extraerFiltroDoc_Parcial($tipoDoc, $this -> miEstado -> id_sociedad , $this -> miEstado -> IdCliente);
+        $doc = null;
+        $filtros  = null;
+        $fecha = date('Ymd H:i:s');
+        $primeraEjecucion = false;
         $this -> miEstado -> puntero_posicion = 30;
-        if($doc !== null){
+        
             switch ($tipoDoc) {
                 case 1 :
-                    if(empty($this -> miEstado -> Pedidos)){
-                        $this -> miEstado -> Pedidos = $doc;
-                        $this -> miEstado -> Documentos = array_merge($this -> miEstado -> Documentos, $doc);
-                        $this -> miEstado -> FiltrosDoc = array_merge($this -> miEstado -> FiltrosDoc, $filtros);
-                        //$this -> miEstado -> FiltrosP = $filtros;
+                    if(empty($this -> miEstado -> FechaPedidos)){
+                        $primeraEjecucion = true;
                     }
+                    $this -> miEstado -> FechaPedidos = $fecha;
                     break;
                 case 2 :
-                    if(empty($this -> miEstado -> Albaranes)){
-                        $this -> miEstado -> Albaranes = $doc;
-                        $this -> miEstado -> Documentos = array_merge($this -> miEstado -> Documentos, $doc);
-                        $this -> miEstado -> FiltrosDoc = array_merge($this -> miEstado -> FiltrosDoc, $filtros);
-                        //$this -> miEstado -> FiltrosA = $filtros;
+                    if(empty($this -> miEstado -> FechaAlbaranes)){
+                        $primeraEjecucion = true;
                     }
+                    $this -> miEstado -> FechaAlbaranes = $fecha;
                     break;
                 case 3 :
-                    if(empty($this -> miEstado -> Facturas)){
-                        $this -> miEstado -> Facturas = $doc;
-                        $this -> miEstado -> Documentos = array_merge($this -> miEstado -> Documentos, $doc);
-                        $this -> miEstado -> FiltrosDoc = array_merge($this -> miEstado -> FiltrosDoc, $filtros);
-                        //$this -> miEstado -> FiltrosF = $filtros;
+                    if(empty($this -> miEstado -> FechaFacturas)){
+                        
+                        $primeraEjecucion = true;
                     }
+                    $this -> miEstado -> FechaFacturas = $fecha;
                     break;
                 case 4 :
-                    if(empty($this -> miEstado -> Proyectos)){
-                        $this -> miEstado -> Proyectos = $doc;
-                        $this -> miEstado -> Documentos = array_merge($this -> miEstado -> Documentos, $doc);
-                        $this -> miEstado -> FiltrosDoc = array_merge($this -> miEstado -> FiltrosDoc, $filtros);
-                        //$this -> miEstado -> FiltrosPro = $filtros;
+                    if(empty($this -> miEstado -> FechaProyectos)){
+                        $primeraEjecucion = true;
                     }
+                    $this -> miEstado -> FechaProyectos = $fecha;
+                    break;
+                case 5:
+                    if(empty($this -> miEstado -> FechaTareas)){
+                        $primeraEjecucion = true;
+                    }
+                    $this -> miEstado -> FechaTareas = $fecha;
                     break;
                 default:
-                if(empty($this -> miEstado -> Presupuestos)){
-                    $this -> miEstado -> Presupuestos = $doc;
-                    $this -> miEstado -> Documentos = array_merge($this -> miEstado -> Documentos, $doc);
-                    $this -> miEstado -> FiltrosDoc = array_merge($this -> miEstado -> FiltrosDoc, $filtros);
-                    //$this -> miEstado -> FiltrosPre = $filtros;
-                }
+                    if(empty($this -> miEstado -> FechaPresupuestos)){
+                        $primeraEjecucion = true;
+                    }
+                    $this -> miEstado -> FechaPresupuestos = $fecha;
                     break;
             }
+        if($primeraEjecucion){
+            $doc = extraerDoc_parcial($tipoDoc, $this -> miEstado -> id_sociedad , $this -> miEstado -> IdCliente);
+            $filtros = extraerFiltroDoc_Parcial($tipoDoc, $this -> miEstado -> id_sociedad , $this -> miEstado -> IdCliente);
+        }else{
+            $doc = extraerDoc_parcial($tipoDoc, $this -> miEstado -> id_sociedad , $this -> miEstado -> IdCliente,$fecha);
+        }
+        if($doc !== null){
+            $this -> miEstado -> Documentos = array_merge($this -> miEstado -> Documentos, $doc);
+        }
+        if($filtros !== null){
+            $this -> miEstado -> FiltrosDoc = array_merge($this -> miEstado -> FiltrosDoc, $filtros);
         }
     }
     //colocar sociedad
@@ -239,6 +250,7 @@ class Controlador
         $this -> miEstado -> acciones["descarga"] = 0;
         $this -> miEstado -> acciones["anadirLinea"] = 0;
         $this -> miEstado -> acciones["modalValidaciones"] = 0;
+        $this -> miEstado -> acciones["modalSubirDoc"] = 0;
         if($this -> miEstado -> tipo_App == 2){
             //Portal del empleado
             switch ($this -> miEstado -> Estado) {   
@@ -280,7 +292,8 @@ class Controlador
                     $this -> miEstado -> IdTipoPropietario = null;
                     break;
                 case 9 :
-                    $this -> miEstado -> acciones["adjunto"] = 1;
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    $this -> miEstado -> acciones["modalSubirDoc"] = 1;
                     break;
                 default:
                     $this -> miEstado -> acciones["descarga"] = 1;
@@ -294,11 +307,9 @@ class Controlador
     function subirArchivosServicioWeb($pin,$IdtipoPropietario,$idPropietario,$idArchivoTipo,$url,$nombre_archivo){
         $url = "http://onixsw.esquio.es:8080/Funciones.aspx?SubirArchivo=1&pin=".$pin.
         "&IdTipoPropietario=".$IdtipoPropietario.'&IdPropietario='.$idPropietario.
-        '&IdArchivoTipo='.$idArchivoTipo.'&URL='.$url.'&NombreArchivo='.$nombre_archivo;
+        '&IdArchivoTipo='.$idArchivoTipo.'&URL='.urlencode($url).'&NombreArchivo='.$nombre_archivo;
         
         $response = file_get_contents($url);
-        print_r($response);
-        print_r($url);
         return true;
     }
 
@@ -306,11 +317,10 @@ class Controlador
     //funciones de para generar el contenido
     // optimizar el navegar pestañas
     function generarContenido($arrayDatos = array()){
-
         $arrayAuxiliarHtml = array();
         $msgError = "" ;
         $abrirNuebaPestaña = 0;
-        $c = $this -> miEstado -> Estado;
+        $c = $this -> miEstado -> Estado;      
         $this -> comprobarBBDD($_SESSION["pinC"]);
         $nav = "";
         if($c === 0 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1){
@@ -326,6 +336,7 @@ class Controlador
                 }else{
                     $msgError = "Usuario o contraseña Incorrectos" ;
                 }
+                
                 $this -> navegarPestanas($nav);
         }elseif($c === 0 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2){
             //PORTAL EMLEADO
@@ -392,13 +403,22 @@ class Controlador
             }
             $this -> navegarPestanas($nav);
         
-        }elseif($c === 8 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1) {
+        }elseif($c === 8 && !empty($arrayDatos) && $arrayDatos[0] != -1  && $arrayDatos[0] != 0 && $this -> miEstado -> tipo_App == 1) {
         //Portal del cliente navegacion a la pestaña de archivos de cada documento 
                 $this -> miEstado -> IdPropietario = $arrayDatos[1];
                 $this -> miEstado -> ArchivosDocumento = extraerArchivosCliente_Documento();
             //print_r($arrayDatos[0]);
             $this -> navegarPestanas($arrayDatos[0]);
-
+        }elseif($c === 9 && !empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App ==  1){
+        //guardar el archivo
+                $subida = subirArchivosServicioWeb($_SESSION["pinC"],
+                                                    $this -> miEstado -> IdtipoPropietario,
+                                                    $this -> miEstado -> IdPropietario,
+                                                    $arrayDatos[2]['IdAT'],
+                                                    $arrayDatos[2]['Archivo'],
+                                                    $arrayDatos[2]['Nombre']);
+                $msgError = 'archivo subido con exito';
+            
         }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
         //PORTAL EMPLEADO la navegación Menu principal 
             $nav = null;
@@ -560,17 +580,18 @@ class Controlador
                     $msgError = 'Error al guardar el archivo en el servidor.';
                 }
             }
-        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 1 && $this -> miEstado -> Estado==8){
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 1 && $c == 8){
         //Portal del cliente insertar la solicitud correspondiente
                 //print_r("entre");
                 $solicitud = SolicitudTareas_Insert($arrayDatos[2][0]);
-
                 if($solicitud){
                     $msgError = 'Solicitud subida correctamente';
                 }else{
                     $msgError = 'No se ha podido realizar su solicitud';
                 }
-
+                $this -> cargaDocumentos_Parcial(5);
+                
+                
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 2 && !isset($arrayDatos[2])){
         //Portal empleado cargar Formulario
             if($this -> miEstado -> Estado != 7){
@@ -639,8 +660,14 @@ class Controlador
         //navega a la siguiente pestaña segun el estado de la clase estado
         // optimizar todo el script de pintar
         // return pinta_contenido($this -> miEstado -> Estado)."idc :".$this -> miEstado -> IdCliente."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd);
-        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App)."A:".$this -> miEstado -> tipo_App. "idc :".$this -> miEstado -> IdCliente.
-        $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdPropietario,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml);
+        //print_r($this -> miEstado -> Estado);
+        $txtErr = '';
+        if($_SESSION["pinC"] == 123654){
+            $txtErr = "A:".$this -> miEstado -> tipo_App. "idc :".$this -> miEstado -> IdCliente.
+            $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdPropietario;
+        }
+
+        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml);
         
     }
 }
