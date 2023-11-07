@@ -369,8 +369,7 @@ function pinta_contenido($estado){
             $filetext = str_replace('<span id="filtros_dinamicos">',$filtrosCalendario,$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicaFiltrosCalendario()',$filetext);
             return $filetext.'<div id="calendar"></div></div></div></div>
-            <button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
-        
+            <button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
         //selección de el tipo de documneto
             
@@ -503,7 +502,6 @@ function muestra_documentos(){
           </div>';
         }
         
-
         $tipoDocf = 0;
         switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
             case 4 :
@@ -576,7 +574,7 @@ function muestra_documentos(){
                 }
 
                 if($newDate==date("d/m/Y")){
-                    $listaDoc .= "<tr style='background-color:#B0CDFF54' data-tipo-servicio='$estado' id='$estado'>";
+                    $listaDoc .= "<tr data-tipo-servicio='$estado' id='$estado'>";
                 }else{
                     $listaDoc .= "<tr data-tipo-servicio='$estado' id='$estado'>";
                 }
@@ -609,9 +607,52 @@ function muestra_documentos(){
        
     }else{
         //mostrar los archivos con sus acciones propias
-
         $arrayDoc = $_SESSION["Controlador"] -> miEstado -> ArchivosDocumento;
         $arrayDoc = array_values($arrayDoc);
+
+        //lista de docs con acceso
+        $arrayDropdown = array_filter($_SESSION["Controlador"] -> miEstado -> archivostiposAccesos, function ($dupla){
+            return $dupla["IdTipoPropietario"] == 2; 
+        });
+        
+        $acciones_globales .= '<button onclick="cargarModalValidacion(2,0,'."'prueba'".')" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
+        if($_SESSION["Controlador"] -> miEstado -> acciones["modalSubirDoc"] == 1 ){
+            //$acciones_linea .= '<a onclick="cargarModalValidacion(0,%id%,'."'%codigo%'".')" ><img class="pdf_icono" src="Img/bolsa-de-dinero.png"></a>';
+            // Optimizar pepe
+            $nuevoArrayArchivosAccesos = array('codigo','codigo2','codigo3');
+            $acciones_globales .= '<div class="modal fade" id="modalValidaciones" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="CabeceraModalSolicitud"></h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form class="formulario_modal">
+
+                    <div class="input-group-lg mb-3">
+                    <label for="TipoArchivo" class="form-label">Tipo de archivo</label>
+                        <select class="form-select border-secondary" aria-label="Tipo de archivo" id="TipoArchivo">';
+
+            foreach($arrayDropdown as $dupla){
+                $acciones_globales .=  '<option value="'.$dupla['IdArchivoTipo'].'">'.$dupla['Nombre'].'</option>';
+            }
+            $acciones_globales .= '    </select>
+                    </div>
+                    <div class="input-group-lg mb-3" style="">
+                        <label for="Archivo" class="form-label">Archivo</label>
+                        <input type="file" class="form-control border-secondary" id="Archivo" aria-describedby="Archivo" value="" required=>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary" id="SubmitModalForm">Adjuntar</button>
+                </div>
+              </div>
+            </div>
+          </div>';
+        }
         //print_r($arrayDoc);
         //print_r($arrayDoc);
         $listaDoc .= "<section>";

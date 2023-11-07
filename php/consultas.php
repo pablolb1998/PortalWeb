@@ -99,17 +99,17 @@ function compruebaPersonasContaco(){
 }
 
 //extraer los documentos del cliente
-function extraerDoc_parcial($tipoDoc = null,$ids = null,$c = null){
+function extraerDoc_parcial($tipoDoc = null,$ids = null,$c = null,$fecha = '19981201 00:00:00'){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     //Estraer los documentos
     $sql = "SELECT id,codigo,Fecha,NombreComercial,Descripcion,Estado,tipo,PinDescargas,OrigenImpresion,importe,PinDescargas,color
     FROM vw_PortalCliente_Documentos 
-    WHERE tipo=? AND IdSociedad=? AND IdCliente=? 
+    WHERE tipo=? AND IdSociedad=? AND IdCliente=? AND Fecha > ?
     ORDER BY Fecha DESC, Codigo DESC;";
     $ListaDoc = array();
-    $parm = array($tipoDoc,$ids, $c );
+    $parm = array($tipoDoc,$ids, $c,$fecha);
     $stmt = sqlsrv_query($conn, $sql, $parm);
-    if ($stmt === false) {
+    if ($stmt === false){
         die(print_r(sqlsrv_errors(), true));
     }else{
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
@@ -145,17 +145,31 @@ function extraerFiltroDoc_Parcial($tipoDoc = null,$ids = null,$c = null){
 //Insertar la solicitud de tarea
 function SolicitudTareas_Insert($desc){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $IdPer = 118;
+    $IdTp = 10;
+    if($_SESSION["pinC"] == 123654){
+        $IdPer = 93;
+        $IdTp = 16;
+    }
     $sql = "DECLARE @IdTarea INT,
             @FECHA SMALLDATETIME = GETDATE();
             EXECUTE dbo.up_bp_Tareas_Insert @IdTarea = @IdTarea OUTPUT,
                                     @FechaCreacion = @FECHA,
                                     @Descripcion = ?,
                                     @IdCliente = ?,              
-                                    @IdSociedad = ?";
-    $parm = array($desc,$_SESSION["Controlador"] -> miEstado -> IdCliente,$_SESSION["Controlador"] -> miEstado -> id_sociedad);
+                                    @IdSociedad = ?,
+                                    @IdPersonalCreador = ?,
+                                    @IdPersonalAsignado = ?,
+                                    @IdTareaTipo= ?";
+    $parm = array($desc,$_SESSION["Controlador"] -> miEstado -> IdCliente,
+            $_SESSION["Controlador"] -> miEstado -> id_sociedad,
+            $IdPer,
+            $IdPer,
+            $IdTp);
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
     //print_r($stmt);
     if (!sqlsrv_execute($stmt)) {
+        print_r(sqlsrv_errors());
         return false;
         die;
     } else {
@@ -366,9 +380,9 @@ function extraerDocPersonal_Masivo(){
 //Extraer los tipos de archivo a los que tiene acceso el personal 
 function extraerArchivosTiposAccesos(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
-    $sql = "SELECT IdArchivoTipo,Nombre,IdTipoPropietario FROM dbo.vw_PEArchivosTipos_Acceso WHERE idpersonal  = ?;";
+    $sql = "SELECT IdArchivoTipo,Nombre,IdTipoPropietario FROM dbo.vw_PWArchivosTipos_Acceso WHERE IdIdentidad  = ?;";
     $ListaTipos = array();
-    $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
+    $parm = array($_SESSION["Controlador"] -> miEstado -> IdIdentidad);
     $stmt = sqlsrv_query($conn, $sql, $parm);
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));

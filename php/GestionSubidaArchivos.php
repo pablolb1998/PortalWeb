@@ -1,16 +1,19 @@
 <?php
-
+session_start();
 if(isset($_FILES["Archivo"])){
     
-    //$directorio_destino = $_SESSION["DirectorioEmpresa"] ."/inteco/subidasTemp/";
-    //$nombre_archivo = $_FILES["Archivo"]["name"];
-    // echo $directorio_destino;
-    // echo $_FILES["Archivo"]["tmp_name"];
-    //$tmp_name = $_FILES["Archivo"]["tmp_name"];
+    $directorioDestino = 'subidasTemp/'.$_SESSION["pinC"].'/';
+    
+    // Verificar si el directorio existe o crearlo si es necesario
+    if (!file_exists($directorioDestino)) {
+        mkdir($directorioDestino, 0777, true);
+    }
 
-    ///funciona asi pero hay que cambiarlo con urgencia
-    if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], 'C:/xampp/htdocs/portaldecliente/inteco/subidasTemp/'.$_FILES["Archivo"]["name"] )){
-        echo 'C:/xampp/htdocs/portaldecliente/inteco/subidasTemp/'.$_FILES["Archivo"]["name"];
+    if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], $directorioDestino . $_FILES["Archivo"]["name"] )){
+        $externalContent = file_get_contents('https://api64.ipify.org?format=json');
+        $externalData = json_decode($externalContent);
+    
+        echo $externalData->ip.'/php/'.$directorioDestino.$_FILES["Archivo"]["name"];
     } else {
         echo false;
     }
