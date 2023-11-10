@@ -206,6 +206,12 @@ var calendar;
                     let arrayValAdicional = {'Archivo' : xhr.responseText,
                                                 'Nombre' : nombreArchivo,
                                             'IdAT' : IdAT};
+                    $('#SubmitModalForm').modal('hide');
+                    $('.modal-backdrop').hide();
+                    $('body').css({
+                    'overflow': 'auto',
+                    'padding-right': '0'
+                    });
                     dibuja_pagina([0,3,arrayValAdicional]);
                 }else{
                     alert("Error  0x80072f8f - 0x20000: Fallo al subir el archivo al servidor");
@@ -218,6 +224,7 @@ var calendar;
 
             // Enviar el formulario con el archivo al servidor
             xhr.send(formData);
+            
         }else{
             $('#SubmitModalForm').modal('hide');
             $('.modal-backdrop').hide();
@@ -306,6 +313,18 @@ var calendar;
         this.classList.toggle('fa-eye-slash');
 
     })
+//     $(document).on("click", ".toggle-password", function () {
+//     var passwordFieldId = $(this).data("target");
+//     var passwordField = document.querySelector("#" + passwordFieldId);
+//     togglePassword(passwordField, this);
+//     });
+
+//     function togglePassword(passwordField, eyeIcon) {
+//     var tipoCampo = passwordField.getAttribute("type") === "password" ? "text" : "password";
+//     passwordField.setAttribute("type", tipoCampo);
+//     eyeIcon.classList.toggle('fa-eye');
+//     eyeIcon.classList.toggle('fa-eye-slash');
+// }
 
     //Jquery para dibujar el calendario
     function dibuja_calendario(){
@@ -347,11 +366,21 @@ var calendar;
         }else if(tipo == 2){
             txtTitulo = 'Adjuntar a tarea '+codigo;
         }else{
-            txtTitulo = 'Nueva solicitud de tarea';
+            txtTitulo = 'Nueva petición';
         }
         document.getElementById("CabeceraModalSolicitud").innerHTML = txtTitulo;
         $('#modalValidaciones').modal('show');
     }
+
+    //cambiar el color y el switch del modal
+    $(document).on("change","#togglePeticionSwitch",function(event){
+        var switchLabel2 = $('.form-check-label2');
+        if (this.checked) {
+            switchLabel2.text('Mejora');
+        } else {
+            switchLabel2.text('Incidencia');
+        }
+    });
     
 
  /********* ------------------------------------------------------------- ************/
@@ -377,7 +406,7 @@ var calendar;
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="TituloError">MSG</h5>
+              <h5 class="modal-title" id="TituloError">Mensaje</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="msgError">
