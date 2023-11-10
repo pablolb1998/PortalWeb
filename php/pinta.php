@@ -186,6 +186,11 @@ function pinta_contenido($estado){
                     break;
             }
             break;
+        case 10:        
+                $titulo = "Cambiar Contraseña";
+                $cabecera = "../html/header.html";
+                $filename = "../html/cambiarContrasena.html";
+            break;
         default:
             $filename = "../html/login.html";
             break;
@@ -199,8 +204,9 @@ function pinta_contenido($estado){
         //$fileheadertext = fread($fileheader, $filesizeheader);
         $fileheadertext = $_SESSION["Controlador"] -> miEstado -> header;
         $fileheadertext = str_replace("%NombreE%",$titulo.($_SESSION["Controlador"] -> miEstado -> cargarForm == 1 ? ' / Nueva':''),$fileheadertext);
-        if($_SESSION["Controlador"] -> miEstado -> Estado ==2){
+        if($_SESSION["Controlador"] -> miEstado -> Estado == 2){
             $fileheadertext = str_replace('class="col-2"','class="col-2 d-none"',$fileheadertext);
+            
         }
     }
     //cargar el nombre del usuario
@@ -462,18 +468,13 @@ function muestra_documentos(){
                   <form class="formulario_modal">
                   <div class="mb-3">
                   
-                  <!--<div class="form-check form-switch">
+                <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="togglePeticionSwitch" checked >
-                    <label class="form-check-label2" for="togglePeticionSwitch" id="LabelPeticionSwitch"></label>
-                  </div>-->
+                    <label class="form-check-label2" for="togglePeticionSwitch" id="LabelPeticionSwitch">Mejora</label>
+                  </div>
                 </div>
                 
-                <div class="btn-group">
-                <!--<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                ¿Quien realiza la petición?
-                </button>
-                <ul class="dropdown-menu">
-                <input   id="nombreInput" class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar">-->';
+                <div class="btn-group">';
  
                 // $acciones_globales .= '<ul>';
                 // foreach ($_SESSION["Controlador"] -> miEstado -> PersonasContacto as $pc) {
