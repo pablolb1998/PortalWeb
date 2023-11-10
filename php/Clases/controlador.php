@@ -111,7 +111,7 @@ class Controlador
         //optimizar para evitar conexión
         $doc = null;
         $filtros  = null;
-        $fecha = date('Ymd H:i:s');
+        $fecha = date('Y-m-d H:i:s');
         $primeraEjecucion = false;
         $this -> miEstado -> puntero_posicion = 30;
         
@@ -161,7 +161,7 @@ class Controlador
             $doc = extraerDoc_parcial($tipoDoc, $this -> miEstado -> id_sociedad , $this -> miEstado -> IdCliente,$fecha);
         }
         if($doc !== null){
-            $this -> miEstado -> Documentos = array_merge($this -> miEstado -> Documentos, $doc);
+            $this -> miEstado -> Documentos = array_merge($doc, $this -> miEstado -> Documentos );
         }
         if($filtros !== null){
             $this -> miEstado -> FiltrosDoc = array_merge($this -> miEstado -> FiltrosDoc, $filtros);
@@ -294,6 +294,8 @@ class Controlador
                 case 9 :
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["modalSubirDoc"] = 1;
+                    $this -> miEstado -> acciones["adjunto"] = 1;
+                    $this -> miEstado -> IdTipoPropietario = 2;
                     break;
                 default:
                     $this -> miEstado -> acciones["descarga"] = 1;
@@ -307,7 +309,7 @@ class Controlador
     function subirArchivosServicioWeb($pin,$IdtipoPropietario,$idPropietario,$idArchivoTipo,$url,$nombre_archivo){
         $url = "http://onixsw.esquio.es:8080/Funciones.aspx?SubirArchivo=1&pin=".$pin.
         "&IdTipoPropietario=".$IdtipoPropietario.'&IdPropietario='.$idPropietario.
-        '&IdArchivoTipo='.$idArchivoTipo.'&URL='.urlencode($url).'&NombreArchivo='.$nombre_archivo;
+        '&IdArchivoTipo='.$idArchivoTipo.'&URL=http://'.urlencode($url).'&NombreArchivo='.$nombre_archivo;
         
         $response = file_get_contents($url);
         return true;
@@ -320,7 +322,8 @@ class Controlador
         $arrayAuxiliarHtml = array();
         $msgError = "" ;
         $abrirNuebaPestaña = 0;
-        $c = $this -> miEstado -> Estado;      
+        $c = $this -> miEstado -> Estado;   
+        
         $this -> comprobarBBDD($_SESSION["pinC"]);
         $nav = "";
         if($c === 0 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1){
@@ -350,27 +353,27 @@ class Controlador
             }
             $this -> navegarPestanas($nav);
         }elseif($this -> miEstado -> tipo_App == 1.5 && ($c === 0 ||($c === 0.5 && empty($arrayDatos))) ){
-            //PORTAL CLIENTE DESCARGAR DOC
+        //PORTAL CLIENTE DESCARGAR DOC
             //DESCARGAR DOCUMENTO MEDIANTE CIF
                 $nav = 0.5;
                 $this -> navegarPestanas($nav);
-        }elseif($this -> miEstado -> tipo_App == 1.5 && $c === 0.5 && !empty($arrayDatos)){ 
-            //PORTAL CLIENTE DESCARGAR DOC
-            //DESCARGAR DOCUMENTO MEDIANTE CIF
-            // $DatosDoc = ExtraerDocumento_Por_CIF($_SESSION["tipoArchivo"],$_SESSION["IdDocumento"],$arrayDatos[0]);
-            // if(count($DatosDoc)>0){
-            //     $valor = $DatosDoc[0]; 
-            //     $id = $valor["id"];
-            //     $PinDescargas = $valor["PinDescargas"];
-            //     $Origen_impresion = $valor["OrigenImpresion"];
-            //     $linkDescarga = 'http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=' . $PinDescargas .'&IdOrigenImpresion='. $Origen_impresion .'&IdPropietario='. $id;
-            //     return array($linkDescarga,0,1);
-            //     //session_abort();
-            //     die;
-            // } else {
-            //     $msgError = "CIF Incorrecto";
-            // }
-                
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 10){
+        //Abrir la pestaña de cambio de contraseña
+                $this -> navegarPestanas($arrayDatos[0]); 
+
+        }elseif(!empty($arrayDatos) && $c == 10 && $arrayDatos[0] != -1){
+        //confirmar el cambio de contraseña
+            if($arrayDatos[2] == $arrayDatos[1]){
+                if(cambiarContrasena($arrayDatos[0],$arrayDatos[1])){
+                    $msgError = 'Contraseña modificada con exito.';
+                }else{
+                    $msgError = 'No se ha podido modificar la contraseña.';
+                }
+
+            }else{
+                $msgError = 'La contraseña nueva ha de coincidir';
+            }
+               // print_r(pruebaC());
 
         }elseif($c === 1 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1){
         //PORTAL CLIENTE coloca los datos de la sociedad seleccionada y navega a la siguiente pestaña
@@ -409,16 +412,17 @@ class Controlador
                 $this -> miEstado -> ArchivosDocumento = extraerArchivosCliente_Documento();
             //print_r($arrayDatos[0]);
             $this -> navegarPestanas($arrayDatos[0]);
-        }elseif($c === 9 && !empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App ==  1){
+        }elseif($c == 9 && !empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2]) && $this -> miEstado -> tipo_App ==  1){
         //guardar el archivo
-                $subida = subirArchivosServicioWeb($_SESSION["pinC"],
-                                                    $this -> miEstado -> IdtipoPropietario,
+                $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
+                                                    2,
                                                     $this -> miEstado -> IdPropietario,
                                                     $arrayDatos[2]['IdAT'],
                                                     $arrayDatos[2]['Archivo'],
                                                     $arrayDatos[2]['Nombre']);
-                $msgError = 'archivo subido con exito';
-            
+                $this -> miEstado -> ArchivosDocumento = extraerArchivosCliente_Documento();
+                $msgError = 'Documento adjuntado con exito.';
+          
         }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
         //PORTAL EMPLEADO la navegación Menu principal 
             $nav = null;
@@ -440,7 +444,7 @@ class Controlador
                         if( $documento["tipoDocPortal"] != 3){
                             $dc = array($documento["descripcion"],
                                     $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
-                                    $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
+                                    $documento["FechaInicio"]-> z,
                                     "#800080",
                                     $documento["tipoDocPortal"]
                                 );
@@ -460,7 +464,6 @@ class Controlador
             $this -> navegarPestanas($nav);
         }elseif ($c === 4 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
         //navegacion del submenu y adicion de acciones
-            
             //PORTAL EMPLEADO  la navegación Submenu
             switch ($arrayDatos[0]) {   
                 case 4.1 :
@@ -523,7 +526,7 @@ class Controlador
         }elseif($this -> miEstado -> Estado == 7  && $this -> miEstado -> tipo_App == 2 && !empty($arrayDatos) &&  $this -> miEstado -> cargarForm == 1){
         // navegacion al formulario correspondiente desde la pestaña de calendario
 
-        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 1 && in_array($this -> miEstado -> Estado, array(3,4,5,6,7)) && $this -> miEstado -> tipo_App == 1){
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 1 && in_array($this -> miEstado -> Estado, array(3,4,5,6,7,8,9)) && $this -> miEstado -> tipo_App == 1){
             //PORTAL CLIENTE
         //Sumar de 30  en 30 al puntero de mostrar documentos
             $this -> miEstado -> puntero_posicion += 30;
@@ -558,7 +561,7 @@ class Controlador
             
 
             
-            $directorio_destino = "archivos/".$_SESSION["pinC"]."/";
+            $directorio_destino = "subidasTemp/".$_SESSION["pinC"]."/";
             // Verificar si el directorio existe, si no, crearlo
             if (!file_exists($directorio_destino)) {
                 mkdir($directorio_destino, 0755, true);
@@ -583,7 +586,7 @@ class Controlador
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 1 && $c == 8){
         //Portal del cliente insertar la solicitud correspondiente
                 //print_r("entre");
-                $solicitud = SolicitudTareas_Insert($arrayDatos[2][0]);
+                $solicitud = SolicitudTareas_Insert($arrayDatos[2][1]);
                 if($solicitud){
                     $msgError = 'Solicitud subida correctamente';
                 }else{
@@ -666,7 +669,7 @@ class Controlador
             $txtErr = "A:".$this -> miEstado -> tipo_App. "idc :".$this -> miEstado -> IdCliente.
             $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdPropietario;
         }
-
+        
         return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml);
         
     }
