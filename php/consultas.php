@@ -80,6 +80,84 @@ function compruebaSociedades($Id){
     sqlsrv_close( $conn );
 }
 
+//cambiar contraseña
+function cambiarContrasena( $CVieja, $Cnueva){
+    $conn = ConexionBD($_SESSION["Controlador"]->miEstado->IP, $_SESSION["Controlador"]->miEstado->bbdd);
+    $sql = "SELECT IdUsuario FROM dbo.SeguridadUnificada_Identidad 
+    WHERE IdIdentidad = ? AND pwdcompare(?,ContrasenaEnc) = 1";  
+    //$actualizado;
+    $parm = array($_SESSION["Controlador"]->miEstado->IdIdentidad,$CVieja);
+    $stmt = sqlsrv_query($conn, $sql,$parm);
+    //var_dump($parm);
+    $usu = array();
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($usu, $row);
+        }
+    }
+    if(Isset($usu[0])){
+        $sql = "EXECUTE dbo.SeguridadUnificada_Identidad_Update_Contrasena @IdIdentidad = ?,
+		@Contrasena = ?";
+        
+        $parm = array($_SESSION["Controlador"]->miEstado->IdIdentidad, $Cnueva);
+        //var_dump($parm);
+        $stmt = sqlsrv_prepare($conn, $sql,$parm);
+
+        //print_r($stmt);
+        if (!sqlsrv_execute($stmt)) {
+            print_r(sqlsrv_errors());
+            return false;
+            die;
+        } else {
+            return true;
+        }
+        
+
+    } 
+    //var_dump($usu);
+    sqlsrv_close( $conn );
+}
+function reestablecerContrasenaConfirmar($Cnueva){
+    $conn = ConexionBD($_SESSION["Controlador"]->miEstado->IP, $_SESSION["Controlador"]->miEstado->bbdd);
+    $sql = "EXECUTE dbo.SeguridadUnificada_Identidad_Update_Contrasena @IdIdentidad = ?,
+		@Contrasena = ?";
+        
+        $parm = array($_SESSION["Controlador"]->miEstado->IdIdentidad, $Cnueva);
+        //var_dump($parm);
+        $stmt = sqlsrv_prepare($conn, $sql,$parm);
+
+        //print_r($stmt);
+        if (!sqlsrv_execute($stmt)) {
+            print_r(sqlsrv_errors());
+            return false;
+            die;
+        } else {
+            return true;
+        }
+}
+function pruebaC(){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $sql = "SELECT IdUsuario FROM dbo.EXECUTE dbo.SeguridadUnificada_Identidad_Update_Contrasena @IdIdentidad = ?,
+    @Contrasena = ?;";
+    $parm = array(62,'Abel2');
+    $ListaPC = array();
+    $stmt = sqlsrv_query($conn, $sql,$parm);
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+
+        }
+        
+    }
+    sqlsrv_close( $conn );
+    
+}
+
+
+
 //Extraer las personas de contacto del cliente
 function compruebaPersonasContaco(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
@@ -101,19 +179,20 @@ function compruebaPersonasContaco(){
 //extraer los documentos del cliente
 function extraerDoc_parcial($tipoDoc = null,$ids = null,$c = null,$fecha = '19981201 00:00:00'){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $fechaFormateada = date('Ymd H:i:s', strtotime($fecha));
     //Estraer los documentos
     $sql = "SELECT id,codigo,Fecha,NombreComercial,Descripcion,Estado,tipo,PinDescargas,OrigenImpresion,importe,PinDescargas,color
     FROM vw_PortalCliente_Documentos 
-    WHERE tipo=? AND IdSociedad=? AND IdCliente=? AND Fecha > ?
+    WHERE tipo=? AND IdSociedad=? AND IdCliente=? AND Fecha> ?
     ORDER BY Fecha DESC, Codigo DESC;";
     $ListaDoc = array();
-    $parm = array($tipoDoc,$ids, $c,$fecha);
+    $parm = array($tipoDoc,$ids, $c,$fechaFormateada);
     $stmt = sqlsrv_query($conn, $sql, $parm);
     if ($stmt === false){
         die(print_r(sqlsrv_errors(), true));
     }else{
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            array_push($ListaDoc, $row);
+                array_push($ListaDoc, $row);    
         }
         return $ListaDoc;
     }
@@ -296,7 +375,7 @@ function extraerDocPersonal_Masivo(){
         }
     //3 - Documentos
         $sql2 = "SELECT IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS FechaInicio,
-        IdTipoPropietario,IdPropietario,Documento,1 as Firmable 
+        IdTipoPropietario,IdPropietario,Documento, Firmable ,Firmado
         FROM dbo.vw_PEArchivosPersonal 
         WHERE idpersonal = ? ORDER BY fechainicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -357,7 +436,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //7 - Nominas
-        $sql7 = "SELECT IdPersonalSalario AS id,Liquido AS descripcion,SalarioBruto AS descripcion2,FechaPago AS FechaInicio 
+        $sql7 = "SELECT IdPersonalSalario AS id,Fecha  AS descripcion,'Bruto :'+CAST(SalarioBruto AS VARCHAR)+'€'  AS descripcion2,Pagado AS FechaInicio 
         FROM dbo.vw_selectSalariosAppsheet
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -371,6 +450,22 @@ function extraerDocPersonal_Masivo(){
                 array_push($DatosBD, $row);
             }
         }
+
+        $sql8 = "SELECT IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcion2, Año AS FechaInicio 
+        FROM dbo.vw_PEVacaciones
+        WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
+        $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
+        //$parm = array($IdCliente);
+        $stmt = sqlsrv_query($conn,$sql8,$parm);
+        if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }else{
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $row["tipoDocPortal"] = 8;
+                array_push($DatosBD, $row);
+            }
+        }
+   
    
     return $DatosBD;
     sqlsrv_close( $conn );
@@ -465,7 +560,7 @@ function exect_Insert_From_Dinamico($arrayValores){
         }
         
         $sql .=$sql2;
-        //  print_r($sql);
+        // print_r($sql);
         //  print_r($arrayValores);
         $parm = $arrayValores;
         $stmt = sqlsrv_prepare($conn, $sql, $parm);
@@ -500,7 +595,14 @@ function exect_Insert_From_Dinamico($arrayValores){
                     WHERE IdPersonal = ? ORDER BY IdPersonalIncidencia DESC";
                     $tipoDoc = 5;
                     break;
-
+                
+                case 4.9:
+                
+                    $sqlReturn = "SELECT IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcion2, Año AS FechaInicio 
+                    FROM dbo.vw_PEVacaciones
+                    WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
+                    $tipoDoc = 8;
+                    break;
                 default:
                     # code...
                     break;
@@ -618,6 +720,43 @@ function confirmarUsuarioSeguridadUnificada($Ip,$bd,$IdIdent,$usu){
     sqlsrv_close( $conn );
 }
 
+function comprobarUsuarioSURecuperacionContrasena($Ip,$bd,$email){
+    $row;
+    $tipousu;
+    $conn = ConexionBD($Ip,$bd);
+    $sql = "SELECT IdIdentidad FROM dbo.SeguridadUnificada_Identidad 
+    WHERE Usuario = ?";
+
+
+    $parm = array($email);
+    $stmt = sqlsrv_query($conn,$sql,$parm);
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+    }
+    if(isset($row) && $row != null && $row != ''){
+            $link = 'http://www.areadecliente.de/php/reestablecerContrasenaCompletar.php?a='.$row['IdIdentidad'].'&b='.$_COOKIE['pinCPortalE'].'&c='.$_COOKIE['TipoPortalE'];
+            if($_COOKIE['pinCPortalE'] == 123654){
+                $link = 'http://localhost/portaldecliente/php/reestablecerContrasenaCompletar.php?a='.$row['IdIdentidad'].'&b='.$_COOKIE['pinCPortalE'].'&c='.$_COOKIE['TipoPortalE'];
+            }
+            //$link = 'localhost/portaldecliente/php/ActivadorUsuariosCliente.php?a='.$UsuarioCreado.'&c='.$Ip.'&d='. $datosBBDD[0]["BBDD"].'&b='.$arratLogin[2];
+           // echo $link;
+            $plantillaHtml = '../html/plantillas/plantilla_mailRecuperacion.html';
+            $file = fopen($plantillaHtml, "r");
+            $filesize = filesize($plantillaHtml);
+            $plantilla = fread($file, $filesize);
+            $htmlCorreo = str_replace(["%Usuario%","%LinkActivacionPortal%"],[$email,$link],$plantilla);
+        
+        if(execute_EnviarMail_CreacionUsuario($email,$htmlCorreo,'Reestablecimiento contraseña del Area de cliente')){
+            return true;
+        }
+    }
+
+    sqlsrv_close( $conn );
+}
+
+
 function crearRegistroEntrada_SeguridadUnificada($idIdentidad,$idApp){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $sql = "DECLARE @IdControlAcceso INT;
@@ -639,25 +778,61 @@ function crearRegistroEntrada_SeguridadUnificada($idIdentidad,$idApp){
     sqlsrv_close( $conn );
 }
 
-function execute_EnviarMail_CreacionUsuario($destinatario,$html){
+function execute_EnviarMail_CreacionUsuario($destinatario,$html,$Asunto = 'Activación usuario Area de cliente'){
     $conn = ConexionBD("85.214.41.17,23459","IntecoDistribucion");
     $sql = "EXEC msdb.dbo.sp_send_dbmail
     @profile_name = 'AreaClienteNimo',
     @recipients = ?,
     @body = ?,
-    @subject = 'Activación usuario Area de cliente',
+    @subject = ?,
     @body_format = 'HTML',
     @from_address = 'areadecliente@nimoerp.com'"  ;
-    $parm = array($destinatario,$html);
+    $parm = array($destinatario,$html,$Asunto);
     $stmt = sqlsrv_prepare($conn, $sql,$parm);
+    
+    if (!sqlsrv_execute($stmt)) {
+        $errors = sqlsrv_errors();
+        if($errors[0]['SQLSTATE'] == '01000'){
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        return true;
+    }
+    sqlsrv_close( $conn );
+}
+
+function PEfirmaInsert($IdDoc,$IdTipoDoc,$NArchivo,$IdA,$LinkA,$IP,$BBDD){
+    $conn = ConexionBD($IP,$BBDD);
+    $sql = " INSERT INTO dbo.PEFirma
+    (
+        IdDocumento,
+        IdTipoDocumento,
+        Archivo,
+        IdArchivo,
+        LinkArchivo,
+        pinArchivo
+    )
+    VALUES
+    (   ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ? 
+        )";
+    $parm = array($IdDoc,$IdTipoDoc,$NArchivo,$IdA,$LinkA,$_SESSION["pinC"]);
+    $stmt = sqlsrv_prepare($conn, $sql, $parm);
     if (!sqlsrv_execute($stmt)) {
         die(print_r(sqlsrv_errors(), true));
         return false;
         die;
     }else{
         return true;
-    }
+    }   
     sqlsrv_close( $conn );
 }
+
 ?>
 
