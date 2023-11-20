@@ -40,13 +40,16 @@
     function dibuja_pagina(arrayDatos = []){
         $.ajax({
                     data:{ arrayDatos : arrayDatos}, 
-                    url: '../php/AltaUsuariosCliente.php',
+                    url: '../php/reestablecerContrasena.php',
                     type: 'POST',
                     success: function(response) {
-                        alert(response);
+                        if(response == 1){
+                          alert("");
+                        }else{
+                          alert(response)
+                        }
                     },
                     error: function(xhr, status, error) {
-                      
                         console.log("Error: " + error);
                     }
                 });
@@ -136,43 +139,20 @@
                     src="%logoImg%">
                 </h3> -->
                 
-                <div><h4>Alta usuario</h4></div>
-                <br>
+                <div><h4>Reestablecer contraseña</h4></div>
+                <div><p>Introduzca los datos requeridos para recibir un email con el que podra reestablecer la contraseña.</p></div>
+      
                 <form id="form_login" class="formulario">
-                  <div class="input-group mb-3 input-group-lg ">
-                    <label for="NCliente" class="form-label"></label>
-                    <input type="text" pattern="\d+" class="form-control c_img" placeholder="Numero de Cliente" id="nCliente" required>
-                    <span class="input-group-text" id="ImgPwContainer">
-                      <i class="fa fa-info" id="ImgInterrogacion" 
-                     style="cursor: pointer"></i>
-                     </span>
-                    <div class="invalid-feedback">Por favor, ingrese su número de cliente.</div>
-                  </div>
                   <div class="input-group mb-3 input-group-lg rounded-pill">
                     <label for="cif" class="form-label"></label>
-                    <input type="text" class="form-control rounded-pill" placeholder="CIF" id="user" required>
-                  </div>
-
-
-                  <div class="input-group mb-3 input-group-lg rounded-pill">
-                    <label for="email" class="form-label"></label>
                     <input type="email" class="form-control rounded-pill" placeholder="Email" id="email" required>
                   </div>
-
-                  <div class="input-group mb-3 input-group-lg "  >
-                    <!-- <span class="input-group-text"><i class="fa fa-lock"></i></span> -->
-                    <input class="form-control c_img" id="pw_text" type="password" placeholder="Contraseña" value="" required>
-                    <span class="input-group-text" id="ImgPwContainer">
-                      <i class="fa fa-eye" id="ImgPw" 
-                     style="cursor: pointer"></i>
-                     </span>
-                  </div>
-                  
-                  <!-- <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                    <label class="form-check-label" for="exampleCheck1" style="float:left">Recordar contraseña</label>
+                  <!-- <div class="input-group mb-3 input-group-lg rounded-pill">
+                    <label for="cif" class="form-label"></label>
+                    <input type="text" class="form-control rounded-pill" placeholder="CIF" id="user" required>
                   </div> -->
-                  <button type="submit" class="col-6 btn btn-primary rounded-pill" id="btnForm">Crear</button>
+
+                  <button type="submit" class="col-6 btn btn-primary rounded-pill" id="btnForm">Enviar</button>
                 </form>
               </div>
             </div>
