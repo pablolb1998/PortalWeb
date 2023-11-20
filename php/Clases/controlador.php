@@ -64,7 +64,7 @@ class Controlador
         }
         //pruebas
         if($_SESSION["pinC"] == 123654){
-            $this -> miEstado -> IP = '192.168.204.111';
+                $this -> miEstado -> IP = '192.168.204.111';
         }elseif ($_SESSION["pinC"] == '65814415D75C') {
             $this -> miEstado -> IP = '81.169.167.5,23459';
         }
@@ -277,6 +277,10 @@ class Controlador
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     break;
                 case 4.8:
+                    $this -> miEstado -> acciones["archivos"] = 1;
+                    break;
+                case 4.9:
+                    $this -> miEstado -> acciones["anadirLinea"] = 1;
                     break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
@@ -314,7 +318,43 @@ class Controlador
         $response = file_get_contents($url);
         return true;
     }
+    function descargaArchivoServicoWeb($IdP,$nombre_archivo,$tipoDoc,$OI = null){
+        $nombre_archivo = "";
+        if($arrayDatos[3] == "OPDF"){
+            $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$arrayDatos[2][1].'&IdPropietario='.$arrayDatos[2][0];
+            $nombre_archivo = $arrayDatos[2][2];
+        }else{
+            $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin=".$_SESSION["pinC"].'&IdArchivo='.$arrayDatos[2][0];
+            $nombre_archivo = $arrayDatos[2][1];
+        }
+        
 
+        
+        $directorio_destino = "subidasTemp/".$_SESSION["pinC"]."/";
+        // Verificar si el directorio existe, si no, crearlo
+        if (!file_exists($directorio_destino)) {
+            mkdir($directorio_destino, 0755, true);
+        }
+
+        // Realiza la solicitud HTTP para obtener el contenido del archivo
+        $response = file_get_contents($url_archivo);
+        if ($response === false) {
+            $msgError = 'Error al obtener el archivo desde el servicio web.';
+        } else {
+            // Específica la ruta donde deseas guardar el archivo
+            $rutaGuardado = $directorio_destino.$nombre_archivo; // Reemplaza esto con la ruta y nombre deseado
+        
+            // Guarda el contenido en un archivo en el servidor
+            if (file_put_contents($rutaGuardado, $response) !== false) {
+                //$abrirNuebaPestaña = 1;
+                return array('php/'.$rutaGuardado,1,1);
+            } else {
+                return 0;
+            }
+        }
+
+
+    }
 
     //funciones de para generar el contenido
     // optimizar el navegar pestañas
@@ -359,11 +399,36 @@ class Controlador
                 $this -> navegarPestanas($nav);
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 10){
         //Abrir la pestaña de cambio de contraseña
-                $this -> navegarPestanas($arrayDatos[0]); 
+            
+            $this -> navegarPestanas($arrayDatos[0]); 
+        }elseif(!empty($arrayDatos) && $this -> miEstado -> Estado == 11){
+            //Abrir la pestaña de cambio de contraseña
+            if(strlen($arrayDatos[0])<5){
+                $msgError = 'La nueva contraseña ha de tener una longitud mínima de 5 caracteres.';
+            }elseif($arrayDatos[0] === $arrayDatos[1]){
+                if(reestablecerContrasenaConfirmar($arrayDatos[0])){ 
+                    $msgError = 'Contraseña modificada con exito.';
+                    if($_SESSION["pinC"] == 123654){
+                        $this -> cerrarSesion();
+                        return array('../portaldecliente/Index.html',0,1,$msgError);
+                    }else{
+                        return array('../Index.html',0,1,$msgError);
+                    }
+                        
+                    
+                }else{
+                    $msgError = 'No se ha podido modificar la contraseña.';
+                }
 
+            }else{
+                $msgError = 'La contraseña nueva ha de coincidir';
+            }
+             
         }elseif(!empty($arrayDatos) && $c == 10 && $arrayDatos[0] != -1){
         //confirmar el cambio de contraseña
-            if($arrayDatos[2] == $arrayDatos[1]){
+            if(strlen($arrayDatos[2])<5){
+                $msgError = 'La nueva contraseña ha de tener una longitud mínima de 5 caracteres.';
+            }elseif($arrayDatos[2] === $arrayDatos[1]){
                 if(cambiarContrasena($arrayDatos[0],$arrayDatos[1])){
                     $msgError = 'Contraseña modificada con exito.';
                 }else{
@@ -441,16 +506,15 @@ class Controlador
                 case 4 :
                     $nav = 7;
                     foreach($this -> miEstado -> Documentos as $documento){
-                        if( $documento["tipoDocPortal"] != 3){
-                            $dc = array($documento["descripcion"],
-                                    $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
-                                    $documento["FechaInicio"]-> z,
-                                    "#800080",
-                                    $documento["tipoDocPortal"]
-                                );
-                            array_push($arrayAuxiliarHtml,$dc);
+                        // if( $documento["tipoDocPortal"] != 3){
+                        //     $dc = array($documento["descripcion"],
+                        //             $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
+                        //             "#800080",
+                        //             $documento["tipoDocPortal"]
+                        //         );
+                        //     array_push($arrayAuxiliarHtml,$dc);
 
-                        }
+                        // }
                         
                     }
                     
@@ -488,6 +552,10 @@ class Controlador
                 case 4.8:
                     $this -> miEstado -> IdTipoPropietario = 25;
                     break;
+                case 4.9:
+                    //Vacaciones de personal
+                    $this -> miEstado -> IdTipoPropietario = 146;
+                    break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
                     break;
@@ -503,7 +571,7 @@ class Controlador
         }elseif($c == 4.4 && !empty($arrayDatos) && $arrayDatos[1] == 6 && $arrayDatos[2] != null ){
         //Navegar a la pestaña de firma desde documentos
             $this -> miEstado -> IdDocumentoPadre = $arrayDatos[2];
-            $this -> miEstado -> cargarFormFirma = 1;
+            //$this -> miEstado -> cargarFormFirma = 1;
            
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == 0 ){
         //Volver a la anterior pestaña
@@ -550,6 +618,7 @@ class Controlador
             // $arrayDatos[2][0] 
             // $arrayDatos[2][1] 
             //print_r($arrayDatos[2][2]);
+            //$descarga = descargaArchivoServicoWeb($arrayDatos[2][0],$arrayDatos[2][2],$arrayDatos[3],$arrayDatos[2][1]);
             $nombre_archivo = "";
             if($arrayDatos[3] == "OPDF"){
                 $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$arrayDatos[2][1].'&IdPropietario='.$arrayDatos[2][0];
@@ -666,8 +735,8 @@ class Controlador
         //print_r($this -> miEstado -> Estado);
         $txtErr = '';
         if($_SESSION["pinC"] == 123654){
-            $txtErr = "A:".$this -> miEstado -> tipo_App. "idc :".$this -> miEstado -> IdCliente.
-            $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdPropietario;
+            $txtErr = "A:".$this -> miEstado -> tipo_App. "idI :".$this -> miEstado -> IdIdentidad.
+            $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario;
         }
         
         return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml);
