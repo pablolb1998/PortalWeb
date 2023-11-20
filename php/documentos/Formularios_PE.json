@@ -519,6 +519,119 @@
                     "MsgError":""
                 }
             ]        
+        },       
+        {
+            "Nombre" : "Vacaciones",
+            "Estado" : 4.9,
+            "Instruccion" : "INSERT_UP",
+            "Pro_Tabla" : "Personal_Vacaciones",
+            "Campos" :[
+                {
+                    "Variable" : "IdPersonalVacaciones",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : 0,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdPersonal",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdPersonal",
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "FechaInicio",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "date",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Fecha Inicio",
+                    "TipoDatoHtml": "date",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 1,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "FechaFin",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "date",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Fecha Fin",
+                    "TipoDatoHtml": "date",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 1,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Estado",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "INT",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "Number",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : 2,
+                    "ValorAdicional": null,
+                    "Required": 1,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "Año",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "INT",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Año Imputación",
+                    "TipoDatoHtml": "number",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : 2023,
+                    "ValorAdicional": null,
+                    "Required": 1,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdIdentidadInsert",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdIdentidad",
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                }
+            ]        
         }
 
     ]
