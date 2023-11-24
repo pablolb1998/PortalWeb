@@ -14,9 +14,15 @@ require_once "Conexion.php";
 
 function comprueba_usuario($usuario, $contrasena){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $IdTipoUsu;
+    if($_SESSION["Controlador"] -> miEstado ->  tipo_App == 1){
+        $IdTipoUsu = 3;
+    }else{
+        $IdTipoUsu = 1;
+    }
     //Comprueba los datos de la tabla de clientes
-    $sql = "EXECUTE seguridadunificada_identidad_select  @Usuario=?, @Contrasena=?;";
-    $parm = array($usuario, $contrasena);
+    $sql = "EXECUTE seguridadunificada_identidad_select  @Usuario=?, @Contrasena=?, @IdTipoUsuario = ?;";
+    $parm = array($usuario, $contrasena, $IdTipoUsu);
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
     //print_r($stmt);
     if (!sqlsrv_execute($stmt)) {
@@ -299,7 +305,7 @@ function comprueba_jornada_personal(){
 function extraer_JornadaHistorico(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     //Comprueba los datos de la tabla de clientes
-    $sql = "SELECT FechaInicio,FechaFin,HoraInicioFin,DiaIto,DuracionHoras 
+    $sql = "SELECT FechaInicio,FechaFin,HoraInicioFin,DiaIto,DuracionHoras,LongLat_Entrada,LongLat_Salida
     FROM  dbo.vw_TiemposPersonal_historico WHERE idpersonal = ? ORDER BY FechaInicio DESC ;";
     $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
     $DatosBD = array();
@@ -343,8 +349,9 @@ function extraerDocPersonal_Masivo(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $DatosBD = array();
     //1 - Asistencias
-        $sql1 = "SELECT IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2,FechaInicio,FechaFin ,NumeroArchivos
-         FROM dbo.vw_PEAsistencias 
+        $sql1 = "SELECT IdPersonalAsistencia AS id,descripcion AS descripcion,Justificada AS descripcion2,FechaInicio AS descripcionLateral,FechaFin ,NumeroArchivos,color, tipo AS descripcion3,
+        FechaInicio,FechaFin
+        FROM dbo.vw_PEAsistencias 
         WHERE IdPersonal = ?";
         $DatosBD = array();
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -359,8 +366,8 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //2 - Contratos
-        $sql2 = "SELECT idpersonalcontrato AS id,tipo AS descripcion,EstadoContrato AS descripcion2,NumeroArchivos,
-        fechainicio AS FechaInicio, ISNULL(fechafin,'1900-01-01 00:00:00') AS FechaFin,observaciones FROM dbo.vw_PEContratos 
+        $sql2 = "SELECT idpersonalcontrato AS id,tipo AS descripcion,EstadoContrato AS descripcion2,NumeroArchivos,color,InicioFin AS descripcionLateral, 
+        FechaInicio, FechaInicio AS FechaFin,observaciones FROM dbo.vw_PEContratos 
         WHERE idpersonal = ? ORDER BY fechainicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
         //$parm = array($IdCliente);
@@ -374,10 +381,10 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //3 - Documentos
-        $sql2 = "SELECT IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS FechaInicio,
+        $sql2 = "SELECT IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
         IdTipoPropietario,IdPropietario,Documento, Firmable ,Firmado
         FROM dbo.vw_PEArchivosPersonal 
-        WHERE idpersonal = ? ORDER BY fechainicio DESC";
+        WHERE idpersonal = ? ORDER BY FechaCreacionRegistro DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
         //$parm = array($IdCliente);
         $stmt = sqlsrv_query($conn,$sql2,$parm);
@@ -390,7 +397,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //4 - Formacion
-        $sql2 = "SELECT IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS FechaInicio 
+        $sql2 = "SELECT IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3
         FROM dbo.vw_PEFormacion
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -405,7 +412,8 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //5 - Incidencias
-        $sql5 = "SELECT IdPersonalIncidencia AS id,TipoIncidencia AS descripcion,Justificada AS descripcion2,Fecha AS FechaInicio 
+        $sql5 = "SELECT IdPersonalIncidencia AS id,TipoIncidencia AS descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,color,
+        Fecha AS FechaInicio, Fecha AS FechaFin
         FROM dbo.vw_PEIncidencias
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -421,7 +429,8 @@ function extraerDocPersonal_Masivo(){
         }
 
     //6 - Material
-        $sql6 = "SELECT IdPersonalMaterial AS id,Material AS descripcion,Cantidad AS descripcion2,Fecha AS FechaInicio 
+        $sql6 = "SELECT IdPersonalMaterial AS id,Material AS descripcion,Cantidad AS descripcion2,Fecha AS descripcionLateral, color,
+        Fecha AS FechaInicio, Fecha AS FechaFin
         FROM dbo.vw_PEMaterial
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -436,9 +445,10 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //7 - Nominas
-        $sql7 = "SELECT IdPersonalSalario AS id,Fecha  AS descripcion,'Bruto :'+CAST(SalarioBruto AS VARCHAR)+'€'  AS descripcion2,Pagado AS FechaInicio 
+        $sql7 = "SELECT IdPersonalSalario AS id,Fecha  AS descripcion,Pagado  AS descripcion2, CAST(Liquido AS VARCHAR)+'€' AS descripcionLateral,color,'Bruto :'+CAST(SalarioBruto AS VARCHAR)+'€' AS descripcion3,
+        FechaRegistro AS FechaInicio, FechaRegistro AS FechaFin
         FROM dbo.vw_selectSalariosAppsheet
-        WHERE IdPersonal = ? ORDER BY Fecha DESC";
+        WHERE IdPersonal = ? ORDER BY FechaRegistro DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
         //$parm = array($IdCliente);
         $stmt = sqlsrv_query($conn,$sql7,$parm);
@@ -451,7 +461,8 @@ function extraerDocPersonal_Masivo(){
             }
         }
 
-        $sql8 = "SELECT IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcion2, Año AS FechaInicio 
+        $sql8 = "SELECT IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcionLateral, 'Año : ' + CAST(Año AS VARCHAR) AS descripcion2, color2 as color,
+        FechaInicio,FechaFin
         FROM dbo.vw_PEVacaciones
         WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -508,7 +519,7 @@ function extraerDropdownsFormsValores(){
 }
 
 //iniciar o finalizar jornada
-function exec_up_Tiempos_Insert(){
+function exec_up_Tiempos_Insert($lat = '',$long = ''){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $sql = "DECLARE @IdTiempo INT;
     EXEC up_Tiempos_Insert
@@ -518,13 +529,17 @@ function exec_up_Tiempos_Insert(){
 	@IdPersonal = ?,
     @FechaInicio = ?,
 	@InicioFin= ?,
-    @FechaImputacion = ?";
+    @FechaImputacion = ?,
+    @Latitud = ?,                     
+    @Longitud = ?";
     $parm = array($_SESSION["Controlador"] -> miEstado -> id_sociedad, 
             $_SESSION["Controlador"] -> miEstado ->EstadoJornada[2],
             $_SESSION["Controlador"] -> miEstado -> IdPersonal,
             date('Ymd H:i:s'),
             $_SESSION["Controlador"] -> miEstado ->EstadoJornada[0],
-            date('Ymd H:i:s'));
+            date('Ymd H:i:s'),
+            $lat,
+            $long);
     // print_r($parm);
     // print_r('<br>');
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
@@ -575,30 +590,45 @@ function exect_Insert_From_Dinamico($arrayValores){
             $tipoDoc = 0;
             switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
                 case 4.1:
-                    $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2,FechaInicio,FechaFin ,NumeroArchivos
+                    $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2,FechaInicio As descripcionLateral,FechaFin ,NumeroArchivos
                     FROM dbo.vw_PEAsistencias 
                     WHERE IdPersonal = ? ORDER BY IdPersonalAsistencia DESC" ;
                     $tipoDoc = 1;
                     break;
+                case 4.4:
+                    $sqlReturn = "SELECT TOP 1 IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
+                    IdTipoPropietario,IdPropietario,Documento, Firmable ,Firmado
+                    FROM dbo.vw_PEArchivosPersonal 
+                    WHERE idpersonal = ? ORDER BY fechainicio DESC" ;
+                    $tipoDoc = 3;
+                    break;
+                    
+                    break;
                 case 4.5:
                     
-                    $sqlReturn = "SELECT TOP 1 IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS FechaInicio 
+                    $sqlReturn = "SELECT TOP 1 IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral 
                     FROM dbo.vw_PEFormacion
                     WHERE IdPersonal = ? ORDER BY IdPersonalFormacion DESC" ;
                     $tipoDoc = 4;
                     break;
                 
                 case 4.6:
-                    
-                    $sqlReturn = "SELECT TOP 1 IdPersonalIncidencia AS id,TipoIncidencia AS descripcion,Justificada AS descripcion2,Fecha AS FechaInicio 
+                    $sqlReturn = "SELECT TOP 1 IdPersonalIncidencia AS id,TipoIncidencia AS descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral 
                     FROM dbo.vw_PEIncidencias
                     WHERE IdPersonal = ? ORDER BY IdPersonalIncidencia DESC";
+                    
                     $tipoDoc = 5;
                     break;
-                
+                case 4.7:
+                    $sqlReturn = "SELECT TOP 1 IdPersonalMaterial AS id,Material AS descripcion,Cantidad AS descripcion2,Fecha AS descripcionLateral 
+                    FROM dbo.vw_PEMaterial
+                    WHERE IdPersonal = ? ORDER BY Fecha DESC";
+                    
+                    $tipoDoc = 6;
+                    break;
                 case 4.9:
                 
-                    $sqlReturn = "SELECT IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcion2, Año AS FechaInicio 
+                    $sqlReturn = "SELECT IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcion2, Año AS descripcionLateral 
                     FROM dbo.vw_PEVacaciones
                     WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
                     $tipoDoc = 8;

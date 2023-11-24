@@ -565,25 +565,40 @@ function muestra_documentos(){
                     $listaDoc .= "<tr data-tipo-servicio='$estado' id='$estado'>";
                 }
 
-                $acciones_mostrar = str_replace(['%id%','%Origen_impresion%','%codigo%'], [$id, $Origen_impresion,$codigo], $acciones_linea);;
+                $acciones_mostrar = str_replace(['%id%','%Origen_impresion%','%codigo%'], [$id, $Origen_impresion,$codigo], $acciones_linea);
 
 
-                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $codigo . ' - ' . $newDate . '<br><details><summary></summary>';
+                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $codigo . ' - ' . $newDate . '<br>';
+                if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
+                    $listaDoc .= '<details>';
+                    
+                }else{
+                    $listaDoc .= '<details open>';
+                }
+                $listaDoc .='<summary></summary>';
                 $listaDoc .='<p><b style="color:'.$color.';">' . $estado . '</b><br>';
-                $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td>';
+                $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p>';
+                if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
+                    $listaDoc .= '</details>';
+                }
+
+                $listaDoc .= '</div></td>';
                 $listaDoc .= '<td class="col-5"><div class="precio" name="precio" ><b id="importe_documento" style="float:right;color:'.$color.';">' . $importe;
                 $listaDoc .= '</b><br>'.$acciones_mostrar.'</div></td></tr>';
                 //$listaDoc .= '</b><br><a onclick="dibuja_pagina([0,4,['.$id.','.$Origen_impresion.",'".$codigo.".pdf'".']])" >';
                 //$listaDoc .= '<img class="pdf_icono" src="Img/descarga_generica.png"></a></div></td></tr>'; 
                 }
+
                 $listaDoc .= "</tbody></table></span>";
                 $listaDoc .= "<div class='container text-center'>";
                 $listaDoc .= "<div class='row'>";
                 $listaDoc .= "<div class='col'>";
+
                 //optimizar moverlo a un documento aparte
                 if (count($arrayDoc) > $_SESSION["Controlador"] -> miEstado -> puntero_posicion) {
                     $listaDoc .= '<button type="button" class="btn btn-primary mb-3" onclick="dibuja_pagina([0,1])">Ver más...</button>';
                 }
+
         }else{
             $listaDoc .= '<div class="d-flex justify-content-center mt-5 mb-5"> No hay elementos </div>';
         }
@@ -783,19 +798,29 @@ function DibujaLineas_PortalEmpleado(){
 
             $listaDoc .=  "<tbody id='myTable'>";
             for($dc = 0; $dc < count($arrayDoc) ; $dc++ ){
-               
                 $valor = $arrayDoc[$dc];
-                $id = $valor["id"];
                 $descripcion = $valor["descripcion"];
                 $descripcion2 = $valor["descripcion2"];
+                $descripcion3 = '';
+                
+                $color = '';
+                if(isset($valor["color"])){
+                    $color =  $valor["color"];
+                }
+                if(isset($valor["descripcion3"])){
+                    $descripcion3 =  $valor["descripcion3"];
+                }
+                
+                $id = $valor["id"];
+                
                 try {
-                    if(isset($valor["FechaInicio"])){
-                        $FechaInicio = $valor["FechaInicio"] -> format('d/m/Y');
+                    if(isset($valor["descripcionLateral"])){
+                        $descripcionLateral = $valor["descripcionLateral"] -> format('d/m/Y');
                     }else{
-                        $FechaInicio = '';
+                        $descripcionLateral = '';
                     }
                 } catch (\Throwable $th) {
-                    $FechaInicio = $valor["FechaInicio"];
+                    $descripcionLateral = $valor["descripcionLateral"];
                 }
                 try {
                     if(isset($valor["FechaFin"])){
@@ -868,10 +893,21 @@ function DibujaLineas_PortalEmpleado(){
 
                 //pintar cada linea
                 $listaDoc .= '<tr data-tipo-servicio="'.$id.'" id="'.$id.'" >';
-                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador"><h5>' . $descripcion. '<h5><br><details><summary></summary>';
-                $listaDoc .='<p><b style="color:'.'Blue'.';">' . $descripcion2 . '</b><br>';
-                $listaDoc .= '<span class="descripcion_doc">'.$descripcion .'</span></p></details></div></td></b>';
-                $listaDoc .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;"><h5>'. $FechaInicio.'<h5>';
+                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador"><h5>' . $descripcion. '<h5>';
+                if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
+                    $listaDoc .= '<details>';
+                    
+                }else{
+                    $listaDoc .= '<details open>';
+                }
+                $listaDoc .='<summary></summary>';
+                $listaDoc .='<p> <span style="color:'.$color.';">' . $descripcion2 . '</span><br>';
+                $listaDoc .= $descripcion3 .'</p>';
+                if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
+                    $listaDoc .= '</details>';
+                }
+                
+                $listaDoc .= '</div></td><td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;color:'.$color.';"><h5>'. $descripcionLateral.'<h5>';
                 $listaDoc .= '<div class="mt-1">' . $acciones_linea_pintar . '</div>';
                 $listaDoc .= '</div></td></tr>'; 
             }
@@ -948,9 +984,18 @@ function cargarJornadaHistorico(){
             $valor = $arrayJ[$dc];
             $hora = $valor["HoraInicioFin"];
             if($valor["DuracionHoras"] !== null){
-                $duracion = round($valor["DuracionHoras"],2);
+                $duracion = round($valor["DuracionHoras"],2) ;
+                $duracion_s = $duracion * 3600;
+                $horas = floor($duracion_s / 3600);
+                $minutos = floor(($duracion_s % 3600) / 60);
+                $longlat_entrada;
+                $longlat_salida;
+                if($minutos<10){
+                    $minutos = '0'.$minutos;
+                }
+                $duracion = $horas . ':' . $minutos . ' h'; 
             }else{
-                $duracion = 0;
+                $duracion = 'En Jornada' ;
             }
            
             try {
@@ -979,14 +1024,23 @@ function cargarJornadaHistorico(){
             } catch (\Throwable $th) {
                 $FechaFin = '';
             }
-                
+            $acciones_linea_pintar = '';
+            if(isset( $valor['LongLat_Entrada'])){
+                $longlat_entrada = explode(",", $valor['LongLat_Entrada']);
+                $acciones_linea_pintar .= '<a href="https://www.google.com/maps/place/'.$longlat_entrada[0].','.$longlat_entrada[1].'" target="_blank"><img src="Img/UbicacionEntrada.png"></a>';
+            }   
+            if(isset( $valor['LongLat_Salida'])){
+                $longlat_salida = explode(",", $valor['LongLat_Salida']);
+                $acciones_linea_pintar .= '<a href="https://www.google.com/maps/place/'.$longlat_salida[0].','.$longlat_salida[1].'" target="_blank"><img src="Img/UbicacionSalida.png" style="margin-left: 5px;"></a>';
+            }     
             
             $listaJ .= '<tr>';
             $listaJ .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $dia. '<br><details><summary></summary>';
-            $listaJ .='<p><b style="color:'.'Blue'.';">' . $hora . '</b><br>';
+            //$listaJ .='<p><b>' . $hora . '</b><br>';
             $listaJ .= '<span class="descripcion_doc">'.$hora .'</span></p></details></div></td></b>';
-            $listaJ .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;color:'.'Blue'.';"><b>'. $duracion.'</b>';
-            $listaJ .= '</p></div></td></tr>'; 
+            $listaJ .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;"><b>'. $duracion.'</b>';
+            $listaJ .= '<div class="mt-1">' . $acciones_linea_pintar . '</div>';
+            $listaJ .= '</div></td></tr>';
         }
         $listaJ .= "</tbody></table></span>";
      
