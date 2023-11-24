@@ -1,7 +1,7 @@
 <br>
 <br>
 
-<!-- Panel de control -->
+<!-- Panel de control --> 
 <div class="row h-75 justify-content-center">
   <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
     <div class="card shadow-2-strong shadow pb-5 col-12">
@@ -14,8 +14,15 @@
       <div class="row col-12">
         <div class="col-12 text-center mt-3"><h2><b>%FechaAccionjornada%</b></h2></div>
       </div>
+        <!-- <iframe
+    id="mapIframe"
+    title="Mapa Fichaje"
+    width="300"
+    height="200"
+    > -->
+</iframe>
       <div class="col-11 d-flex flex-row-reverse">
-        <button id="flecha_volver" onclick="dibuja_pagina([0,0])" class="align-self-end"><img src="img/FlechaJornada.png" alt="BotonIniciarFinalizarJornada"></button>
+        <button id="flecha_volver" onclick="guardarJornada()" class="align-self-end"><img src="img/FlechaJornada.png" alt="BotonIniciarFinalizarJornada"></button>
         
         <!-- <div class="col-2 offset-1 btn btn-success mt-3" onclick="dibuja_pagina([0,0])" style="display: %BotonIniciarJornada%;"><h3><b>Iniciar Jornada</b></h3></div>
         <div class="col-2 offset-1 btn btn-danger mt-3" onclick="dibuja_pagina([0,0])" style="display: %BotonFinalizarJornada%;"><h3><b>Finalizar Jornada</b></h3></div> -->
@@ -23,11 +30,7 @@
         <!-- <div class="col-1 offset-1 btn btn-secondary mt-3" onclick="dibuja_pagina([0,0])" style="display: %BotonretomarJornada%;"><b>Reanudar</b></div> -->
 
       </div>
-      <div id="map"></div>
-      <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly"
-        defer
-      ></script>
+     
     </div>
 
     
