@@ -179,8 +179,8 @@ class Controlador
         $this -> miEstado -> NombreSociedad = $ns; 
     }
     // iniciar o finalizar la jornada segun el estadp 
-    function iniciarFinalizarJornada(){
-        exec_up_Tiempos_Insert();
+    function iniciarFinalizarJornada($lat = null,$long = null ){
+        exec_up_Tiempos_Insert($lat,$long);
         if($this -> miEstado -> EstadoJornada[0] == 1){
             $this -> miEstado -> EstadoJornada[0] = 0;
         }else{
@@ -251,12 +251,14 @@ class Controlador
         $this -> miEstado -> acciones["anadirLinea"] = 0;
         $this -> miEstado -> acciones["modalValidaciones"] = 0;
         $this -> miEstado -> acciones["modalSubirDoc"] = 0;
+        $this -> miEstado -> acciones["desplegado"] = 0;
         if($this -> miEstado -> tipo_App == 2){
             //Portal del empleado
             switch ($this -> miEstado -> Estado) {   
                 case 4.1 :
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    $this -> miEstado -> acciones["desplegado"] = 1;
                     break;
                 case 4.3 :
                     $this -> miEstado -> acciones["archivos"] = 1;
@@ -289,6 +291,10 @@ class Controlador
         }else{
             //Poeral del comercial
             switch ($this -> miEstado -> Estado) { 
+                case 6 :
+                    $this -> miEstado -> acciones["descarga"] = 1;
+                    $this -> miEstado -> acciones["desplegado"] = 1;
+                    break;
                 case 8 :
                     $this -> miEstado -> acciones["modalValidaciones"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
@@ -384,6 +390,7 @@ class Controlador
         }elseif($c === 0 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2){
             //PORTAL EMLEADO
             $InicioS = $this -> IniciarSesion($arrayDatos[0], $arrayDatos[1]);
+
             $nav=0;
             if($InicioS){
                 $nav = 2;
@@ -505,18 +512,34 @@ class Controlador
                     break;
                 case 4 :
                     $nav = 7;
-                    foreach($this -> miEstado -> Documentos as $documento){
-                        // if( $documento["tipoDocPortal"] != 3){
-                        //     $dc = array($documento["descripcion"],
-                        //             $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
-                        //             "#800080",
-                        //             $documento["tipoDocPortal"]
-                        //         );
-                        //     array_push($arrayAuxiliarHtml,$dc);
-
-                        // }
+                    
+                        foreach($this -> miEstado -> Documentos as $documento){
+                            if( !in_array($documento["tipoDocPortal"],array(2,3,4))){
+                                $fi;
+                                $ff;
+                                try{
+                                   $fi = ($documento["FechaInicio"] ? $documento["FechaInicio"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
+                                   $ff = ($documento["FechaFin"] ? $documento["FechaFin"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
+                                }catch (e){
+            
+                                }
+                                if($ff && $fi){
+                                    $dc = array($documento["descripcion"],
+                                        $fi,
+                                        $ff,
+                                        $documento["color"],
+                                        $documento["tipoDocPortal"]
+                                    );
+                                    array_push($arrayAuxiliarHtml,$dc);
+            
+                                }
+                                
+            
+                            }
+                            
+                        }
                         
-                    }
+                    
                     
                     break;
                 default:
@@ -576,17 +599,30 @@ class Controlador
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == 0 ){
         //Volver a la anterior pestaña
             $this -> navegarPestanas(-1);
-        }elseif($this -> miEstado -> Estado == 7  && $this -> miEstado -> tipo_App == 2 && empty($arrayDatos) &&  $this -> miEstado -> cargarForm == 0){
+        }elseif($this -> miEstado -> Estado == 7  && $this -> miEstado -> tipo_App == 2 ){
         // cargar la pestaña de calendario
+        //print_r($this -> miEstado -> Estado);
             foreach($this -> miEstado -> Documentos as $documento){
-                if( $documento["tipoDocPortal"] != 3){
-                    $dc = array($documento["descripcion"],
-                            $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
-                            $documento["FechaInicio"]-> format('Y-m-d H:i:s'),
-                            "#800080",
+                if( !in_array($documento["tipoDocPortal"],array(2,3,4))){
+                    $fi;
+                    $ff;
+                    try{
+                       $fi = ($documento["FechaInicio"] ? $documento["FechaInicio"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
+                       $ff = ($documento["FechaFin"] ? $documento["FechaFin"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
+                    }catch (e){
+
+                    }
+                    if($ff && $fi){
+                        $dc = array($documento["descripcion"],
+                            $fi,
+                            $ff,
+                            $documento["color"],
                             $documento["tipoDocPortal"]
                         );
-                    array_push($arrayAuxiliarHtml,$dc);
+                        array_push($arrayAuxiliarHtml,$dc);
+
+                    }
+                    
 
                 }
                 
@@ -723,9 +759,14 @@ class Controlador
             }
             $this -> miEstado -> cargarForm = 0;
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $this -> miEstado -> Estado == 5 && $this -> miEstado -> tipo_App == 2){
-            //PORTAL Empleado
-            //iniciar/ finalizar jornada en la pestaña de tiempos
-            $this -> iniciarFinalizarJornada();
+        //PORTAL Empleado Iniciar/ finalizar jornada en la pestaña de tiempos
+            if(isset($arrayDatos[2]) && isset($arrayDatos[3])){
+                $this -> iniciarFinalizarJornada($arrayDatos[2],$arrayDatos[3]);
+            }else{
+                $this -> iniciarFinalizarJornada();
+            }
+            //$this -> miEstado -> EstadoJornada = comprueba_jornada_personal();//comprobar el estado actual
+            $this -> miEstado -> HistoricoJornada = extraer_JornadaHistorico();// extraer el historico de la jornada
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == -1){
             $this -> cerrarSesion();
         }
