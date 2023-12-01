@@ -13,7 +13,7 @@ if(isset($_FILES["Archivo"])){
         // $externalContent = file_get_contents('https://api64.ipify.org?format=json');
         // $externalData = json_decode($externalContent);
         $ruta = 'http://www.areadecliente.de/prueba/PortalWeb/php/';
-        echo $externalData-> $ruta.$directorioDestino.$_FILES["Archivo"]["name"];
+        echo $ruta.$directorioDestino.$_FILES["Archivo"]["name"];
     } else {
         echo false;
     }
