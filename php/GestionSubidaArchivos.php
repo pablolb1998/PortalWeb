@@ -7,6 +7,7 @@ if(isset($_FILES["Archivo"])){
     // Verificar si el directorio existe o crearlo si es necesario
     if (!file_exists($directorioDestino)) {
         mkdir($directorioDestino, 0777, true);
+        chown($directorioDestino, 'www-data');
     }
 
     if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], $directorioDestino . $_FILES["Archivo"]["name"] )){
