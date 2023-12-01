@@ -1,4 +1,4 @@
-
+/*\\datos\APLIS\ARCHIVOS ONIX\Esquio20\
 /* Flecha del header */
 #flecha_volver{
     all: unset;
@@ -10,7 +10,7 @@
 }
 
 #flecha_volver:hover {
-    transform: scale(1.1);
+    transform: scale(1.4);
 }
 
 /* Estilos iconos */
@@ -55,10 +55,7 @@
 
     
 }
-body {
-    /*overflow-x: hidden;*/
-}
-/*css del login*/
+
 
 .c_img{
     border-top-left-radius:var(--bs-border-radius-pill) !important;
@@ -79,6 +76,20 @@ body {
     display: block;
     margin: 0 auto;
 }
+
+
+#cookie-modal {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-top: 1px solid #ccc;
+    text-align: center;
+    z-index: 150;
+  }
 
 /*css para eliminar el paddig por defecto de boostrap */
 /* @media screen and (min-width: 600px) { /* setting default row and cols values for non mobile screens */
