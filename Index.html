@@ -403,14 +403,20 @@ var calendar;
         
     }
     function GestionaUbicacion(posicion) {
-        var latitud = posicion.coords.latitude;
-        var longitud = posicion.coords.longitude;
-        dibuja_pagina([0,0,latitud,longitud]);
+        try {
+            var latitud = posicion.coords.latitude;
+            var longitud = posicion.coords.longitude;
+            dibuja_pagina([0,0,latitud,longitud]);
+            } catch (error) {
+                dibuja_pagina([0,0]);
+            }
+        
     }
     function CargarMapaFichaje(){
         try{
             let localizacion = navigator.geolocation.getCurrentPosition(EditarPosicionMapa);
         }catch(e){
+            $('#map').hide();
             console.log(e);
         }
            
