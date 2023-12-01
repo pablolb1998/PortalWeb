@@ -283,13 +283,14 @@ class Controlador
                     break;
                 case 4.9:
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    
                     break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
                     break;
             }
         }else{
-            //Poeral del comercial
+            //Portal del comercial
             switch ($this -> miEstado -> Estado) { 
                 case 6 :
                     $this -> miEstado -> acciones["descarga"] = 1;
@@ -299,12 +300,14 @@ class Controlador
                     $this -> miEstado -> acciones["modalValidaciones"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["desplegado"] = 1;
                     $this -> miEstado -> IdTipoPropietario = null;
                     break;
                 case 9 :
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["modalSubirDoc"] = 1;
                     $this -> miEstado -> acciones["adjunto"] = 1;
+                    
                     $this -> miEstado -> IdTipoPropietario = 2;
                     break;
                 default:
@@ -706,6 +709,15 @@ class Controlador
                 $this -> cargarDatosForm();
             }
             $this -> miEstado -> cargarForm = 1;
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $c == 4.4  && $this -> miEstado -> tipo_App == 2 && isset($arrayDatos[2])){
+        //portal del empleado marcar como dirmado  documento (optimizar)
+            
+            foreach($this -> miEstado -> Documentos as $doc){
+                if($doc['id'] == $arrayDatos[2] && $doc['tipoDocPortal'] == 3 ){
+                    $doc['Firmado'] = 1;
+                }
+            }
+
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 ){
         //portal del empleado guardar o cancelar en la pestaña de formulario
             $this -> miEstado -> camposFormularios = null;
