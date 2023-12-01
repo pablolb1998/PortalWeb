@@ -11,7 +11,7 @@ if(isset($_POST['IdD']) && isset($_POST['TipoArchivo']) && isset($_POST['Pin']) 
         $Ip = $datosBBDD[0]["Servidor"].','.$datosBBDD[0]["Puerto"];
     }
     if($_COOKIE['pinCPortalE'] == 123654){
-        $Ip = '192.168.204.111';
+       $Ip = '192.168.204.111';
     }
     $cadena = $_POST['IdD'].$_POST['TipoArchivo'].$_POST['Pin'];
     //echo $cadena;

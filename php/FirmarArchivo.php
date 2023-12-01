@@ -9,7 +9,13 @@ if(isset($_POST['firmaDataUrl']) && $_POST['Id'] && $_POST['IdP'] && $_POST['IdT
     $firmaBinario = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $firmaDataUrl));
 
     // Ruta donde se guardará la imagen (ajusta según tus necesidades)
+    $directorio = 'subidasTemp/'.$_SESSION["pinC"];
     $rutaImagen = 'subidasTemp/'.$_SESSION["pinC"].'/'.$_POST['Id'].'.png';
+    if (!is_dir($directorio)) {
+        mkdir($directorio, 0755, true);
+        chown($directorio, 'www-data');
+    
+    }
 
     // Guardar la imagen en el servidor
     file_put_contents($rutaImagen, $firmaBinario);
@@ -19,20 +25,26 @@ if(isset($_POST['firmaDataUrl']) && $_POST['Id'] && $_POST['IdP'] && $_POST['IdT
                     $_POST['IdTp'],
                     $_SESSION["pinC"].'_'.$_POST['Id'].'.png',
                     $_POST['Id'],
-                    'http://www.areadecliente.de/php/'.$rutaImagen,
+                    'http://www.areadecliente.de/php/prueba/PortalWeb/php'.$rutaImagen,
                     $_POST['IPc'],
                     $_POST['BBDD']
-                    )){
+    )){
+
+        $url = "http://onixsw.esquio.es:8080/Funciones.aspx?FirmarPDF=1&pin=".$_SESSION["pinC"].
+        "&IdArchivo=".$_POST['Id'].'&TipoFirma='.$_POST['TipoF'].'&IdSociedad='.$_POST['IdS'];
+        
+        $response = file_get_contents($url);
+        
+        echo 1;
+    }else{
+        echo 0;
     }
-    
-    $url = "http://onixsw.esquio.es:8080/Funciones.aspx?FirmarPDF=1&pin=".$_SESSION["pinC"].
-    "&IdArchivo=".$_POST['Id'].'&TipoFirma='.$_POST['TipoF'].'&IdSociedad='.$_POST['IdS'];
-    
-    $response = file_get_contents($url);
+
+   
     
     //$_SESSION["Controlador"] -> miEstado -> id_sociedad
     // Puedes devolver una respuesta al cliente si es necesario
-    echo 1;
+    
 } else {
     echo 0;
 }

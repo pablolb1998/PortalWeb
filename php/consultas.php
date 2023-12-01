@@ -188,7 +188,8 @@ function extraerDoc_parcial($tipoDoc = null,$ids = null,$c = null,$fecha = '1998
     $fechaFormateada = date('Ymd H:i:s', strtotime($fecha));
     //Estraer los documentos
     $sql = "SELECT id,codigo,Fecha,NombreComercial,Descripcion,Estado,tipo,PinDescargas,OrigenImpresion,importe,PinDescargas,color
-    FROM vw_PortalCliente_Documentos 
+    FROM     
+    vw_PortalCliente_Documentos
     WHERE tipo=? AND IdSociedad=? AND IdCliente=? AND Fecha> ?
     ORDER BY Fecha DESC, Codigo DESC;";
     $ListaDoc = array();
@@ -306,7 +307,7 @@ function extraer_JornadaHistorico(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     //Comprueba los datos de la tabla de clientes
     $sql = "SELECT FechaInicio,FechaFin,HoraInicioFin,DiaIto,DuracionHoras,LongLat_Entrada,LongLat_Salida
-    FROM  dbo.vw_TiemposPersonal_historico WHERE idpersonal = ? ORDER BY FechaInicio DESC ;";
+    FROM  dbo.vw_PW_TiemposPersonal_historico_html WHERE idpersonal = ? ORDER BY FechaInicio DESC ;";
     $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
     $DatosBD = array();
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
@@ -841,18 +842,16 @@ function PEfirmaInsert($IdDoc,$IdTipoDoc,$NArchivo,$IdA,$LinkA,$IP,$BBDD){
         IdTipoDocumento,
         Archivo,
         IdArchivo,
-        LinkArchivo,
-        pinArchivo
+        LinkArchivo
     )
     VALUES
     (   ?,
         ?,
         ?,
         ?,
-        ?,
         ? 
         )";
-    $parm = array($IdDoc,$IdTipoDoc,$NArchivo,$IdA,$LinkA,$_SESSION["pinC"]);
+    $parm = array($IdDoc,$IdTipoDoc,$NArchivo,$IdA,$LinkA);
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
     if (!sqlsrv_execute($stmt)) {
         die(print_r(sqlsrv_errors(), true));

@@ -32,4 +32,3 @@ function ConexionBD( $server = "192.168.204.111", $bd = "OnixInteco",$un = "sa",
     return $conn;
 }
 ?>
-

@@ -360,8 +360,8 @@ function pinta_contenido($estado){
                                 </span>';
             $filetext = str_replace('<span id="filtros_dinamicos">',$filtrosCalendario,$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicaFiltrosCalendario()',$filetext);
-            return $filetext.'<div id="calendar"></div></div></div></div>
-            <button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';
+            return $filetext.'<div id="calendar"></div></div></div></div>';
+            //<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
         //selección de el tipo de documneto
             
@@ -569,7 +569,7 @@ function muestra_documentos(){
 
 
                 $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $codigo . ' - ' . $newDate . '<br>';
-                if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
+                if(isset($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"]) && $_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
                     $listaDoc .= '<details>';
                     
                 }else{
@@ -856,7 +856,7 @@ function DibujaLineas_PortalEmpleado(){
                     }else{
                         $tipoD = 0;
                     }
-                    $acciones_linea_pintar .= '<button onclick="cargarModalFirma('.$valor["id"].','.$tipoD.
+                    $acciones_linea_pintar .= '<button  onclick="cargarModalFirma('.$valor["id"].','.$tipoD.
                     ','.$_SESSION["Controlador"] -> miEstado -> IdPropietario.
                     ','.$_SESSION["Controlador"] -> miEstado -> IdTipoPropietario.
                     ','.$_SESSION["Controlador"] -> miEstado -> id_sociedad.
@@ -865,7 +865,7 @@ function DibujaLineas_PortalEmpleado(){
                     ')"  style="all: initial;cursor: pointer;" >
                                         <img  src="Img/firma2.png"></button>';
                 }elseif(isset($valor["Firmado"]) && $valor["Firmado"] != 0 ){
-                    $iconoFirmado = '<img class="pdf_icono" src="Img/DocumentoFirmado.png">';
+                    $iconoFirmado = '<img src="Img/DocumentoFirmado.png" height="25px" style="margin-left:15px;">';
                     $descripcion = $descripcion.$iconoFirmado;
                 }
                 
@@ -983,20 +983,21 @@ function cargarJornadaHistorico(){
            
             $valor = $arrayJ[$dc];
             $hora = $valor["HoraInicioFin"];
-            if($valor["DuracionHoras"] !== null){
-                $duracion = round($valor["DuracionHoras"],2) ;
-                $duracion_s = $duracion * 3600;
-                $horas = floor($duracion_s / 3600);
-                $minutos = floor(($duracion_s % 3600) / 60);
-                $longlat_entrada;
-                $longlat_salida;
-                if($minutos<10){
-                    $minutos = '0'.$minutos;
-                }
-                $duracion = $horas . ':' . $minutos . ' h'; 
-            }else{
-                $duracion = 'En Jornada' ;
-            }
+            $duracion = $valor["DuracionHoras"];
+            // if($valor["DuracionHoras"] !== null){
+            //     // $duracion = round($valor["DuracionHoras"],2) ;
+            //     // $duracion_s = $duracion * 3600;
+            //     // $horas = floor($duracion_s / 3600);
+            //     // $minutos = floor(($duracion_s % 3600) / 60);
+            //     $longlat_entrada;
+            //     $longlat_salida;
+            //     if($minutos<10){
+            //         $minutos = '0'.$minutos;
+            //     }
+            //     $duracion = $horas . ':' . $minutos . ' h'; 
+            // }else{
+            //     $duracion = 'En Jornada' ;
+            // }
            
             try {
                 if(isset($valor["FechaInicio"])){
@@ -1009,7 +1010,7 @@ function cargarJornadaHistorico(){
             }
             try {
                 if(isset($valor["DiaIto"])){
-                    $dia = $valor["DiaIto"] -> format('d/m/Y');
+                    $dia = $valor["DiaIto"] ;
                 }else{
                     $dia = '';
                 }
@@ -1032,13 +1033,18 @@ function cargarJornadaHistorico(){
             if(isset( $valor['LongLat_Salida'])){
                 $longlat_salida = explode(",", $valor['LongLat_Salida']);
                 $acciones_linea_pintar .= '<a href="https://www.google.com/maps/place/'.$longlat_salida[0].','.$longlat_salida[1].'" target="_blank"><img src="Img/UbicacionSalida.png" style="margin-left: 5px;"></a>';
-            }     
+            }
+            $color = '';   
+            if(str_contains($duracion,'Jornada')){
+                $color = 'color:Green;';
+            }
+            
             
             $listaJ .= '<tr>';
             $listaJ .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $dia. '<br><details><summary></summary>';
             //$listaJ .='<p><b>' . $hora . '</b><br>';
             $listaJ .= '<span class="descripcion_doc">'.$hora .'</span></p></details></div></td></b>';
-            $listaJ .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;"><b>'. $duracion.'</b>';
+            $listaJ .= '<td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;'.$color.'"><b>'. $duracion.'</b>';
             $listaJ .= '<div class="mt-1">' . $acciones_linea_pintar . '</div>';
             $listaJ .= '</div></td></tr>';
         }
@@ -1140,6 +1146,7 @@ function cargaFormularioDinamico(){
     $camposForm .= '<div class="row col-11 justify-content-center">';
     $camposForm .= '<button class="col-5 col-lg-3 offset-1 btn  mt-3" onclick="dibuja_pagina([0,3,0])"  onmouseover="this.style.backgroundColor='."'#d6d5d3'".'" onmouseout="this.style.backgroundColor='."'#ffffff'".'";><h3>Cancelar</h3></button>';
     $camposForm .= '<button class="col-5 col-lg-3 offset-1 btn  mt-3" onclick="" type="submit" style="color:#0265bd;" onmouseover="this.style.backgroundColor='."'#d6d5d3'".'" onmouseout="this.style.backgroundColor='."'#ffffff'".'";><h3>Guardar</h3></button>';
+    //$camposForm .= '<DIV>'.$valor['FechaInicio'].'</div>';
     //$camposForm .= '<button class="btn btn-primary" type="submit">Submit form</button>';
     $camposForm .= "</div><br>";
     $camposForm .= "</form></section></div></div></div>";
