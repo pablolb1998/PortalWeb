@@ -802,6 +802,7 @@ function DibujaLineas_PortalEmpleado(){
                 $descripcion = $valor["descripcion"];
                 $descripcion2 = $valor["descripcion2"];
                 $descripcion3 = '';
+                $descripcion4 = '';
                 
                 $color = '';
                 if(isset($valor["color"])){
@@ -809,6 +810,9 @@ function DibujaLineas_PortalEmpleado(){
                 }
                 if(isset($valor["descripcion3"])){
                     $descripcion3 =  $valor["descripcion3"];
+                }
+                if(isset($valor["descripcion4"])){
+                    $descripcion4 =  $valor["descripcion4"];
                 }
                 
                 $id = $valor["id"];
@@ -902,7 +906,7 @@ function DibujaLineas_PortalEmpleado(){
                 }
                 $listaDoc .='<summary></summary>';
                 $listaDoc .='<p> <span style="color:'.$color.';">' . $descripcion2 . '</span><br>';
-                $listaDoc .= $descripcion3 .'</p>';
+                $listaDoc .= $descripcion3 .'<br>'. $descripcion4.'</p>';
                 if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
                     $listaDoc .= '</details>';
                 }

@@ -351,7 +351,7 @@ function extraerDocPersonal_Masivo(){
     $DatosBD = array();
     //1 - Asistencias
         $sql1 = "SELECT IdPersonalAsistencia AS id,descripcion AS descripcion,Justificada AS descripcion2,FechaInicio AS descripcionLateral,FechaFin ,NumeroArchivos,color, tipo AS descripcion3,
-        FechaInicio,FechaFin
+        FechaInicio,FechaFin, duracion AS descripcion4
         FROM dbo.vw_PEAsistencias 
         WHERE IdPersonal = ?";
         $DatosBD = array();
@@ -413,7 +413,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //5 - Incidencias
-        $sql5 = "SELECT IdPersonalIncidencia AS id,TipoIncidencia AS descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,color,
+        $sql5 = "SELECT IdPersonalIncidencia AS id,TipoIncidencia AS descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,color,TipoIncidencia AS descripcion3,
         Fecha AS FechaInicio, Fecha AS FechaFin
         FROM dbo.vw_PEIncidencias
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
@@ -430,7 +430,7 @@ function extraerDocPersonal_Masivo(){
         }
 
     //6 - Material
-        $sql6 = "SELECT IdPersonalMaterial AS id,Material AS descripcion,Cantidad AS descripcion2,Fecha AS descripcionLateral, color,
+        $sql6 = "SELECT IdPersonalMaterial AS id,Material AS descripcion,Cantidad AS descripcion3,Fecha AS descripcionLateral, color,Validado AS descripcion2,
         Fecha AS FechaInicio, Fecha AS FechaFin
         FROM dbo.vw_PEMaterial
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
@@ -591,7 +591,7 @@ function exect_Insert_From_Dinamico($arrayValores){
             $tipoDoc = 0;
             switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
                 case 4.1:
-                    $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2,FechaInicio As descripcionLateral,FechaFin ,NumeroArchivos
+                    $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,tipo AS descripcion,Justificada AS descripcion2,FechaInicio As descripcionLateral,FechaFin ,NumeroArchivos,duracion AS descripcion3
                     FROM dbo.vw_PEAsistencias 
                     WHERE IdPersonal = ? ORDER BY IdPersonalAsistencia DESC" ;
                     $tipoDoc = 1;
@@ -629,7 +629,8 @@ function exect_Insert_From_Dinamico($arrayValores){
                     break;
                 case 4.9:
                 
-                    $sqlReturn = "SELECT IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcion2, Año AS descripcionLateral 
+                    $sqlReturn = "SELECT top 1 IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcionLateral, 'Año : ' + CAST(Año AS VARCHAR) AS descripcion2, color2 as color,
+                    FechaInicio,FechaFin
                     FROM dbo.vw_PEVacaciones
                     WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
                     $tipoDoc = 8;

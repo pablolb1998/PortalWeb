@@ -10,10 +10,10 @@ if(isset($_FILES["Archivo"])){
     }
 
     if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], $directorioDestino . $_FILES["Archivo"]["name"] )){
-        $externalContent = file_get_contents('https://api64.ipify.org?format=json');
-        $externalData = json_decode($externalContent);
-    
-        echo $externalData->ip.'/php/'.$directorioDestino.$_FILES["Archivo"]["name"];
+        // $externalContent = file_get_contents('https://api64.ipify.org?format=json');
+        // $externalData = json_decode($externalContent);
+        $ruta = 'http://www.areadecliente.de/prueba/PortalWeb/php/';
+        echo $externalData-> $ruta.$directorioDestino.$_FILES["Archivo"]["name"];
     } else {
         echo false;
     }
