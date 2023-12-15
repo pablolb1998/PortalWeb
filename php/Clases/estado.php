@@ -9,6 +9,9 @@ class Estado{
     //variables documentos
     public $tipo_documento;
     public $filtrado_estado;
+
+    public $nombreDocumentoPadre;
+
     //public $documentos = array();
     public $punteros;
     public $puntero_posicion;

@@ -97,6 +97,7 @@ class Controlador
                 $this -> miEstado -> archivostiposAccesos = extraerArchivosTiposAccesos();
                 $this -> miEstado -> linkDocumentoSubido = null;
                 $IdTipoApp = 33;
+                $this -> cargarDatosForm();
             }
             crearRegistroEntrada_SeguridadUnificada($this -> miEstado -> IdIdentidad,$IdTipoApp);
             return true;
@@ -201,6 +202,7 @@ class Controlador
                 $this -> miEstado -> Estado = $estadoAnterior;
             }
             //reinicializar variables
+            $this -> miEstado -> nombreDocumentoPadre = null;
             $this -> miEstado -> IdPropietario = null;
         }else{
             array_unshift($this -> miEstado -> EstadosAnteriores , $this -> miEstado -> Estado);
@@ -283,7 +285,7 @@ class Controlador
                     break;
                 case 4.9:
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
-                    
+                    $this -> miEstado -> acciones["desplegado"] = 1;
                     break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
@@ -555,6 +557,7 @@ class Controlador
         }elseif ($c === 4 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
         //navegacion del submenu y adicion de acciones
             //PORTAL EMPLEADO  la navegación Submenu
+            
             switch ($arrayDatos[0]) {   
                 case 4.1 :
                     $this -> miEstado -> IdTipoPropietario = 143;
@@ -593,6 +596,45 @@ class Controlador
             //indicar el propietario
             //$this -> reinicializarAccionesArchivos();
             $this -> miEstado -> IdPropietario = $arrayDatos[1];
+
+            switch ($this -> miEstado -> Estado) {
+                case 4.1 :
+                    $tipoDocf = 1;
+                    break;
+                case 4.3 :
+                    $tipoDocf = 2;
+                    break;
+                case 4.4 :
+                    $tipoDocf = 3;
+                    break;
+                case 4.5:
+                    $tipoDocf = 4;
+                    break;
+                case 4.6:
+                    $tipoDocf = 5;
+                    break;
+                case 4.7:
+                    $tipoDocf = 6;
+                    break;
+                case 4.8:
+                    $tipoDocf = 7;
+                    break;
+                case 4.9:
+                    $tipoDocf = 8;
+                    break;
+                case 7 :
+                    $tipoDocf = 4; 
+                    break;
+                default:
+                    $tipoDocf = 1;
+                    break;
+            }
+
+            $arrayDoc = array_values(array_filter($this -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
+                return $docF["tipoDocPortal"] == $tipoDocf
+                && $docF["id"] ==  $this -> miEstado -> IdPropietario;
+            }));
+            $this -> miEstado -> nombreDocumentoPadre = $arrayDoc[0]['descripcion'];
             $this -> navegarPestanas($arrayDatos[0]);
         }elseif($c == 4.4 && !empty($arrayDatos) && $arrayDatos[1] == 6 && $arrayDatos[2] != null ){
         //Navegar a la pestaña de firma desde documentos
@@ -630,7 +672,7 @@ class Controlador
                 }
                 
             }
-        }elseif($this -> miEstado -> Estado == 7  && $this -> miEstado -> tipo_App == 2 && !empty($arrayDatos) &&  $this -> miEstado -> cargarForm == 1){
+        //}elseif($this -> miEstado -> Estado == 7  && $this -> miEstado -> tipo_App == 2 && !empty($arrayDatos) &&  $this -> miEstado -> cargarForm == 1){
         // navegacion al formulario correspondiente desde la pestaña de calendario
 
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 1 && in_array($this -> miEstado -> Estado, array(3,4,5,6,7,8,9)) && $this -> miEstado -> tipo_App == 1){
