@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Portal Cliente</title>
   <!-- font awesome  -->
@@ -227,7 +227,7 @@ var calendar;
         dibuja_pagina(valArray);
     })
     
-    $(document).on("click","#SubmitModalForm",function(event){
+    function SubmitModalForm(tipoApp = 0){
         event.preventDefault();
         if ($(".formulario_modal :file").length > 0 && $(".formulario_modal :file")[0].files.length > 0) {
             var formulario = document.getElementsByClassName('formulario_modal');
@@ -245,9 +245,21 @@ var calendar;
                 // Manejar la respuesta del servidor si es necesario
                 if(xhr.responseText != false){
                     var IdAT = $("#TipoArchivo").val()
-                    let arrayValAdicional = {'Archivo' : xhr.responseText,
+                    let arrayValAdicional = {}
+                    if(tipoApp == 0){
+                        arrayValAdicional = {'Archivo' : xhr.responseText,
                                                 'Nombre' : nombreArchivo,
                                             'IdAT' : IdAT};
+                    }else{
+                        $(".formulario_modal :input").each(function(){
+                            if($(this).attr("id") != "Archivo"){
+                                arrayValAdicional.push($(this).val());
+                            } 
+                        })
+                        //alert(xhr.responseText);
+                        arrayValAdicional.push(xhr.responseText);
+                    }
+                    
                     $('#SubmitModalForm').modal('hide');
                     $('.modal-backdrop').hide();
                     $('body').css({
@@ -285,7 +297,68 @@ var calendar;
         }
         
         
-    })
+    }
+
+
+    // $(document).on("click","#SubmitModalForm",function(event){
+    //     event.preventDefault();
+    //     if ($(".formulario_modal :file").length > 0 && $(".formulario_modal :file")[0].files.length > 0) {
+    //         var formulario = document.getElementsByClassName('formulario_modal');
+    //         var archivo = document.getElementById('Archivo').files[0];
+    //         var nombreArchivo = document.getElementById('Archivo').files[0].name;
+    //         var formData = new FormData();
+            
+    //         formData.append('Archivo', archivo);
+    //         var xhr = new XMLHttpRequest();
+    //         xhr.open('POST', 'php/GestionSubidaArchivos.php', true);
+    //         xhr.onload = function() {
+
+    //         if (xhr.status === 200) {
+                
+    //             // Manejar la respuesta del servidor si es necesario
+    //             if(xhr.responseText != false){
+    //                 var IdAT = $("#TipoArchivo").val()
+    //                 let arrayValAdicional = {'Archivo' : xhr.responseText,
+    //                                             'Nombre' : nombreArchivo,
+    //                                         'IdAT' : IdAT};
+    //                 $('#SubmitModalForm').modal('hide');
+    //                 $('.modal-backdrop').hide();
+    //                 $('body').css({
+    //                 'overflow': 'auto',
+    //                 'padding-right': '0'
+    //                 });
+    //                 dibuja_pagina([0,3,arrayValAdicional]);
+    //             }else{
+    //                 alert("Error  0x80072f8f - 0x20000: Fallo al subir el archivo al servidor");
+    //             }
+    //         } else {
+    //             // Error en la solicitud
+    //             console.error('Error al subir el archivo.');
+    //         }
+    //         };
+
+    //         // Enviar el formulario con el archivo al servidor
+    //         xhr.send(formData);
+            
+    //     }else{
+    //         $('#SubmitModalForm').modal('hide');
+    //         $('.modal-backdrop').hide();
+    //         let valArray = [];
+    //         $(".formulario_modal :input").each(function(){
+    //             valArray.push($(this).val());
+    //         })
+
+    //         $('body').css({
+    //         'overflow': 'auto',
+    //         'padding-right': '0'
+    //         });
+            
+
+    //         dibuja_pagina([0,3,valArray]);
+    //     }
+        
+        
+    // })
 
     //Subir los datos del formulario dinamico
     $(document).on("submit",".formulario_Dinamico",function(event){
@@ -391,12 +464,7 @@ var calendar;
     //Manejo de la eolocalización
     function guardarJornada(){
         if (navigator.geolocation) {
-            try {
-                let localizacion = navigator.geolocation.getCurrentPosition(GestionaUbicacion);
-            } catch (error) {
-                dibuja_pagina([0,0]);
-            }
-            
+            let localizacion = navigator.geolocation.getCurrentPosition(GestionaUbicacion);
         }else{
             dibuja_pagina([0,0]);
         }
@@ -413,12 +481,15 @@ var calendar;
         
     }
     function CargarMapaFichaje(){
-        try{
+        if($("#map").length){
+            try{
             let localizacion = navigator.geolocation.getCurrentPosition(EditarPosicionMapa);
-        }catch(e){
-            $('#map').hide();
-            console.log(e);
+            }catch(e){
+                $('#map').hide();
+                console.log(e);
+            }
         }
+        
            
     }
     function EditarPosicionMapa(posicion){
@@ -438,7 +509,7 @@ var calendar;
         var marker = L.marker([latitud, longitud]).addTo(map);
          
     }
-    //funcion para llenar los modales con los datos correspondientes
+    //funcion para llenar los modales con los datos correspondientes del portal cliente
     function cargarModalValidacion(tipo,id,codigo){
         let txtTitulo;
         if(tipo == 0){
@@ -450,6 +521,10 @@ var calendar;
         }
         document.getElementById("CabeceraModalSolicitud").innerHTML = txtTitulo;
         $('#modalValidaciones').modal('show');
+        
+    }
+    function cargarModalFormularioDinamico(){
+        $('#modalFormularioDinamico').modal('show');
     }
 
     function cargarModalFirma(Id,TipoF,IdP,IdTp,IdS,IPc,BBDD){
@@ -538,7 +613,7 @@ var calendar;
 
     /***** Subir el archivo ******/
     $(document).on("change","#Archivo",function(event){
-        var maxSize = 2 * 1024 * 1024; // 5 MB (en bytes)
+        var maxSize = 10 * 1024 * 1024; // 5 MB (en bytes)
         if (this.files[0].size > maxSize) {
             // cambiar por nuestro modal
             alert('El archivo es demasiado grande. El tamaño máximo permitido es 2 MB.');
@@ -569,7 +644,7 @@ var calendar;
             </div>
           </div>
         </div>
-      </div>
+    </div>
 
     <!-- Modal para las firmas  -->
     <div class="modal fade" id="ModalFirma" tabindex="-1" aria-labelledby="CampoFirma" aria-hidden="true">
