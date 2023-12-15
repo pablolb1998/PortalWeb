@@ -43,18 +43,20 @@
         box-shadow: none;
         border: none;
     }
+}
 /* css para eliminar los margenes en movil de boostrap */
 
-        #no-margin {
-            margin: 0px !important;
-            
-        }
-        #no-padding{
-            padding: 0px !important;
-        }
-
+#no-margin {
+    margin-left: 0px !important;
+    margin-right: 0px !important;
     
 }
+#no-padding{
+    padding: 0px !important;
+}
+
+
+
 
 
 .c_img{
