@@ -245,7 +245,8 @@ var calendar;
                 // Manejar la respuesta del servidor si es necesario
                 if(xhr.responseText != false){
                     var IdAT = $("#TipoArchivo").val()
-                    let arrayValAdicional = {}
+                    let arrayValAdicional = []
+                    let RutaArchivo = '';
                     if(tipoApp == 0){
                         arrayValAdicional = {'Archivo' : xhr.responseText,
                                                 'Nombre' : nombreArchivo,
@@ -257,7 +258,7 @@ var calendar;
                             } 
                         })
                         //alert(xhr.responseText);
-                        arrayValAdicional.push(xhr.responseText);
+                        RutaArchivo = xhr.responseText;
                     }
                     
                     $('#SubmitModalForm').modal('hide');
@@ -266,7 +267,8 @@ var calendar;
                     'overflow': 'auto',
                     'padding-right': '0'
                     });
-                    dibuja_pagina([0,3,arrayValAdicional]);
+                    //alert([0,3,arrayValAdicional,RutaArchivo,nombreArchivo]);
+                    dibuja_pagina([0,3,arrayValAdicional,RutaArchivo,nombreArchivo]);
                 }else{
                     alert("Error  0x80072f8f - 0x20000: Fallo al subir el archivo al servidor");
                 }
@@ -292,7 +294,7 @@ var calendar;
             'padding-right': '0'
             });
             
-
+            
             dibuja_pagina([0,3,valArray]);
         }
         
@@ -401,7 +403,8 @@ var calendar;
                     })
                     //alert(xhr.responseText);
                     let arrayValAdicional = {'Archivo' : xhr.responseText};
-                    dibuja_pagina([0,3,valArray,arrayValAdicional]);
+                    alert([0,3,valArray,arrayValAdicional]);
+                    //dibuja_pagina([0,3,valArray,arrayValAdicional]);
                 }else{
                     alert("Error  0x80072f8f - 0x20000: Fallo al subir el archivo al servidor");
                 }
@@ -463,11 +466,11 @@ var calendar;
     }
     //Manejo de la eolocalización
     function guardarJornada(){
-        if (navigator.geolocation) {
-            let localizacion = navigator.geolocation.getCurrentPosition(GestionaUbicacion);
-        }else{
+        //if (navigator.geolocation) {
+          //  let localizacion = navigator.geolocation.getCurrentPosition(GestionaUbicacion);
+        //}else{
             dibuja_pagina([0,0]);
-        }
+        //}
         
     }
     function GestionaUbicacion(posicion) {
