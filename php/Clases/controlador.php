@@ -763,6 +763,21 @@ class Controlador
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 ){
         //portal del empleado guardar o cancelar en la pestaña de formulario
             $this -> miEstado -> camposFormularios = null;
+
+
+            if( $this -> miEstado -> Estado == 4.4 ){
+                $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
+                                                $this -> miEstado -> IdTipoPropietario,
+                                                $this -> miEstado -> IdPropietario,
+                                                $arrayDatos[2][0],
+                                                $arrayDatos[3],
+                                                $arrayDatos[4]);
+                 //$this -> subirArchivosServicioWeb($_SESSION["pinC"],$this -> miEstado -> IdTipoPropietario,$this -> miEstado -> IdPropietario,$arrayValores[4],$arrayValores[1],$nombreA);
+            }
+
+
+
+
             if($arrayDatos[2] != 0){
                 $arrayForm = array_filter($this -> miEstado -> formularios, function ($form) {
                     return $form["Estado"] == $this -> miEstado -> Estado;
@@ -775,7 +790,18 @@ class Controlador
                         $valorCampo = isset($campo["VariableAlmacenada"]) ? $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}  : $campo["ValorPorDefecto"];
                         if($valorCampo == "%now%"){
                             $valorCampo = date('Ymd H:i:s');
+                        }elseif($valorCampo == '%randmKey%'){
+                            $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                            $claveGenerada = '';
+
+                            for ($i = 0; $i < 9; $i++) {
+                                $claveGenerada .= $caracteres[rand(0, strlen($caracteres) - 1)];
+                            }
+                            $valorCampo =$claveGenerada;
                         }
+                        array_push($arrayValores,$valorCampo);
+                    }elseif($campo["TipoDatoHtml"] == "file"){
+                        $valorCampo = $arrayDatos[3];
                         array_push($arrayValores,$valorCampo);
                     }elseif($campo["Mostrar"] == 1 && $campo["ValorAdicional"] == null){
                         $valorCampo = array_shift($arrayDatos[2]);
@@ -797,18 +823,16 @@ class Controlador
              
                 $resultadoEjecucion = true;
 
-                if( $this -> miEstado -> Estado == 4.4 ){
-                    $temp = explode('/',$arrayValores[1]);
-                    $nombreA = end($temp);
-                    $this -> subirArchivosServicioWeb($_SESSION["pinC"],$this -> miEstado -> IdTipoPropietario,$this -> miEstado -> IdPropietario,$arrayValores[4],$arrayValores[1],$nombreA);
+               if($arrayIntermedio["Instruccion"] != ""){
+                $resultadoEjecucion = exect_Insert_From_Dinamico($arrayValores);
+               }
+                
+                if($resultadoEjecucion == false ){
+                    $msgError = "Ha ocurrido un error al insertal el registro";
                 }else{
-                    $resultadoEjecucion = exect_Insert_From_Dinamico($arrayValores);
-                    if($resultadoEjecucion == false ){
-                        $msgError = "Ha ocurrido un error al insertal el registro";
-                    }else{
-                        array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
-                    }
+                    array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
                 }
+                
                 
             }
             $this -> miEstado -> cargarForm = 0;
