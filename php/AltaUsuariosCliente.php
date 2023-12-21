@@ -14,32 +14,51 @@ if($_COOKIE['pinCPortalE'] == 123654){
 
 if(isset($_POST['arrayDatos'])){
     $arratLogin = $_POST['arrayDatos'];
-    $UsuarioCreado = execSeguridadUnificada_Identidad_Insert($Ip,$datosBBDD[0]["BBDD"],$arratLogin[0],$arratLogin[2],$arratLogin[3],$arratLogin[1]);
-        if($UsuarioCreado != null && $UsuarioCreado != 0 ){
-            
-            //link de pruebas
-            $link = 'http://www.areadecliente.de/php/ActivadorUsuariosClientes.php?a='.$UsuarioCreado.'&c='.$_COOKIE['pinCPortalE'].'&b='.$arratLogin[2];
-            //$link = 'localhost/portaldecliente/php/ActivadorUsuariosCliente.php?a='.$UsuarioCreado.'&c='.$Ip.'&d='. $datosBBDD[0]["BBDD"].'&b='.$arratLogin[2];
-           // echo $link;
-            
-            $plantillaHtml = '../html/plantillas/plantilla_mailCreacion.html';
-            $file = fopen($plantillaHtml, "r");
-            $filesize = filesize($plantillaHtml);
-            $plantilla = fread($file, $filesize);
-            $htmlCorreo = str_replace("%LinkActivacionPortal%",$link,$plantilla);
-            //echo $htmlCorreo;
-            if(execute_EnviarMail_CreacionUsuario($arratLogin[2],$htmlCorreo)){
-                echo "Se ha generado el usuario correctamente, por favor revise su correo.";
-            }else{
-                echo "No se pudo crear el usuario especificado";
-            }
-            
+    $UsuarioCreado ;
+    $saludo = '';
+    $linkBase = '';
+    $email = '';
+    $asuntoCorreo= '';
+    if(count($arratLogin) == 5){
+        $asuntoCorreo= 'Activación usuario Area de cliente';
+        $email = $arratLogin[2];
+        $UsuarioCreado = execSeguridadUnificada_Identidad_Insert($Ip,$datosBBDD[0]["BBDD"],$email,$arratLogin[3],$arratLogin[1],$arratLogin[0],3);
+        $saludo = 'Bienvenido a nuestra área de cliente';
+        $linkBase = 'http://www.areadecliente.de/php/ActivadorUsuariosClientes.php?';
+        
+    }else{
+        $asuntoCorreo= 'Activación usuario portal del cliente';
+        $email = $arratLogin[1];
+        $UsuarioCreado = execSeguridadUnificada_Identidad_Insert($Ip,$datosBBDD[0]["BBDD"],$email,$arratLogin[2],$arratLogin[0],null,1);
+        $saludo = 'Bienvenido a nuestro Portal del empleado';
+        $linkBase = 'http://www.tuportal.de/empleado/php/ActivadorUsuariosClientes.php?';
+    }
+
+    if($UsuarioCreado != null && $UsuarioCreado != 0 ){
+        
+        //link de pruebas
+        $link = $linkBase.'a='.$UsuarioCreado.'&c='.$_COOKIE['pinCPortalE'].'&b='.$arratLogin[2];
+        //$link = 'localhost/portaldecliente/php/ActivadorUsuariosCliente.php?a='.$UsuarioCreado.'&c='.$Ip.'&d='. $datosBBDD[0]["BBDD"].'&b='.$arratLogin[2];
+        // echo $link;
+        
+        $plantillaHtml = '../html/plantillas/plantilla_mailCreacion.html';
+        $file = fopen($plantillaHtml, "r");
+        $filesize = filesize($plantillaHtml);
+        $plantilla = fread($file, $filesize);
+        $htmlCorreo = str_replace(["%LinkActivacionPortal%",'%msgSaludo%'],[$link,$saludo],$plantilla);
+        //echo $htmlCorreo;
+        if(execute_EnviarMail_CreacionUsuario($email,$htmlCorreo,$asuntoCorreo)){
+            echo "Se ha generado el usuario correctamente, por favor revise su correo.";
         }else{
-            
             echo "No se pudo crear el usuario especificado";
         }
+        
+    }else{
+        
+        echo "No se pudo crear el usuario especificado";
+    }
     
 }else{
-    echo "Fallo al recibir los datos en el servidor";
+    echo "Se ha perdido la conexión, vuelva a intentarlo mas tarde.";
 }
 ?>

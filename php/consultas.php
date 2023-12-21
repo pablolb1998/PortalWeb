@@ -576,8 +576,8 @@ function exect_Insert_From_Dinamico($arrayValores){
         }
         
         $sql .=$sql2;
-        // print_r($sql);
-        //  print_r($arrayValores);
+        //print_r($sql);
+        //print_r($arrayValores);
         $parm = $arrayValores;
         $stmt = sqlsrv_prepare($conn, $sql, $parm);
         if (!sqlsrv_execute($stmt)) {
@@ -601,23 +601,24 @@ function exect_Insert_From_Dinamico($arrayValores){
                     $sqlReturn = "SELECT TOP 1 IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
                     IdTipoPropietario,IdPropietario,Documento, Firmable ,Firmado
                     FROM dbo.vw_PEArchivosPersonal 
-                    WHERE idpersonal = ? ORDER BY fechainicio DESC" ;
+                    WHERE idpersonal = ? ORDER BY IdArchivo DESC" ;
                     $tipoDoc = 3;
                     break;
                     
                     break;
                 case 4.5:
                     
-                    $sqlReturn = "SELECT TOP 1 IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral 
+                    $sqlReturn = "SELECT TOP 1  IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3
                     FROM dbo.vw_PEFormacion
                     WHERE IdPersonal = ? ORDER BY IdPersonalFormacion DESC" ;
                     $tipoDoc = 4;
                     break;
-                
+                    
                 case 4.6:
-                    $sqlReturn = "SELECT TOP 1 IdPersonalIncidencia AS id,desripcion AS descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,TipoIncidencia AS descripcion3
+                    $sqlReturn = "SELECT TOP 1 IdPersonalIncidencia AS id,descripcion AS descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,color,TipoIncidencia AS descripcion3,
+                    Fecha AS FechaInicio, Fecha AS FechaFin
                     FROM dbo.vw_PEIncidencias
-                    WHERE IdPersonal = ? ORDER BY IdPersonalIncidencia DESC";
+                    WHERE IdPersonal = ?  ORDER BY IdPersonalIncidencia DESC";
                     
                     $tipoDoc = 5;
                     break;
@@ -625,7 +626,7 @@ function exect_Insert_From_Dinamico($arrayValores){
                     $sqlReturn = "SELECT TOP 1 IdPersonalMaterial AS id,Material AS descripcion,Cantidad AS descripcion3,Fecha AS descripcionLateral, color,Validado AS descripcion2,
                     Fecha AS FechaInicio, Fecha AS FechaFin
                     FROM dbo.vw_PEMaterial
-                    WHERE IdPersonal = ? ORDER BY Fecha DESC";
+                    WHERE IdPersonal = ? ORDER BY IdPersonalMaterial DESC";
                     
                     $tipoDoc = 6;
                     break;
@@ -634,7 +635,7 @@ function exect_Insert_From_Dinamico($arrayValores){
                     $sqlReturn = "SELECT top 1 IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcionLateral,  Estado2 AS descripcion2, color2 as color,'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
                     FechaInicio,FechaFin
                     FROM dbo.vw_PEVacaciones
-                    WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
+                    WHERE IdPersonal = ? ORDER BY IdPersonalVacaciones DESC";
                     $tipoDoc = 8;
                     break;
                 default:
@@ -703,15 +704,16 @@ function comprobarBD($c){
 //     }
 //     sqlsrv_close( $conn );
 // }
-
-function execSeguridadUnificada_Identidad_Insert($Ip,$bd,$NumeroCliente,$Email,$Contrasena,$cif){
+//$Ip,$bd,$NumeroCliente,$Email,$Contrasena,$Ndoc = null, $tipoUsr = null
+function execSeguridadUnificada_Identidad_Insert($Ip,$bd,$Email,$Contrasena,$Ndoc = null,$NumeroCliente = null, $tipoUsr = null){
     $conn = ConexionBD($Ip,$bd);
     $sql = "EXECUTE SeguridadUnificada_Usuario_Insert_From_PC @NumeroCliente = ?,
-    @cif = ?,
+    @Ndoc = ?,
     @usuario = ?,
-    @Contrasena = ?";  
+    @Contrasena = ?,
+    @TipoUsu = ?";  
     $DatosBD = array();
-    $parm = array($NumeroCliente,$cif,$Email,$Contrasena) ;
+    $parm = array($NumeroCliente,$Ndoc,$Email,$Contrasena,$tipoUsr) ;
 
     $stmt = sqlsrv_query($conn, $sql, $parm);
     if ($stmt === false) {
@@ -836,7 +838,7 @@ function execute_EnviarMail_CreacionUsuario($destinatario,$html,$Asunto = 'Activ
     }
     sqlsrv_close( $conn );
 }
-
+    
 function PEfirmaInsert($IdDoc,$IdTipoDoc,$NArchivo,$IdA,$LinkA,$IP,$BBDD){
     $conn = ConexionBD($IP,$BBDD);
     $sql = " INSERT INTO dbo.PEFirma

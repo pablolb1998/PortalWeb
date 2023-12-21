@@ -378,9 +378,9 @@ function pinta_contenido($estado){
     } else {
         
         if($_SESSION['Controlador'] -> miEstado -> tipo_App == 1){
-            $filetext = str_replace(["%NombrePortal%","%TipoUsuario%","%Displaycrear%"],['Área del Cliente','cliente',''],$filetext);   
+            $filetext = str_replace(["%NombrePortal%","%TipoUsuario%","%Linkcrear%"],['Área del Cliente','cliente','alta_Usuario'],$filetext);   
         }else{
-            $filetext = str_replace(["%NombrePortal%","%TipoUsuario%","%Displaycrear%"],['Área del Empleado','empleado','display:none;'],$filetext);
+            $filetext = str_replace(["%NombrePortal%","%TipoUsuario%","%Linkcrear%"],['Área del Empleado','empleado','alta_Empleado'],$filetext);
         }
         if(isset($_SESSION["imgLogo"])){
             $filetext = str_replace("%logoImg%",$_SESSION["imgLogo"],$filetext);
@@ -1072,7 +1072,7 @@ function cargarJornadaHistorico(){
         return $listaJ;
 }
 
-//pintar los formularios dinamicamente
+//pintar los formularios dinamicamente (deprecated)
 function cargaFormularioDinamico(){
 
     //extraer los campos dinamicamente del JSON
@@ -1180,7 +1180,7 @@ function cargaFormularioDinamico(){
 }
 
 
-
+//Pintar los formularios modales dinamicamente
 function cargaFormularioDinamico2(){
     $TituloModal = '';
     switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
@@ -1227,6 +1227,13 @@ function cargaFormularioDinamico2(){
         });
     }
     $camposForm = '';
+
+    //generacion del script
+    $scriptForm = "<script  type='text/javascript'> 
+                    function comprobarModalForm(){
+                        var FechaActual = new Date().toISOString().split('T')[0];
+                        var condicion = true;
+                    ";
     /////////////////////
     $camposForm .= '<div class="modal fade" id="modalFormularioDinamico" tabindex="-1" aria-labelledby="modalDinamico" aria-hidden="true">
             <div class="modal-dialog">
@@ -1248,8 +1255,8 @@ function cargaFormularioDinamico2(){
                           // print_r($campo);'.($campo["Mostrar"] == 1 ? "" : 'display:none;').'
                           
                           $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="'.($campo["Mostrar"] == 1 ? "" : 'display:none;').'">';
-                          $camposForm .= '<label for="'.$campo["Nombre_campo"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
-                          $camposForm .= '<input type="'.$campo["TipoDatoHtml"].'" class="form-control border-secondary" id = "'.$campo["Nombre_campo"].'" aria-describedby="'.$campo["Nombre_campo"].'"'
+                          $camposForm .= '<label for="'.$campo["Variable"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
+                          $camposForm .= '<input type="'.$campo["TipoDatoHtml"].'" class="form-control border-secondary" id = "'.$campo["Variable"].'" aria-describedby="'.$campo["Nombre_campo"].'"'
                           .($campo["VariableAlmacenada"] != null ? ' value = "'. $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}.'"' : ' value = "'. $campo["ValorPorDefecto"].'"').' '.($campo["Required"] == 1 ? "required" : "").'>';
                           //$camposForm .= '<div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>''
                           $camposForm .= '</div><br>';
@@ -1259,8 +1266,8 @@ function cargaFormularioDinamico2(){
                               return $valorDropdown["IdTipoDefinicion"] == $campo["IdTipoDefinicion"];
                           });
                           $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
-                          $camposForm .= '<label for="'.$campo["Nombre_campo"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
-                          $camposForm .= '<select class="form-select border-secondary" aria-label="'.$campo["Nombre_campo"].'" id="'.$campo["Nombre_campo"].'">';
+                          $camposForm .= '<label for="'.$campo["Variable"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
+                          $camposForm .= '<select class="form-select border-secondary" aria-label="'.$campo["Nombre_campo"].'" id="'.$campo["Variable"].'">';
                           $existeSelecion = 0;
                           foreach($arraydropdownfiltrado as $valorSelecionable){
                               switch ($existeSelecion){
@@ -1276,8 +1283,8 @@ function cargaFormularioDinamico2(){
                           $camposForm .= '</select></div><br>';
                       }elseif($campo["Variable"] == "IdArchivosTipo" && $campo["Mostrar"] == 1 && $campo["SelectorDesplegable"] == 1){
                           $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
-                          $camposForm .= '<label for="'.$campo["Nombre_campo"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
-                          $camposForm .= '<select class="form-select border-secondary" aria-label="'.$campo["Nombre_campo"].'" id="'.$campo["Nombre_campo"].'">';
+                          $camposForm .= '<label for="'.$campo["Variable"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
+                          $camposForm .= '<select class="form-select border-secondary" aria-label="'.$campo["Nombre_campo"].'" id="'.$campo["Variable"].'">';
                           $existeSelecion = 0;
                           foreach($arraydropdown as $valorSelecionable){
                               switch ($existeSelecion){
@@ -1292,16 +1299,34 @@ function cargaFormularioDinamico2(){
                           }
                           $camposForm .= '</select></div><br>';
                       }
-                      
+                    
+                    if(isset($campo["Condicion"]) && $campo["Condicion"]!= '' ){
+                        $scriptForm .= 'var '.$campo["Variable"].' = document.getElementById("'.$campo["Variable"].'").value;';
+                        $scriptForm .='
+                        if ('.$campo["Condicion"].'){
+                            var condicion = false;
+                        }
+                    ';
+                    }
               
                   }
-                 
+                  
+                  $scriptForm .= '  
+                  alert(condicion);
+                  if(condicion){
+                    //SubmitModalForm(1);
+                    
+                  }
+                  
+                }
+
+                                </script>';
                     
                   $camposForm .= '</form>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                  <button type="button" class="btn btn-primary" id="SubmitModalForm" onclick="SubmitModalForm(1)">Guardar</button>
+                  <button type="button" class="btn btn-primary" id="SubmitModalForm" onclick="SubmitModalForm()">Guardar</button>
                 </div>
               </div>
             </div>
@@ -1313,7 +1338,8 @@ function cargaFormularioDinamico2(){
             $camposForm = str_replace("%tipoForm%","class=' formulario_Dinamico col-10 col-md-12 mt-3'",$camposForm);
             
         }
-    return $camposForm;
+
+    return $scriptForm.$camposForm;
 }
 
 
@@ -1410,3 +1436,5 @@ function cargarSeleccionDocumentosCalendario(){
     return $seccionbtn;
     
 }
+
+
