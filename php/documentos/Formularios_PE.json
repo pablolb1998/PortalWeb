@@ -42,14 +42,14 @@
                         "OUTPUT" : 0,
                         "TipoDatoBBDD" : "datetime",
                         "Mostrar" : 1,
-                        "Nombre_campo" : "Fecha",
+                        "Nombre_campo" : "Fecha Inicio",
                         "TipoDatoHtml": "datetime-local",
                         "SelectorDesplegable": 0,
                         "VariableAlmacenada" : null,
                         "ValorPorDefecto" : null,
                         "ValorAdicional": null,
                         "Required": 1,
-                        "MsgError":""
+                        "MsgError":"Fecha necesaria"
                     },
                     {
                         "Variable" : "FechaFin",
@@ -57,14 +57,15 @@
                         "OUTPUT" : 0,
                         "TipoDatoBBDD" : "datetime",
                         "Mostrar" : 1,
-                        "Nombre_campo" : "Fecha",
+                        "Nombre_campo" : "Fecha Fin",
                         "TipoDatoHtml": "datetime-local",
                         "SelectorDesplegable": 0,
                         "VariableAlmacenada" : null,
                         "ValorPorDefecto" : null,
                         "ValorAdicional": null,
                         "Required": 1,
-                        "MsgError":""
+                        "MsgError":"Fecha Fin no puede ser anterior a Fecha Inicio.",
+                        "Condicion": "$('#FechaFin').val() > $('#FechaInicio').val() "
                     },
                     {
                         "Variable" : "AsistenciaIncidencia",
@@ -94,7 +95,7 @@
                         "ValorPorDefecto" : null,
                         "ValorAdicional": null,
                         "Required": 1,
-                        "MsgError":""
+                        "MsgError":"El campo no puede estar vacío."
                     },
                     {
                         "Variable" : "IdTipo",
@@ -177,7 +178,7 @@
                     "ValorPorDefecto" : null,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "MsgError":""
+                    "MsgError":"Fecha necesaria"
                 },
                 {
                     "Variable" : "Curso",
@@ -192,7 +193,7 @@
                     "ValorPorDefecto" : null,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "MsgError":""
+                    "MsgError":"El campo no puede estar vacío."
                 },
                 {
                     "Variable" : "horas",
@@ -207,7 +208,8 @@
                     "ValorPorDefecto" : 0,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "MsgError":""
+                    "MsgError":"La duración ha de ser mayor que 0.",
+                    "Condicion": "$('#horas').val() > 0"
                 }
             ]        
         },
@@ -260,7 +262,7 @@
                     "ValorPorDefecto" : "null",
                     "ValorAdicional": null,
                     "Required": 1,
-                    "MsgError":""
+                    "MsgError":"Fecha necesaria"
                 },
                 {
                     "Variable" : "FechaFin",
@@ -293,7 +295,7 @@
                     "MsgError":""
                 },
                 {
-                    "Variable" : "Incidencia",
+                    "Variable" : "descripcion",
                     "IdTipoDefinicion" : null,
                     "OUTPUT" : 0,
                     "TipoDatoBBDD" : "Varchar",
@@ -305,7 +307,7 @@
                     "ValorPorDefecto" : null,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "MsgError":""
+                    "MsgError":"El campo no puede estar vacío."
                 },
                 {
                     "Variable" : "IdTipo",
@@ -388,7 +390,7 @@
                     "ValorPorDefecto" : "null",
                     "ValorAdicional": null,
                     "Required": 0,
-                    "MsgError":""
+                    "MsgError":"Fecha necesaria"    
                 },
                 {
                     "Variable" : "Material",
@@ -403,7 +405,7 @@
                     "ValorPorDefecto" : null,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "MsgError":""
+                    "MsgError":"El campo no puede estar vacío."
                 },
                 {
                     "Variable" : "Cantidad",
@@ -418,7 +420,8 @@
                     "ValorPorDefecto" : 0,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "MsgError":""
+                    "MsgError":"La cantidad ha de ser mayor que 0.",
+                    "Condicion": "$('#Cantidad').val() > 0"
                 }
             ]        
         },
@@ -584,8 +587,7 @@
                     "ValorPorDefecto" : null,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "Condicion": "FechaInicio <= FechaActual",
-                    "MsgError":"El inicio tiene que ser superior a la fecha actual "
+                    "MsgError":"Fecha Inicio necesaria."
                 },
                 {
                     "Variable" : "FechaFin",
@@ -600,7 +602,7 @@
                     "ValorPorDefecto" : null,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "Condicion": "FechaFin < FechaInicio ",
+                    "Condicion": "$('#FechaFin').val() > $('#FechaInicio').val() ",
                     "MsgError":"La fecha de fin no puede ser menor que la fecha de inicio"
                 },
                 {
@@ -628,10 +630,11 @@
                     "TipoDatoHtml": "number",
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
-                    "ValorPorDefecto" : 2023,
+                    "ValorPorDefecto" : 0,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "MsgError":""
+                    "MsgError":"El Año Imputación ha de tener maximo 1 año de diferencia con el año actual.",
+                    "Condicion": "($('#Año').val() <=  anoActual +1 && $('#Año').val()  >= anoActual -1)  "
                 },
                 {
                     "Variable" : "IdIdentidadInsert",
