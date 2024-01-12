@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Portal Cliente</title>
+  <title>Área del Cliente</title>
   <!-- font awesome  -->
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
     <!--Librerias de bootstrap-->
@@ -32,6 +32,13 @@
     <!-- Libreria de Openmaps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"    crossorigin=""></script>
+
+    <!-- librerias para los estilos -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.label/dist/leaflet.label.js"></script> -->
+
+
     <!-- <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
@@ -59,6 +66,7 @@ var eventos = [];
 var signaturePad;
 var cookiesAceptadas;
 var calendar;
+var map2;
     function dibuja_pagina(arrayDatos = []){
         if(cookiesAceptadas == null){
             if(verificarCookiesAceptadas()){
@@ -72,7 +80,7 @@ var calendar;
                 data:{ arrayDatos : arrayDatos},    
                 url:   'php/index.php', 
                 type:  'POST', 
-                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve.
+                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve.Área
                     //alert(response)
                     try {
                     let respuesta = JSON.parse(response);
@@ -229,10 +237,12 @@ var calendar;
     
     function SubmitModalForm(tipoApp = 0){
         event.preventDefault();
+        let campoRequeridoVacio = 0;
         if ($(".formulario_modal :file").length > 0 && $(".formulario_modal :file")[0].files.length > 0) {
             var formulario = document.getElementsByClassName('formulario_modal');
-            var archivo = document.getElementById('Archivo').files[0];
-            var nombreArchivo = document.getElementById('Archivo').files[0].name;
+            var inputArchivo = $(".formulario_modal :file")[0];
+            var archivo  = inputArchivo.files[0];
+            var nombreArchivo = archivo.name;
             var formData = new FormData();
             
             formData.append('Archivo', archivo);
@@ -253,9 +263,9 @@ var calendar;
                                             'IdAT' : IdAT};
                     }else{
                         $(".formulario_modal :input").each(function(){
-                            if($(this).attr("id") != "Archivo"){
+                            if($(this).prop("type") !== "file"){
                                 arrayValAdicional.push($(this).val());
-                            } 
+                            }
                         })
                         //alert(xhr.responseText);
                         RutaArchivo = xhr.responseText;
@@ -286,16 +296,40 @@ var calendar;
             $('.modal-backdrop').hide();
             let valArray = [];
             $(".formulario_modal :input").each(function(){
+                let fechaActual = new Date();
+                let anoActual = fechaActual.getFullYear();
+                let classComprobacion = '#'+ $(this).prop('id') +'_condiciones'; 
+                let comprobacion = $(classComprobacion).text();
+                if(!comprobacion){
+                    comprobacion = 'true';
+                }
+                
+                //alert(comprobacion)
+                if($(this).prop('required') && ($(this).val() == null || $(this).val() =='' || !eval(comprobacion)) ){
+                    $(this).addClass("border-danger");
+                    let classInput =  '#'+ $(this).prop('id') +'_msgError'; 
+                    $(classInput).removeClass('d-none');
+                    
+                    campoRequeridoVacio = 1;
+                }else{
+                    $(this).removeClass("border-danger");
+                    let classInput =  '#'+ $(this).prop('id') +'_msgError'; 
+                    $(classInput).addClass('d-none');
+                }
                 valArray.push($(this).val());
             })
 
             $('body').css({
-            'overflow': 'auto',
-            'padding-right': '0'
+                'overflow': 'auto',
+                'padding-right': '0'
             });
             
+            if(campoRequeridoVacio == 1){
+                
+            }else{
+                dibuja_pagina([0,3,valArray]);
+            }
             
-            dibuja_pagina([0,3,valArray]);
         }
         
         
@@ -466,12 +500,16 @@ var calendar;
     }
     //Manejo de la eolocalización
     function guardarJornada(){
-        //if (navigator.geolocation) {
-          //  let localizacion = navigator.geolocation.getCurrentPosition(GestionaUbicacion);
-        //}else{
+        if (navigator.geolocation) {
+            let localizacion = navigator.geolocation.getCurrentPosition(GestionaUbicacion,errorUbicacion);
+        }else{
             dibuja_pagina([0,0]);
-        //}
+        }
         
+    }
+    function  errorUbicacion(error){
+        console.error('Error al obtener la ubicación:', error);
+        dibuja_pagina([0, 0]);
     }
     function GestionaUbicacion(posicion) {
         try {
@@ -512,6 +550,33 @@ var calendar;
         var marker = L.marker([latitud, longitud]).addTo(map);
          
     }
+
+    function mostrarMapaJornadafichaje(latitud,longitud){
+
+        // let m = document.getElementById('mapafichaje');
+        // m.innerHTML = '';
+        $('#ModalMapaJornada').modal('show');
+        if (!map2) {
+            map2 = L.map('mapafichaje');    
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map2);
+        }
+        map2.setView([latitud, longitud], 14)
+        
+        if (map2.marker) {
+            map2.removeLayer(map2.marker);
+        }
+        map2.marker = L.marker([latitud, longitud]).addTo(map2);
+        
+        //map2.marker.bindPopup(texto).openPopup();
+        //map2.marker2.bindPopup("entrada/salida").openPopup();
+        setTimeout(function () {
+            map2.invalidateSize();
+        }, 200);
+    }
+    
+    
+    
+
     //funcion para llenar los modales con los datos correspondientes del portal cliente
     function cargarModalValidacion(tipo,id,codigo){
         let txtTitulo;
@@ -616,10 +681,10 @@ var calendar;
 
     /***** Subir el archivo ******/
     $(document).on("change","#Archivo",function(event){
-        var maxSize = 10 * 1024 * 1024; // 5 MB (en bytes)
+        var maxSize = 5 * 1024 * 1024; // 5 MB (en bytes)
         if (this.files[0].size > maxSize) {
             // cambiar por nuestro modal
-            alert('El archivo es demasiado grande. El tamaño máximo permitido es 2 MB.');
+            alert('El archivo es demasiado grande. El tamaño máximo permitido es 5 MB.');
             this.value = ''; 
         }
     });
