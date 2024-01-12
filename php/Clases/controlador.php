@@ -332,11 +332,11 @@ class Controlador
     function descargaArchivoServicoWeb($IdP,$nombre_archivo,$tipoDoc,$OI = null){
         $nombre_archivo = "";
         if($arrayDatos[3] == "OPDF"){
-            $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$arrayDatos[2][1].'&IdPropietario='.$arrayDatos[2][0];
-            $nombre_archivo = $arrayDatos[2][2];
+            $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$OI.'&IdPropietario='.$IdP;
+            $nombre_archivo = $nombre_archivo;
         }else{
-            $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin=".$_SESSION["pinC"].'&IdArchivo='.$arrayDatos[2][0];
-            $nombre_archivo = $arrayDatos[2][1];
+            $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin=".$_SESSION["pinC"].'&IdArchivo='.$IdP;
+            $nombre_archivo = $nombre_archivo;
         }
         
 
