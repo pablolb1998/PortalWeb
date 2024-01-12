@@ -37,7 +37,7 @@ if(isset($_POST['arrayDatos'])){
     if($UsuarioCreado != null && $UsuarioCreado != 0 ){
         
         //link de pruebas
-        $link = $linkBase.'a='.$UsuarioCreado.'&c='.$_COOKIE['pinCPortalE'].'&b='.$arratLogin[2];
+        $link = $linkBase.'a='.$UsuarioCreado.'&c='.$_COOKIE['pinCPortalE'].'&b='.$email;
         //$link = 'localhost/portaldecliente/php/ActivadorUsuariosCliente.php?a='.$UsuarioCreado.'&c='.$Ip.'&d='. $datosBBDD[0]["BBDD"].'&b='.$arratLogin[2];
         // echo $link;
         
@@ -45,7 +45,7 @@ if(isset($_POST['arrayDatos'])){
         $file = fopen($plantillaHtml, "r");
         $filesize = filesize($plantillaHtml);
         $plantilla = fread($file, $filesize);
-        $htmlCorreo = str_replace(["%LinkActivacionPortal%",'%msgSaludo%'],[$link,$saludo],$plantilla);
+        $htmlCorreo = str_replace(["%LinkActivacionPortal%",'%msgSaludo%','%usuario%'],[$link,$saludo,$email],$plantilla);
         //echo $htmlCorreo;
         if(execute_EnviarMail_CreacionUsuario($email,$htmlCorreo,$asuntoCorreo)){
             echo "Se ha generado el usuario correctamente, por favor revise su correo.";

@@ -187,7 +187,7 @@ function extraerDoc_parcial($tipoDoc = null,$ids = null,$c = null,$fecha = '1998
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $fechaFormateada = date('Ymd H:i:s', strtotime($fecha));
     //Estraer los documentos
-    $sql = "SELECT id,codigo,Fecha,NombreComercial,Descripcion,Estado,tipo,PinDescargas,OrigenImpresion,importe,PinDescargas,color
+    $sql = "SELECT id,codigo,Fecha,NombreComercial,Descripcion,Estado,tipo,PinDescargas,OrigenImpresion,importe,PinDescargas,color,contadorDoc
     FROM     
     vw_PortalCliente_Documentos
     WHERE tipo=? AND IdSociedad=? AND IdCliente=? AND Fecha> ?

@@ -349,8 +349,27 @@ function pinta_contenido($estado){
                     $filetext = str_replace('%BotonretomarJornada%','none',$filetext);
                     break;
             }
-
+            
             $filetext .= cargarJornadaHistorico();
+
+            //pintar el modal del fichaje
+            $filetext .= '<div class="modal fade" id="ModalMapaJornada" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="TituloError">Mapa fichaje</h5>
+                </div>
+                <div class="modal-body" id="mapaF">
+                <div class="col-12 " id="mapafichaje" style="height: 250px;"></div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button> 
+                  <!-- <button type="button" class="btn btn-primary">Aceptar</button>-->
+                </div>
+              </div>
+            </div>
+        </div>';
+
             return $filetext;
 
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 0){
@@ -380,7 +399,7 @@ function pinta_contenido($estado){
         if($_SESSION['Controlador'] -> miEstado -> tipo_App == 1){
             $filetext = str_replace(["%NombrePortal%","%TipoUsuario%","%Linkcrear%"],['Área del Cliente','cliente','alta_Usuario'],$filetext);   
         }else{
-            $filetext = str_replace(["%NombrePortal%","%TipoUsuario%","%Linkcrear%"],['Área del Empleado','empleado','alta_Empleado'],$filetext);
+            $filetext = str_replace(["%NombrePortal%","%TipoUsuario%","%Linkcrear%"],['Portal del Empleado','empleado','alta_Empleado'],$filetext);
         }
         if(isset($_SESSION["imgLogo"])){
             $filetext = str_replace("%logoImg%",$_SESSION["imgLogo"],$filetext);
@@ -432,7 +451,9 @@ function muestra_documentos(){
         $acciones_linea .= '<a onclick="dibuja_pagina([0,4,[%id%,%Origen_impresion%,'."'%codigo%.pdf'".'],'."'OPDF'".'])" ><img class="pdf_icono" src="Img/descarga_generica.png"></a>';
     }
     if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
-        $acciones_linea .= '<a onclick="dibuja_pagina([9,%id%])" style="all: initial;cursor: pointer;"><img class="pdf_icono" src="Img/Documentos2.png"></a>';
+        
+        $acciones_linea .= '<a onclick="dibuja_pagina([9,%id%])" style="all: initial;cursor: pointer;"><img class="pdf_icono" src="%ImgArchivos%"></a>';
+        
     }
     if($_SESSION["Controlador"] -> miEstado -> acciones["adjunto"] == 1 ){
         $acciones_linea .= '<a onclick="dibuja_pagina([0,4,[%id%,'."'%codigo%'".'],'."'OA'".'])" style="all: initial;cursor: pointer;"><img class="pdf_icono" src="Img/descarga_generica.png"></a>';
@@ -569,8 +590,18 @@ function muestra_documentos(){
                 }else{
                     $listaDoc .= "<tr data-tipo-servicio='$estado' id='$estado'>";
                 }
+                $imgRutaCarpeta = '';
+                if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
+                    $imgRutaCarpeta = 'Img/Documentos2.png';
+                    //print_r($carperta);
+                    if(isset($valor["contadorDoc"]) && $valor["contadorDoc"]>0){
+                        $imgRutaCarpeta = 'Img/Documentos_verde2.png';
+                    }
+                }
 
-                $acciones_mostrar = str_replace(['%id%','%Origen_impresion%','%codigo%'], [$id, $Origen_impresion,$codigo], $acciones_linea);
+
+
+                $acciones_mostrar = str_replace(['%id%','%Origen_impresion%','%codigo%','%ImgArchivos%'], [$id, $Origen_impresion,$codigo,$imgRutaCarpeta], $acciones_linea);
 
 
                 $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $codigo . ' - ' . $newDate . '<br>';
@@ -985,8 +1016,8 @@ function cargarJornadaHistorico(){
     $arrayJ = $_SESSION["Controlador"] -> miEstado -> HistoricoJornada;
     $arrayJ = array_values($arrayJ);
     $listaJ = "";
-    $listaJ .= "<div class='row h-75 justify-content-center mt-5'>";
-    $listaJ .= '<div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">';
+    $listaJ .= "<div class='row h-100 justify-content-center mt-5 mt-md-5' id='no-margin'>";
+    $listaJ .= '<div class=" col-12 col-md-9"  id="no-padding">';
     $listaJ .= '<div class="card shadow-2-strong shadow pb-5 col-12">';
     if(count($arrayJ)>0){
         
@@ -1041,11 +1072,13 @@ function cargarJornadaHistorico(){
             $acciones_linea_pintar = '';
             if(isset( $valor['LongLat_Entrada'])){
                 $longlat_entrada = explode(",", $valor['LongLat_Entrada']);
-                $acciones_linea_pintar .= '<a href="https://www.google.com/maps/place/'.$longlat_entrada[0].','.$longlat_entrada[1].'" target="_blank"><img src="Img/UbicacionEntrada.png"></a>';
+                $acciones_linea_pintar .= '<button id="flecha_volver" onclick="mostrarMapaJornadafichaje('.$longlat_entrada[0].','.$longlat_entrada[1].')" class="align-self-end"><img src="Img/UbicacionEntrada.png" alt="BotonVerMapaJornada"></button>';
+                //$acciones_linea_pintar .= '<a href="https://www.google.com/maps/place/'.$longlat_entrada[0].','.$longlat_entrada[1].'" target="_blank"><img src="Img/UbicacionEntrada.png"></a>';
             }   
             if(isset( $valor['LongLat_Salida'])){
                 $longlat_salida = explode(",", $valor['LongLat_Salida']);
-                $acciones_linea_pintar .= '<a href="https://www.google.com/maps/place/'.$longlat_salida[0].','.$longlat_salida[1].'" target="_blank"><img src="Img/UbicacionSalida.png" style="margin-left: 5px;"></a>';
+                $acciones_linea_pintar .= '<button id="flecha_volver" onclick="mostrarMapaJornadafichaje('.$longlat_salida[0].','.$longlat_salida[1].')" class="align-self-end"><img src="Img/UbicacionSalida.png" alt="BotonVerMapaJornada"></button>';
+                //$acciones_linea_pintar .= '<a href="https://www.google.com/maps/place/'.$longlat_salida[0].','.$longlat_salida[1].'" target="_blank"><img src="Img/UbicacionSalida.png" style="margin-left: 5px;"></a>';
             }
             $color = '';   
             if(str_contains($duracion,'Jornada')){
@@ -1061,7 +1094,7 @@ function cargarJornadaHistorico(){
             $listaJ .= '<div class="mt-1">' . $acciones_linea_pintar . '</div>';
             $listaJ .= '</div></td></tr>';
         }
-        $listaJ .= "</tbody></table></span>";
+        $listaJ .= "</tbody></table>";
      
  
         
@@ -1229,11 +1262,11 @@ function cargaFormularioDinamico2(){
     $camposForm = '';
 
     //generacion del script
-    $scriptForm = "<script  type='text/javascript'> 
-                    function comprobarModalForm(){
-                        var FechaActual = new Date().toISOString().split('T')[0];
-                        var condicion = true;
-                    ";
+    // $scriptForm = "<script  type='text/javascript'> 
+    //                 function comprobarModalForm(){
+    //                     var FechaActual = new Date().toISOString().split('T')[0];
+    //                     var condicion = true;
+    //                 ";
     /////////////////////
     $camposForm .= '<div class="modal fade" id="modalFormularioDinamico" tabindex="-1" aria-labelledby="modalDinamico" aria-hidden="true">
             <div class="modal-dialog">
@@ -1258,7 +1291,12 @@ function cargaFormularioDinamico2(){
                           $camposForm .= '<label for="'.$campo["Variable"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
                           $camposForm .= '<input type="'.$campo["TipoDatoHtml"].'" class="form-control border-secondary" id = "'.$campo["Variable"].'" aria-describedby="'.$campo["Nombre_campo"].'"'
                           .($campo["VariableAlmacenada"] != null ? ' value = "'. $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}.'"' : ' value = "'. $campo["ValorPorDefecto"].'"').' '.($campo["Required"] == 1 ? "required" : "").'>';
-                          //$camposForm .= '<div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>''
+                          //tremenda fumada
+                          if(isset($campo["Condicion"])&& $campo["Condicion"] != null){
+                            $camposForm .='<div class=" d-none" id="'.$campo["Variable"].'_condiciones">'.$campo["Condicion"].'</div>';
+                          }
+                          
+                          $camposForm .='<div class="text-danger d-none" id="'.$campo["Variable"].'_msgError">'.$campo["MsgError"].'</div>';
                           $camposForm .= '</div><br>';
                       }elseif($campo["Mostrar"] == 1 && $campo["SelectorDesplegable"] == 1 && isset($campo["IdTipoDefinicion"]) && $campo["Variable"] != "IdArchivosTipo"){
                           //filtrar el select
@@ -1300,33 +1338,33 @@ function cargaFormularioDinamico2(){
                           $camposForm .= '</select></div><br>';
                       }
                     
-                    if(isset($campo["Condicion"]) && $campo["Condicion"]!= '' ){
-                        $scriptForm .= 'var '.$campo["Variable"].' = document.getElementById("'.$campo["Variable"].'").value;';
-                        $scriptForm .='
-                        if ('.$campo["Condicion"].'){
-                            var condicion = false;
-                        }
-                    ';
-                    }
+                //     if(isset($campo["Condicion"]) && $campo["Condicion"]!= '' ){
+                //         $scriptForm .= 'var '.$campo["Variable"].' = document.getElementById("'.$campo["Variable"].'").value;';
+                //         $scriptForm .='
+                //         if ('.$campo["Condicion"].'){
+                //             var condicion = false;
+                //         }
+                //     ';
+                     }
               
-                  }
+                //   }
                   
-                  $scriptForm .= '  
-                  alert(condicion);
-                  if(condicion){
-                    //SubmitModalForm(1);
+                //   $scriptForm .= '  
+                //   alert(condicion);
+                //   if(condicion){
+                //     //SubmitModalForm(1);
                     
-                  }
+                //   }
                   
-                }
+                // }
 
-                                </script>';
+                //                </script>';
                     
                   $camposForm .= '</form>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                  <button type="button" class="btn btn-primary" id="SubmitModalForm" onclick="SubmitModalForm()">Guardar</button>
+                  <button type="button" class="btn btn-primary" id="SubmitModalForm" onclick="SubmitModalForm(1)">Guardar</button>
                 </div>
               </div>
             </div>
@@ -1339,7 +1377,7 @@ function cargaFormularioDinamico2(){
             
         }
 
-    return $scriptForm.$camposForm;
+    return $camposForm;
 }
 
 
