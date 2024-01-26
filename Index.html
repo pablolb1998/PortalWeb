@@ -47,6 +47,9 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/es.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.js"></script>
+    <!-- librerias de los graficos/chars -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <!-- link de css -->
     <link rel="stylesheet" href="css/header.css">
   <!--Funciones-->
@@ -68,6 +71,7 @@ var cookiesAceptadas;
 var calendar;
 var map2;
     function dibuja_pagina(arrayDatos = []){
+        //alert(arrayDatos);
         if(cookiesAceptadas == null){
             if(verificarCookiesAceptadas()){
                 cookiesAceptadas = true;
@@ -81,18 +85,19 @@ var map2;
                 url:   'php/index.php', 
                 type:  'POST', 
                 success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve.Área
-                    //alert(response)
+                    
                     try {
                     let respuesta = JSON.parse(response);
                     
                         //Pintar de forma normal y corriente
                         if(respuesta[2] == 0){
-                           
                             seccionBody = document.getElementById("cuerpo");
                             seccionBody.innerHTML = respuesta[0];
-                           //  
-                            if(respuesta[3] != null && respuesta[3] != 0){
-                                
+                           // usar el array de respuesta para cargar los datos de las distintas pestañas
+                            if(respuesta[3] != null && respuesta[3] != 0 && respuesta[4]==2){
+                                //alert(respuesta[3]) 
+                                generarGrafico_Barras(respuesta[3]);
+                            }else if(respuesta[3] != null && respuesta[3] != 0){
                                 for(let evento of respuesta[3]){
                                     let e = {title: evento[0],
                                             start: evento[1],
@@ -104,7 +109,6 @@ var map2;
                                 }
                                
                                 dibuja_calendario();
-                                
                             }
                             CargarMapaFichaje();
                             //  CargarMapaFichaje();
@@ -178,17 +182,77 @@ var map2;
             calendar.removeAllEvents();
             calendar.addEventSource(filteredEvents);
     }
-    //subir formularios Sociedades
-    // $(document).on("submit",".formulario_sociedades",function(event){
-    //     event.preventDefault();
-    //     let valArray = [];
-    //     $(".formulario_sociedades :input").each(function(){
-    //         valArray.push($(this).val());
-    //     })
-    //      //alert(valArray);
-    //     dibuja_pagina(valArray);
-    // });
-    //Funciones de la politica de cookies
+
+    function generarGrafico_Barras(AniosVacaciones,AnioSelecionado = null) {
+            //  const anioActual = new Date().getFullYear();
+            // //let anioS = 2024;
+            // let datosParaAnio;
+            // // if(AnioSelecionado == null){
+            // //     datosParaAnio = AniosVacaciones.find(([anio]) => anio == 2023);
+            // //     anioS = 2023;
+            // //     //AnioSelecionado = datosParaAnio[0];
+            // // }
+            // var ctx = document.getElementById('nav-graficos').getContext('2d');
+            // var dias;
+            // if(datosParaAnio != null){
+            //     dias = [datosParaAnio[1] == null ? 0 : datosParaAnio[1]
+            //             , datosParaAnio[2] == null ? 0 : datosParaAnio[2]
+            //             , datosParaAnio[3] == null ? 0 : datosParaAnio[3]
+            //             , datosParaAnio[4] == null ? 0 : datosParaAnio[4]
+            //             ];
+            // }else{
+
+            //     dias = [0,0,0,0];
+            // }
+           
+            // //dias = [0,0,0,0];
+            // var myChart = new Chart(ctx, {
+            //     type: 'bar',
+            //     data: {
+            //         labels: ['Días Totales', 'Días Disfrutados', 'Días Concedidos', 'Dias Pendientes'],
+            //         datasets: [{
+            //             label:  'Vacaciones de '+ anioS,
+            //             data: dias,
+            //             backgroundColor: [
+            //                 'rgba(139, 69, 19, 0.2)', // Color para días totales marron
+            //                 'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
+            //                 'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
+            //                 'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
+            //             ],
+            //             borderColor: [
+            //                 'rgba(139, 69, 19, 0.2)', // Color para días totales marron
+            //                 'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
+            //                 'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
+            //                 'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
+            //             ],
+            //             borderWidth: 1
+            //         }]
+            //     },
+            //     options: {
+            //         animation: {
+            //             duration: 0 // Duración de la animación en milisegundos (0 para desactivar)
+            //         },
+            //         responsive: true,
+            //         scales: {
+            //             y: {
+            //                 beginAtZero: true
+            //             }
+            //         },
+                    
+            //     }
+            // });
+            // $('#nav-graficos').css('display','');
+            // // FILTRO DEL CALENDARIO            ];
+            // $('#myTable tr').filter(function() {
+            //    return $(this).data('nombre') !== "Año : "+anioS;
+            // }).addClass('d-none');
+        }
+
+
+
+
+
+
     function aceptarCookies() {
     // Establecer una cookie llamada "cookiesAceptadas" con un valor de "true"
         document.cookie = "cookiesPortalEsquioAceptadas=true; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
@@ -207,7 +271,20 @@ var map2;
     return false; // La cookie no está establecida
   }
 
+    function cargarModalDetalles(labels,valores){
+        let campos = labels;
+        let len = campos.length;
+        let htmlModal=''
+        for(let i = 0; i < len; i++){
+           
+            htmlModal += '<div class="mb-3"> <label for="message-text" class="col-form-label" style="font-size:13px;">'+campos[i]+':</label><p class="form-control" >'+valores[i]+'</p></div>';
+        }
+        let cuerpo = document.getElementById("msgError");
+        cuerpo.innerHTML = htmlModal;
 
+        $('#popupError').modal('show');
+        
+    }
 
 
     $(document).on("submit", ".formulario_sociedades", function (event) {
