@@ -4,6 +4,9 @@
     all: unset;
     cursor: pointer;
 }
+#nav-graficos{
+    min-height: 700px;
+}
     
 #flecha_volver:focus {
     outline: revert;
@@ -11,6 +14,7 @@
 
 #flecha_volver:hover {
     transform: scale(1.4);
+    
 }
 
 /* Estilos iconos */
@@ -19,6 +23,7 @@
     width: 1.1%;
     float: right;
     min-width: 2.5em;
+    margin-left: 0.75em;
 }
 
 .bolsa_dinero{
@@ -79,6 +84,10 @@
     margin: 0 auto;
 }
 
+.PestanaMenu {
+    color:#757575;
+    font-weight: 500;
+}
 
 #cookie-modal {
     display: none;
