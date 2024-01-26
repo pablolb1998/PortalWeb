@@ -186,14 +186,26 @@ function compruebaPersonasContaco(){
 function extraerDoc_parcial($tipoDoc = null,$ids = null,$c = null,$fecha = '19981201 00:00:00'){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $fechaFormateada = date('Ymd H:i:s', strtotime($fecha));
-    //Estraer los documentos
-    $sql = "SELECT id,codigo,Fecha,NombreComercial,Descripcion,Estado,tipo,PinDescargas,OrigenImpresion,importe,PinDescargas,color,contadorDoc
-    FROM     
-    vw_PortalCliente_Documentos
-    WHERE tipo=? AND IdSociedad=? AND IdCliente=? AND Fecha> ?
-    ORDER BY Fecha DESC, Codigo DESC;";
     $ListaDoc = array();
-    $parm = array($tipoDoc,$ids, $c,$fechaFormateada);
+    $sql;
+    $parm;
+    //Estraer los documentos
+    // if($tipoDoc == 4){
+    //     // tareas del cliente
+    //     $sql = "SELECT IdProyecto as id,Estado,Codigo as codigo,ContadorTareas,ContadorTareasAbiertas,FechaCreacion,Nombre_estado,4 as tipo 
+    //     FROM vw_PWProyectosClientes 
+    //     WHERE IdCliente = ? AND FechaCreacion> ?
+    //     ORDER BY FechaCreacion DESC;";
+    //      $parm = array($_SESSION["Controlador"] -> miEstado -> IdCliente,$fechaFormateada);
+    // }else{
+        $sql = "SELECT id,codigo,Fecha,NombreComercial,Descripcion,Estado,tipo,PinDescargas,OrigenImpresion,importe,PinDescargas,color,contadorDoc,Descripcion2
+        FROM     
+        vw_PortalCliente_Documentos
+        WHERE tipo=? AND IdSociedad=? AND IdCliente=? AND Fecha> ?
+        ORDER BY Fecha DESC, Codigo DESC;";
+        
+        $parm = array($tipoDoc,$ids, $c,$fechaFormateada);
+    //}
     $stmt = sqlsrv_query($conn, $sql, $parm);
     if ($stmt === false){
         die(print_r(sqlsrv_errors(), true));
@@ -284,6 +296,37 @@ function ExtraerDocumento_Por_CIF($Id,$Tipo,$cif,$Ip,$bd){
     
 }
 
+//extraer el contador de documentos del cliente
+function extraerRecursosProyectos($idp = null){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    //Comprueba los datos de la tabla de clientes
+    $sql = "EXECUTE up_proyectos_FasesResumen_Select_PW  @IdProyecto=?;";
+    $ListaPT = array();
+    $ListaRec = array();
+    $parm = array($idp);
+    $stmt = sqlsrv_prepare($conn, $sql, $parm);
+    //print_r($stmt);
+    if (!sqlsrv_execute($stmt)) {
+        die(print_r(sqlsrv_errors(), true));
+        return false;
+        die;
+    } else {
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($ListaPT, $row);
+        }
+        sqlsrv_next_result($stmt);
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($ListaRec, $row);
+        }
+        print_r($ListaPT);
+        print_r('/r/n');
+        print_r($ListaRec);
+        return array($ListaRec,$ListaPT);
+    }
+    sqlsrv_close( $conn );
+    
+    
+}
 //funciones de extraer datos de la jornada, actualizar para juntarlos
 function comprueba_jornada_personal(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
@@ -477,6 +520,22 @@ function extraerDocPersonal_Masivo(){
                 array_push($DatosBD, $row);
             }
         }
+    //8_5 resumen anual vacaciones
+        $sql8_5 = "SELECT IdPersonal,DiasTotales,DiasDisfrutados,DiasDenegados,DiasConcedidos,DiasPendientes,Año
+        FROM dbo.vw_PEVacacionesResumenAnual
+        WHERE IdPersonal = ? ORDER BY Año DESC";
+        $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
+        //$parm = array($IdCliente);
+        $stmt = sqlsrv_query($conn,$sql8_5,$parm);
+        if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }else{
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $row["tipoDocPortal"] = 8.5;
+                array_push($DatosBD, $row);
+            }
+        }
+
    
    
     return $DatosBD;
