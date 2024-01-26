@@ -254,6 +254,9 @@ class Controlador
         $this -> miEstado -> acciones["modalValidaciones"] = 0;
         $this -> miEstado -> acciones["modalSubirDoc"] = 0;
         $this -> miEstado -> acciones["desplegado"] = 0;
+        $this -> miEstado -> acciones["modalVisualizar"] = 0;
+        $this -> miEstado -> acciones["VisualizarDetalles"] = 0;
+        $this -> miEstado -> acciones["modificar"] = 0;
         if($this -> miEstado -> tipo_App == 2){
             //Portal del empleado
             switch ($this -> miEstado -> Estado) {   
@@ -261,24 +264,29 @@ class Controlador
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["desplegado"] = 1;
+                    $this -> miEstado -> acciones["modalVisualizar"] = 1;
                     break;
                 case 4.3 :
                     $this -> miEstado -> acciones["archivos"] = 1;
                     break;
                 case 4.4 :
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    $this -> miEstado -> acciones["modalVisualizar"] = 1;
                     break;
                 case 4.5:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    $this -> miEstado -> acciones["modalVisualizar"] = 1;
                     break;
                 case 4.6:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    $this -> miEstado -> acciones["modalVisualizar"] = 1;
                     break;
                 case 4.7:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    $this -> miEstado -> acciones["modalVisualizar"] = 1;
                     break;
                 case 4.8:
                     $this -> miEstado -> acciones["archivos"] = 1;
@@ -286,6 +294,7 @@ class Controlador
                 case 4.9:
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["desplegado"] = 1;
+                    $this -> miEstado -> acciones["modalVisualizar"] = 1;
                     break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
@@ -298,18 +307,20 @@ class Controlador
                     $this -> miEstado -> acciones["descarga"] = 1;
                     $this -> miEstado -> acciones["desplegado"] = 1;
                     break;
+                case 7 :
+                    $this -> miEstado -> acciones["VisualizarDetalles"] = 1;
+                    break;
                 case 8 :
                     $this -> miEstado -> acciones["modalValidaciones"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["archivos"] = 1;
-                    $this -> miEstado -> acciones["desplegado"] = 1;
+                    $this -> miEstado -> acciones["modalVisualizar"] = 1;
                     $this -> miEstado -> IdTipoPropietario = null;
                     break;
                 case 9 :
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["modalSubirDoc"] = 1;
                     $this -> miEstado -> acciones["adjunto"] = 1;
-                    
                     $this -> miEstado -> IdTipoPropietario = 2;
                     break;
                 default:
@@ -329,6 +340,7 @@ class Controlador
         $response = file_get_contents($url);
         return true;
     }
+
     function descargaArchivoServicoWeb($IdP,$nombre_archivo,$tipoDoc,$OI = null){
         $nombre_archivo = "";
         if($arrayDatos[3] == "OPDF"){
@@ -371,6 +383,7 @@ class Controlador
     // optimizar el navegar pestañas
     function generarContenido($arrayDatos = array()){
         $arrayAuxiliarHtml = array();
+        $accionJs = null;
         $msgError = "" ;
         $abrirNuebaPestaña = 0;
         $c = $this -> miEstado -> Estado;   
@@ -491,6 +504,7 @@ class Controlador
             $this -> navegarPestanas($arrayDatos[0]);
         }elseif($c == 9 && !empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2]) && $this -> miEstado -> tipo_App ==  1){
         //guardar el archivo
+                    
                 $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
                                                     2,
                                                     $this -> miEstado -> IdPropietario,
@@ -499,7 +513,14 @@ class Controlador
                                                     $arrayDatos[2]['Nombre']);
                 $this -> miEstado -> ArchivosDocumento = extraerArchivosCliente_Documento();
                 $msgError = 'Documento adjuntado con exito.';
-          
+        }elseif($c === 7 && !empty($arrayDatos) && $arrayDatos[0] == 7.1  && $arrayDatos[0] != 0 && $this -> miEstado -> tipo_App == 1){
+            // navegar a la pestaña de detalles del proytecto
+                $this -> miEstado -> IdPropietario = $arrayDatos[1];
+                //print_r(extraerRecursosProyectos($arrayDatos[1]));
+                $this -> miEstado -> datosProyecto = extraerRecursosProyectos($arrayDatos[1]);
+                //$this -> navegarPestanas(7.1);
+                
+                
         }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
         //PORTAL EMPLEADO la navegación Menu principal 
             $nav = null;
@@ -523,10 +544,10 @@ class Controlador
                                 $fi;
                                 $ff;
                                 try{
-                                   $fi = ($documento["FechaInicio"] ? $documento["FechaInicio"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
-                                   $ff = ($documento["FechaFin"] ? $documento["FechaFin"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
+                                    $fi = ($documento["FechaInicio"] ? $documento["FechaInicio"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
+                                    $ff = ($documento["FechaFin"] ? $documento["FechaFin"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
                                 }catch (e){
-            
+                                    
                                 }
                                 if($ff && $fi){
                                     $dc = array($documento["descripcion"],
@@ -584,6 +605,16 @@ class Controlador
                 case 4.9:
                     //Vacaciones de personal
                     $this -> miEstado -> IdTipoPropietario = 146;
+                    $accionJs = 2;
+                    if(!isset($this -> miEstado -> anoFiltroVacaciones)){
+                        $this -> miEstado -> anoFiltroVacaciones = date("Y");
+                    }
+                    foreach($this -> miEstado -> Documentos as $documento){
+                        if($documento["tipoDocPortal"] == 8.5){
+                            array_push($arrayAuxiliarHtml,array($documento['Año'],$documento['DiasTotales'],$documento['DiasDisfrutados'],$documento['DiasConcedidos'],$documento['DiasPendientes']));
+                        }
+                    }
+                    //print_r($arrayAuxiliarHtml);
                     break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
@@ -640,7 +671,7 @@ class Controlador
         //Navegar a la pestaña de firma desde documentos
             $this -> miEstado -> IdDocumentoPadre = $arrayDatos[2];
             //$this -> miEstado -> cargarFormFirma = 1;
-           
+
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == 0 ){
         //Volver a la anterior pestaña
             $this -> navegarPestanas(-1);
@@ -766,13 +797,13 @@ class Controlador
 
 
             if( $this -> miEstado -> Estado == 4.4 ){
+               
                 $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
                                                 $this -> miEstado -> IdTipoPropietario,
                                                 $this -> miEstado -> IdPropietario,
                                                 $arrayDatos[2][0],
                                                 $arrayDatos[3],
                                                 $arrayDatos[4]);
-                 //$this -> subirArchivosServicioWeb($_SESSION["pinC"],$this -> miEstado -> IdTipoPropietario,$this -> miEstado -> IdPropietario,$arrayValores[4],$arrayValores[1],$nombreA);
             }
 
 
@@ -858,7 +889,7 @@ class Controlador
             $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario;
         }
         
-        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml);
+        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml,$accionJs);
         
     }
 }
