@@ -16,9 +16,6 @@ $nombre_cliente;
 // } 
 // print_r(getenv('CABECERA'));
 // $headertext =  getenv('CABECERA');
-    
-
-
 
 function pinta_contenido($estado){
     
@@ -122,7 +119,7 @@ function pinta_contenido($estado){
         case 4.9:
             $titulo = "Vacaciones";
             $cabecera = "../html/header.html";
-            $filename = "../html/documentos.html";
+            $filename = "../html/vacacionesTabs.html";
             break;    
         case 5:
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
@@ -179,11 +176,6 @@ function pinta_contenido($estado){
                     $titulo = "Proyecto %NombreProyecto%";
                     $cabecera = "../html/header.html";
                     $filename = "../html/tareasFasesDetalle.html";
-                    break;
-                case 2:
-                    $titulo = "Mi calendario";
-                    $filename = "../html/documentos.html";
-                    $cabecera = "../html/header.html";
                     break;
             }
         break;
@@ -286,8 +278,15 @@ function pinta_contenido($estado){
             }
             $filetext = str_replace('<span id="filtros_dinamicos">',cargaFiltros(),$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicafiltros()',$filetext);
-            return $filetext.muestra_documentos();
+            
+            return str_replace('%LineasE%',muestra_documentos(),$filetext);
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7.1 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
+            $idpt = $_SESSION["Controlador"] -> miEstado -> IdPropietario;
+            $nombreP =  array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($elemento) use ($idpt) {
+                return $elemento['id'] == $idpt && $elemento['tipo'] == 4;
+            });
+            $nombreP = array_values($nombreP);
+            $filetext = str_replace('%NombreProyecto%',$nombreP[0]['Descripcion'],$filetext);
             return pinta_TareasRecursos_Cliente($filetext);
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 2 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
             // elegir la pestaña de la jornad++++a correspondiente switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
@@ -329,11 +328,12 @@ function pinta_contenido($estado){
         }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 && !in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(4.9) ) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Pestañas de navegacion
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
-            return $filetext.DibujaLineas_PortalEmpleado();
+            $filetext = str_replace('%LineasE%',DibujaLineas_PortalEmpleado(),$filetext);
+            return   $filetext;
             
         }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(4.9) ) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
-            return $filetext.DibujaPestanaVacaciones_Empleado();
+            return DibujaPestanaVacaciones_Empleado($filetext);
         //}elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Generar los formularios
             //return $filetext.cargaFormularioDinamico();
@@ -470,7 +470,7 @@ function muestra_documentos(){
     $acciones_linea = '';
     $acciones_globales = '';
     if($_SESSION["Controlador"] -> miEstado -> acciones["descarga"] == 1 ){
-        $acciones_linea .= '<a onclick="dibuja_pagina([0,4,[%id%,%Origen_impresion%,'."'%codigo%.pdf'".'],'."'OPDF'".'])" ><img class="pdf_icono" src="Img/descarga_generica.png"></a>';
+        $acciones_linea .= '<a onclick="dibuja_pagina([0,4,[%id%,%Origen_impresion%,'."'%codigo%.pdf'".'],'."'OPDF'".'])" ><img class="pdf_icono" src="Img/descarga_pdf.png"></a>';
     }
     if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
         
@@ -567,6 +567,7 @@ function muestra_documentos(){
                 $tipoDocf = 0;
                 break;
         }
+        
         // funcion para aplicar un filtro a cada elemento del array
             $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
                 return $docF["tipo"] == $tipoDocf;
@@ -611,13 +612,13 @@ function muestra_documentos(){
                 $newDate = $valor['Fecha'] -> format('d/m/Y');
                 $estado = $valor["Estado"];
                 $color = $valor["color"];
-
+                $codigo2 ='';
                 if($tipoDocf == 4){
-                    $codigo = $descripcion;
+                    $codigo2 = $descripcion;
                     $importe = $newDate;
                     $descripcion = $valor["Descripcion2"];
                 }else{
-                    $codigo .= ' - ' . $newDate;
+                    $codigo2 = $codigo.' - ' . $newDate;
                 }
                 //optimizar/cambiar
                 if (strlen($descripcion) <= 0) {
@@ -644,7 +645,7 @@ function muestra_documentos(){
 
                 $acciones_mostrar = str_replace(['%id%','%Origen_impresion%','%codigo%','%ImgArchivos%','%LabelMostrar%','%ValorMostar%'], [$id, $Origen_impresion,$codigo,$imgRutaCarpeta,"['Documento','Estado','Descripción']","['".$codigo . " - " . $newDate."','".$estado."','".$descripcion."']"], $acciones_linea);
                 //$listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $codigo . ' - ' . $newDate . '<br>';
-                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' .$codigo . '<br>';
+                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' .$codigo2 . '<br>';
                 if(isset($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"]) && $_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
                     $listaDoc .= '<details>';
                     
@@ -758,7 +759,7 @@ function muestra_documentos(){
                     $listaDoc .= "<tr data-tipo-servicio='$id' id='$id'>";
                 }
 
-                $acciones_mostrar = str_replace(['%id%','%codigo%'], [$id,$descripcion], $acciones_linea);;
+                $acciones_mostrar = str_replace(['%id%','%codigo%'], [$id,$descripcion], $acciones_linea);
 
 
                 $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador">' . $descripcion . '<br>';
@@ -788,7 +789,61 @@ function muestra_documentos(){
 }
 
 function pinta_TareasRecursos_Cliente($html){
+    $pestana1 = '';
+    $pestana2 = '';
+    $fases = $_SESSION["Controlador"] -> miEstado -> datosProyecto[0];
+    if(count($fases)>0){
+        $padre=0;
+        for($dc = 0; $dc < count($fases) ; $dc++ ){
+            
+            $offset = substr_count($fases[$dc]['DireccionArbol'], '#')-1;
+            if($offset > 1){
+                $pestana1 .= '<div class="collapse multi-collapse show" id="multiCollapse'.$padre.'">';
+                //$pestana1 .= '<div class="text-decoration-none" style="margin-left:'. 4*$offset.'em;"><img src="./Img/flechaArbol.png" height="25">'. $fases[$dc]['DireccionArbolNombre'].'</div>'; 
+                $pestana1 .= '<div class="text-decoration-none">'. $fases[$dc]['DireccionArbolNombre'].'</div>'; 
+                $pestana1 .= '</div>';
+            }else{
+                $padre +=1;
+                //$pestana1 .= '<div  data-bs-toggle="collapse" href="#multiCollapse'.$padre.'" role="button" aria-expanded="false" aria-controls="multiCollapse'.$padre.'"
+                //class="text-decoration-none" style="margin-left:'. 4*$offset.'em;"> '.$fases[$dc]['Nombre'].'</div>'; 
+                $pestana1 .= '<div  data-bs-toggle="collapse" href="#multiCollapse'.$padre.'" role="button" aria-expanded="false" aria-controls="multiCollapse'.$padre.'"
+                class="text-decoration-none" "> '.$fases[$dc]['DireccionArbolNombre'].'</div>'; 
+            }
+            
+            
+        }
+        
+    }else{
+        $pestana1 .= '<div class="d-flex justify-content-center mt-5 mb-5"><h6> No hay fases asignadas. </h6></div>';
+    }
+    $recursos = $_SESSION["Controlador"] -> miEstado -> datosProyecto[1];
+    $pestana2 .=  "<table class='table table-bordered-bottom' id='cuerpo'>";
+    $pestana2 .=  "<tbody id='myTable'>";
+    $pestana2 .= '<thead><tr><th scope="col" class="text-center">Tipo</th>
+    <th scope="col" class="text-center">Cantidad T.</th>
+    <th scope="col" class="text-center">Precio T.</th>
+      <th scope="col" class="text-center"></th>
+      <th scope="col" class="text-center">Cantidad</th>
+      <th scope="col" class="text-center">Precio</th>
+    </tr>
+  </thead>';
+
+    if(count($recursos)>0){
+        for($dc = 0; $dc < count($recursos) ; $dc++ ){
+            $pestana2 .= '<tr><td scope="col" class="text-center">'.$recursos[$dc]['Tipo'].'</td>
+            <td scope="col" class="text-center">'.$recursos[$dc]['NumeroTotal'].'</td>
+            <td scope="col" class="text-center">'.$recursos[$dc]['PrecioTotal'].'</td>
+            <td scope="col" class="text-center">'.$recursos[$dc]['TotalTexto'].'</td>
+            <td scope="col" class="text-center">'.$recursos[$dc]['NumeroHechas'].'</td>
+            <td scope="col" class="text-center">'.$recursos[$dc]['NumeroTotal'].'</td>
+            </tr>';
+        }
+        $pestana2 .= "</tbody></table></span>";
+    }else{
+        $pestana2 .= '<div class="d-flex justify-content-center mt-5 mb-5"><h6> No hay Documentos </h6></div>';
+    }
     
+    $html = str_replace(['%FasesArbol%','%GastosResumen%'], [$pestana1,$pestana2], $html);
     return $html;
 }
 
@@ -823,12 +878,13 @@ function DibujaLineas_PortalEmpleado(){
             $acciones_globales .= cargaFormularioDinamico2();
         }
         if($_SESSION["Controlador"] -> miEstado -> Estado == 4.4){
-            $acciones_linea = '<a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin='.$_SESSION["pinC"].'&IdArchivo=%IdProp%" target="_blank">
-            <img class="pdf_icono" src="%imgTipoArchivo%"></a>';
+            //$acciones_linea = '<a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin='.$_SESSION["pinC"].'&IdArchivo=%IdProp%" target="_blank">
+            //<img class="pdf_icono" src="%imgTipoArchivo%"></a>';
+            $acciones_linea .= '<a onclick="dibuja_pagina([0,11,[%id%,'."'%codigo%'".'],'."'O'".'])" ><img class="pdf_icono" src="%imgTipoArchivo%"></a>';
         }
         
         
-      
+        
         switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
             case 4.1 :
                 $tipoDocf = 1;
@@ -867,6 +923,7 @@ function DibujaLineas_PortalEmpleado(){
         $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
             return $docF["tipoDocPortal"] == $tipoDocf;
         });
+        
         //print_r($arrayDoc);
         //print_r($_SESSION["Controlador"] -> miEstado -> IdTipoPropietario);
         //print_r($_SESSION["Controlador"] -> miEstado -> IdPropietario);
@@ -898,7 +955,7 @@ function DibujaLineas_PortalEmpleado(){
                 $descripcion2 = $valor["descripcion2"];
                 $descripcion3 = '';
                 $descripcion4 = '';
-                
+                $descripcion_icono = '';
                 $color = '';
                 if(isset($valor["color"])){
                     $color =  $valor["color"];
@@ -965,7 +1022,7 @@ function DibujaLineas_PortalEmpleado(){
                                         <img  src="Img/firma2.png"></button>';
                 }elseif(isset($valor["Firmado"]) && $valor["Firmado"] != 0 ){
                     $iconoFirmado = '<img src="Img/DocumentoFirmado.png" height="25px" style="margin-left:15px;">';
-                    $descripcion = $descripcion.$iconoFirmado;
+                    $descripcion_icono = $descripcion.$iconoFirmado;
                 }
                 
                 
@@ -975,31 +1032,62 @@ function DibujaLineas_PortalEmpleado(){
                     $imgExtension = 'Img/descarga_generica.png';
                     $file_name = $valor["Documento"];
                     $temp = explode('.',$file_name);
-                    $extension = end($temp);
-                    
-                    if($extension == 'pdf'){
-                        $imgExtension = 'Img/descarga_pdf.png';
-                    }elseif($extension == 'docx'){
-                        $imgExtension = 'Img/descarga_word.png';
-                    }elseif($extension == 'xlsx'){
-                        $imgExtension = 'Img/descarga_excell.png';
+                    $extension = strtoupper(end($temp));
+                    // if(in_array($extension,array('JPG','PNG','GIF','WEBB','TIFF','PSD','BMP'))){
+                    //     $imgExtension = 'Img/descarga_IMG.png';
+                    // }else{
+                    //     $imgExtension = 'Img/descarga_generica.png'; 
+                    // }
+
+                    switch ($extension) {
+                        case 'PDF':
+                            $imgExtension = 'Img/descarga_pdf.png';
+                            break;
+                        case 'DOC':
+                            $imgExtension = 'Img/descarga_word.PNG';
+                            break;
+                        case 'DOCX':
+                            $imgExtension = 'Img/descarga_word.PNG';
+                            break;
+                        case 'XLS':
+                            $imgExtension = 'Img/descarga_excell.png';
+                            break;
+                        case 'XLSX':
+                            $imgExtension = 'Img/descarga_excell.png';
+                            break;
+                        default:
+                            if(in_array($extension,array('JPG','JPEG','PNG','GIF','WEBP','APNG','AVIF','SVG','WEBB','TIFF','ICO'))){
+                                $imgExtension = 'Img/descarga_IMG.png';
+                            }else{
+                                $imgExtension = 'Img/descarga_generica.png';         
+                            }
+                            
+                            break;
                     }
                     $acciones_linea_pintar = str_replace('%imgTipoArchivo%',$imgExtension,$acciones_linea_pintar);
+                    $acciones_linea_pintar = str_replace('%id%',$id,$acciones_linea_pintar);
+                    $acciones_linea_pintar = str_replace('%codigo%',$descripcion,$acciones_linea_pintar);
+                    //$acciones_linea_pintar = str_replace(['%id%','%codigo%'], [$id,$descripcion], $acciones_linea_pintar);
+                    
+                    
                 }
                 $pseudoI = '';
                 if($pseudoIdentificador != ''){
                     $pseudoI = $valor[$pseudoIdentificador];
                 }
-                
+                if($descripcion_icono == ''){
+                    $descripcion_icono = $descripcion;
+                }
                 //data-tipo-servicio="'.$id.'"
                 //pintar cada linea
                 $listaDoc .= '<tr  id="'.$id.'" data-nombre="'.$pseudoI.'">';
-                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador"><h5>' . $descripcion. '<h5>';
+                $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador"><h5>'. $descripcion_icono.'<h5>';
                 if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
                     $listaDoc .= '<details>';
                     
                 }else{
                     $listaDoc .= '<details open>';
+                    
                 }
                 $listaDoc .='<summary></summary>';
                 $listaDoc .='<p> <span style="color:'.$color.';">' . $descripcion2 . '</span><br>';
@@ -1013,9 +1101,9 @@ function DibujaLineas_PortalEmpleado(){
                 $listaDoc .= '</div></td></tr>'; 
             }
             $listaDoc .= "</tbody></table></span>";
-            $listaDoc .= "<div class='container text-center'>";
-            $listaDoc .= "<div class='row'>";
-            $listaDoc .= "<div class='col'>";
+            // $listaDoc .= "<div class='container text-center'>";
+            // $listaDoc .= "<div class='row'>";
+            // $listaDoc .= "<div class='col'>";
             
             //optimizar moverlo a un documento aparte
             // if (count($arrayDoc) > $_SESSION["Controlador"] -> miEstado -> puntero_posicion) {
@@ -1025,53 +1113,35 @@ function DibujaLineas_PortalEmpleado(){
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 4.4){
             $listaDoc .= '<div class="d-flex justify-content-center mt-5 mb-5" ><h5>No hay Documentos</h5></div>';
         }else{
-            $listaDoc .= '<div class="d-flex justify-content-center mt-5 mb-5"><h5> No hay elementos </h5></div>';
+            $listaDoc .= '<div clas
+            s="d-flex justify-content-center mt-5 mb-5"><h5> No hay elementos </h5></div>';
         }
         
-        $listaDoc .= "</div></div></div></div></div></section></div></div></div>";
+        $listaDoc .= "</section>";
         $listaDoc .= $acciones_globales;
         return $listaDoc;
 }
 
-function DibujaPestanaVacaciones_Empleado(){
+function DibujaPestanaVacaciones_Empleado($html){
     $anoActual = date("Y");
-    $docVacaciones =  '
-                <div class="nav nav-tabs mt-4 " id="nav-tab" role="tablist">
-                <button class="nav-link active" id="nav-resumen-tab" data-bs-toggle="tab" data-bs-target="#nav-resumen" type="button" role="tab" aria-controls="nav-resumen" aria-selected="false" aria-expanded="true" tabindex="-1">Detalle</button>
-                <button class="nav-link" id="nav-graficos-tab" data-bs-toggle="tab" data-bs-target="#nav-graficos" type="button" role="tab" aria-controls="nav-graficos" aria-selected="true">Gráfico Resumen</button>
-
-                    <!--<button class="nav-link" id="nav-festivos-tab" data-bs-toggle="tab" data-bs-target="#nav-festivos" type="button" role="tab" aria-controls="nav-festivos" aria-selected="false" tabindex="-1">Festivos 2024</button>-->
-                        
-                    <button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Año '.$anoActual.'</button>
-                </div>
-            ';
-
-    $docVacaciones .= '<div class="tab-content mt-2 p-2  " id="nav-tabContent" >
-                            <!-- Contenido de Resumen. -->
-                            <div class="tab-pane fade show active show" id="nav-resumen" role="tabpanel"
-                                aria-labelledby="nav-resumen-tab">
-                                <div id="resumen">';
-    
     $lineas_PE =  DibujaLineas_PortalEmpleado();
-    $docVacaciones .= str_replace('</div></div></div></div></div></section></div></div></div>','</div></div></div>',$lineas_PE);
-    $docVacaciones .=  '</div></div>
-                            <!-- Contenido de Festivos. 
-                            <div class="tab-pane" id="nav-festivos" role="tabpanel"
-                                aria-labelledby="nav-festivos-tab">
-                                <div id="festivos">
-
-                                </div>
-                            </div>-->
-                        
-                            <!-- Contenido de Gráficos. -->
-                            <span class="d-flex justify-content-center">
-                            <canvas class="tab-pane fade" id="nav-graficos" role="tabpanel"
-                               aria-labelledby="nav-graficos-tab"></canvas></span>
-                        </div>';
-    $docVacaciones .= "</div></div></div>";
-    return $docVacaciones;
+    $graficoV =  '<div class="chart-container">
+                    <canvas id="nav-graficos"></canvas>
+                </div>';        
+    $desplegableAnos = '<button class="btn dropdown-toggle" data-nombre="'.date("Y").'" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Año '.$_SESSION["Controlador"] -> miEstado -> anoFiltroVacaciones.'</button>';
+    $desplegableAnos .= '<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">';
+    foreach($_SESSION["Controlador"] -> miEstado -> listaAnoFiltroVacaciones as $anoVacacion){
+        if($anoVacacion != date("Y")){
+            $desplegableAnos .= '<button class="dropdown-item" onclick="generarGrafico_Barras(calendar,'.$anoVacacion.')">'.$anoVacacion.'</button>';
+        }else{
+            $desplegableAnos .= '<button class="dropdown-item" onclick="generarGrafico_Barras(calendar,'.$anoVacacion.')" selected>'.$anoVacacion.'</button>';
+        }
         
-}
+    }
+    $desplegableAnos .= '</div>';
+    $html = str_replace(['%ListaV%','%GraficoV%','%anoActualDropdown%'], [$lineas_PE,$graficoV,$desplegableAnos], $html);
+    return $html;
+}   
 
 function cargaFiltros(){
     $arrayFiltros = array();
@@ -1087,7 +1157,7 @@ function cargaFiltros(){
                 $tipoDocf = 3;
                 break;
             case 7 :
-                $tipoDocf = 4; 
+                $tipoDocf = 4;
                 break;
             default:
                 $tipoDocf = 0;
@@ -1505,14 +1575,14 @@ function cargarSeccionesDinamicas(){
         foreach($arraySecciones as $seccion){
             
             if($seccion['IdFormulario'] == 2612){
-                $pestanaSecciones .= '<div class=" col-12 col-sm-6 mt-5" id="pestanaEnJornada" style="display: none;">';
+                $pestanaSecciones .= '<div class=" col-6 col-sm-6 mt-5" id="pestanaEnJornada" style="display: none;">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
                 $pestanaSecciones .=  'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
                 $pestanaSecciones .=  '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-entrada-f.png" />';
                 $pestanaSecciones .= '</button>';
                 $pestanaSecciones .= '</div>';
               
-                $pestanaSecciones .=  '<div class=" col-12 col-sm-6 mt-5" id="pestanaFueraJornada" style="display: none;">';
+                $pestanaSecciones .=  '<div class=" col-6 col-sm-6 mt-5" id="pestanaFueraJornada" style="display: none;">';
                 $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
                 $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
                 $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-salida-f2.png"/>';
