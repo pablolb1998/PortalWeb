@@ -47,9 +47,8 @@ function pinta_contenido($estado){
                 case 2:
                     //$filename = "../html/secciones_Empleado.html";
                     break;
-
             }
-               
+            
             break;  
         case 3:
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
@@ -63,7 +62,6 @@ function pinta_contenido($estado){
                     break;
 
             }
-            
             break;
         case 4:
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
@@ -77,9 +75,7 @@ function pinta_contenido($estado){
                     $cabecera = "../html/header.html";
                     //$filename = "../html/secciones_Empleado_02.html";
                     break;
-
             }
-            
             break;
         case 4.1:
             $titulo = "Asistencias";
@@ -178,7 +174,7 @@ function pinta_contenido($estado){
                     $filename = "../html/tareasFasesDetalle.html";
                     break;
             }
-        break;
+            break;
         case 8:
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:    
@@ -207,7 +203,7 @@ function pinta_contenido($estado){
             $titulo = "Reestablecer Contraseña";
             $cabecera = "../html/header.html";
             $filename = "../html/reestablecerContrasenaCampos.html";
-        break;
+            break;
         default:
             $filename = "../html/login.html";
             break;
@@ -373,7 +369,7 @@ function pinta_contenido($estado){
             }
             
             $filetext .= cargarJornadaHistorico();
-
+            
             //pintar el modal del fichaje
             $filetext .= '<div class="modal fade" id="ModalMapaJornada" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -415,7 +411,6 @@ function pinta_contenido($estado){
         }else{
             return $filetext;
         }
-
     } else {
         
         if($_SESSION['Controlador'] -> miEstado -> tipo_App == 1){
@@ -1063,7 +1058,7 @@ function DibujaLineas_PortalEmpleado(){
                             }
                             
                             break;
-                    }
+                    } 
                     $acciones_linea_pintar = str_replace('%imgTipoArchivo%',$imgExtension,$acciones_linea_pintar);
                     $acciones_linea_pintar = str_replace('%id%',$id,$acciones_linea_pintar);
                     $acciones_linea_pintar = str_replace('%codigo%',$descripcion,$acciones_linea_pintar);
@@ -1556,7 +1551,7 @@ function cargarSeccionesDinamicas(){
     $pestanaSecciones .= '<div class="card shadow-2-strong shadow">';
     $pestanaSecciones .= '<div class="button-container  justify-content-center pb-5 ">';
     if($_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
-        $rutaImg="PortalEmpleado/PestanaMenu/";
+        $rutaImg = "PortalEmpleado/PestanaMenu/";
     }
     
     if ($_SESSION["Controlador"] -> miEstado -> Estado == 2) {
@@ -1565,47 +1560,51 @@ function cargarSeccionesDinamicas(){
         $pestanaSecciones .= '<div class="row  justify-content-center col-10 offset-1">';
     }
     
-   
     //cargar secciones con acceso
-    $arraySecciones = array_filter($_SESSION["Controlador"] -> miEstado -> permisosSecciones, function ($seccion) {
-        return ($seccion["OrdenEstado"] == $_SESSION["Controlador"] -> miEstado -> Estado);
-    });
-   
-    if(count($arraySecciones)>0){
-        foreach($arraySecciones as $seccion){
-            
-            if($seccion['IdFormulario'] == 2612){
-                $pestanaSecciones .= '<div class=" col-6 col-sm-6 mt-5" id="pestanaEnJornada" style="display: none;">';
-                $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
-                $pestanaSecciones .=  'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .=  '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-entrada-f.png" />';
-                $pestanaSecciones .= '</button>';
-                $pestanaSecciones .= '</div>';
-              
-                $pestanaSecciones .=  '<div class=" col-6 col-sm-6 mt-5" id="pestanaFueraJornada" style="display: none;">';
-                $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
-                $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-salida-f2.png"/>';
-                $pestanaSecciones .= '</button>';
-                $pestanaSecciones .= '</div>';
+    if ($_SESSION["Controlador"] -> miEstado -> permisosSecciones != null){
+        $arraySecciones = array_filter($_SESSION["Controlador"] -> miEstado -> permisosSecciones, function ($seccion) {
+            return $seccion["OrdenEstado"] == $_SESSION["Controlador"] -> miEstado -> Estado;
+        });
+    
+    
+    
+        if(count($arraySecciones)>0){
+            foreach($arraySecciones as $seccion){
                 
-            }else{
-                $pestanaSecciones .= '<div class="'.$seccion['EstiloPestaña'].'">';
-                $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina(['.$seccion['ValorAccion'].'])"';
-                $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
-                $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.''.$seccion['Imagen'].'"/>
-                                        <p class="h4 PestanaMenu">'.$seccion['Nombre'].'</p>';
-                $pestanaSecciones .= '</button>';
-                $pestanaSecciones .= '</div>';
-            }
-           
+                if($seccion['IdFormulario'] == 2612){
+                    $pestanaSecciones .= '<div class=" col-6 col-sm-6 mt-5" id="pestanaEnJornada" style="display: none;">';
+                    $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
+                    $pestanaSecciones .=  'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
+                    $pestanaSecciones .=  '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-entrada-f.png" />';
+                    $pestanaSecciones .= '</button>';
+                    $pestanaSecciones .= '</div>';
+                
+                    $pestanaSecciones .=  '<div class=" col-6 col-sm-6 mt-5" id="pestanaFueraJornada" style="display: none;">';
+                    $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina([2])"';
+                    $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
+                    $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-salida-f2.png"/>';
+                    $pestanaSecciones .= '</button>';
+                    $pestanaSecciones .= '</div>';
+                    
+                }else{
+                    $pestanaSecciones .= '<div class="'.$seccion['EstiloPestaña'].'">';
+                    $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina(['.$seccion['ValorAccion'].'])"';
+                    $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
+                    $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.''.$seccion['Imagen'].'"/>
+                                            <p class="h4 PestanaMenu" style="color:'.$seccion['ColorPestana'].';">'.$seccion['Nombre'].'</p>';
+                    $pestanaSecciones .= '</button>';
+                    $pestanaSecciones .= '</div>';
+                }
             
+                
+            }
+        }else{
+            $pestanaSecciones = "No tienes permisos para acceder a la siguiente pestaña";
         }
+    
     }else{
         $pestanaSecciones = "No tienes permisos para acceder a la siguiente pestaña";
     }
-    
-
     //cierre fragmento comun
     $pestanaSecciones .= '</div></div></div></div></div>';
     return $pestanaSecciones;

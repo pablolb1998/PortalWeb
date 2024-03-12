@@ -14,13 +14,13 @@ if(isset($_POST['firmaDataUrl']) && $_POST['Id'] && $_POST['IdP'] && $_POST['IdT
     if (!is_dir($directorio)) {
         mkdir($directorio, 0755, true);
         chown($directorio, 'www-data');
-    
     }
 
     // Guardar la imagen en el servidor
     file_put_contents($rutaImagen, $firmaBinario);
     
     //consulta para insertar en PEFirma
+    
     if(PEfirmaInsert($_POST['IdP'],
                     $_POST['IdTp'],
                     $_SESSION["pinC"].'_'.$_POST['Id'].'.png',

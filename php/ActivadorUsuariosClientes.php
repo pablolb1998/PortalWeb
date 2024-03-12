@@ -5,13 +5,13 @@ if(isset($_GET['a']) && isset($_GET['b']) && isset($_GET['c'])){
     $usuario = $_GET['b'];
     $IdIdentidad = $_GET['a'];
     $Ip;
-    $datosBBDD = comprobarBD($pin);
+    $datosBBDD = comprobarBD($pin,'sa','Iiaslgv52d');
     if(!isset($datosBBDD[0]["Puerto"])){
         $Ip = $datosBBDD[0]["Servidor"];
     }else{
         $Ip = $datosBBDD[0]["Servidor"].','.$datosBBDD[0]["Puerto"];
     }
-    $datosBBDD = comprobarBD($pin);
+    $datosBBDD = comprobarBD($pin,'sa','Iiaslgv52d');
     if(confirmarUsuarioSeguridadUnificada($Ip,$datosBBDD[0]["BBDD"],$IdIdentidad,$usuario)){
         header('Location:../Index.html');
     }

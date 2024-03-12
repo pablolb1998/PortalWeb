@@ -41,7 +41,7 @@ function comprobarPermisosUsuarios(){
     $arrayPermisos = array();
     $tipoUsr = $_SESSION["TipoPortal"] == 1 ? 1 : 2;
 
-    $sql = "SELECT IdFormulario,Imagen,OrdenEstado,TipoApp,ValorAccion,EstiloPestaña,Nombre
+    $sql = "SELECT IdFormulario,Imagen,OrdenEstado,TipoApp,ValorAccion,EstiloPestaña,Nombre,ColorPestana
     FROM vw_PW_PermisosPestanas  
     WHERE IdIdentidad = ? AND TipoApp = ?;";
     $parm = array($_SESSION["Controlador"] -> miEstado -> IdIdentidad,$tipoUsr);
@@ -52,7 +52,6 @@ function comprobarPermisosUsuarios(){
         die;
     } else {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-           
             array_push($arrayPermisos, $row);
         }
         return $arrayPermisos;
@@ -318,15 +317,13 @@ function extraerRecursosProyectos($idp = null){
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             array_push($ListaRec, $row);
         }
-        print_r($ListaPT);
-        print_r('/r/n');
-        print_r($ListaRec);
-        return array($ListaRec,$ListaPT);
+        return array($ListaPT,$ListaRec);
     }
-    sqlsrv_close( $conn );
+    sqlsrv_close($conn);
     
     
 }
+
 //funciones de extraer datos de la jornada, actualizar para juntarlos
 function comprueba_jornada_personal(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
@@ -581,7 +578,9 @@ function extraerDropdownsFormsValores(){
 //iniciar o finalizar jornada
 function exec_up_Tiempos_Insert($lat = '',$long = ''){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
-    $sql = "DECLARE @IdTiempo INT;
+    $sql = "DECLARE @IdTiempo INT,
+    @FechaVisualizacion DATETIME;
+
     EXEC up_Tiempos_Insert
     @IdTiempo = @IdTiempo OUTPUT,
 	@IdSociedad = ?,
@@ -591,7 +590,8 @@ function exec_up_Tiempos_Insert($lat = '',$long = ''){
 	@InicioFin= ?,
     @FechaImputacion = ?,
     @Latitud = ?,                     
-    @Longitud = ?";
+    @Longitud = ?,
+    @FechaVisualizacion = @FechaVisualizacion OUTPUT";
     $parm = array($_SESSION["Controlador"] -> miEstado -> id_sociedad, 
             $_SESSION["Controlador"] -> miEstado ->EstadoJornada[2],
             $_SESSION["Controlador"] -> miEstado -> IdPersonal,
@@ -722,7 +722,7 @@ function exect_Insert_From_Dinamico($arrayValores){
 }
 
 function comprobarBD($c){
-    $conn = ConexionBD("85.214.41.17,23459","IntecoDistribucion");
+    $conn = ConexionBD("85.214.41.17,23459","IntecoDistribucion","sa","Iiaslgv52d");
     //sacar el primero en caso de que coincidan
     $sql = "SELECT TOP 1 CA.BBDD,ISNULL(ca.ServidorExterno,CA.Servidor) AS Servidor ,ISNULL(CA.PuertoExterno,CA.Puerto) AS Puerto FROM Clientes C 
     INNER JOIN dbo.Clientes_Aplicaciones CA ON CA.IdCliente = C.IdCliente WHERE Codigo LIKE ?;";
@@ -874,7 +874,7 @@ function crearRegistroEntrada_SeguridadUnificada($idIdentidad,$idApp){
 }
 
 function execute_EnviarMail_CreacionUsuario($destinatario,$html,$Asunto = 'Activación usuario Area de cliente'){
-    $conn = ConexionBD("85.214.41.17,23459","IntecoDistribucion");
+    $conn = ConexionBD("85.214.41.17,23459","IntecoDistribucion","sa","Iiaslgv52d");
     $sql = "EXEC msdb.dbo.sp_send_dbmail
     @profile_name = 'AreaClienteNimo',
     @recipients = ?,
