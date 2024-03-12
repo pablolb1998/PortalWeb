@@ -2,6 +2,7 @@
 require_once 'estado.php';
 require 'pinta.php';
 require_once './consultas.php';
+require_once './recursosVarios.php';
 
 class Controlador
 {
@@ -9,13 +10,14 @@ class Controlador
     //valor por defecto en caso de no recibir
     function __construct($Estado = null){
         
-            $_SESSION["pinC"] = $_COOKIE['pinCPortalE'];
+        $_SESSION["pinC"] = $_COOKIE['pinCPortalE'];
+
         if(isset($_COOKIE['LogoUsuarioPortalE'])){
             $_SESSION["imgLogo"] = $_COOKIE['LogoUsuarioPortalE'];
         }
             
         
-            $_SESSION["TipoPortal"] = $_COOKIE['TipoPortalE'];
+        $_SESSION["TipoPortal"] = $_COOKIE['TipoPortalE'];
         $this -> miEstado = new Estado();
         $this -> miEstado -> Estado = 0;
         $this -> miEstado -> Documentos = array();
@@ -38,7 +40,7 @@ class Controlador
     }
     //al final del script iguala la variable de Sesion al estado
     function __destruct(){
-        $_SESSION["Controlador"]= $this;
+        $_SESSION["Controlador"] = $this;
     }
     function almacenarDocumentos($doc){
         $this -> miEstado["documentos"] = $doc;
@@ -76,6 +78,7 @@ class Controlador
         //si no encuentra usuario devuelve false
         $datosSesion = comprueba_usuario($usr, $pass);
         $IdTipoApp;
+    
         if($datosSesion != false){
             $this -> miEstado -> nombre_descriptivo = $datosSesion[2];
             $this -> miEstado -> IdIdentidad = $datosSesion[4];
@@ -102,6 +105,7 @@ class Controlador
             crearRegistroEntrada_SeguridadUnificada($this -> miEstado -> IdIdentidad,$IdTipoApp);
             return true;
         }else{
+            
             return false;
         }
         
@@ -341,16 +345,16 @@ class Controlador
         return true;
     }
 
-    function descargaArchivoServicoWeb($IdP,$nombre_archivo,$tipoDoc,$OI = null){
-        $nombre_archivo = "";
-        if($arrayDatos[3] == "OPDF"){
+    function descargaArchivoServicoWeb($IdP,$nombre_archivo,$tipoDoc = null,$OI = null){
+        
+        if($tipoDoc == "OPDF"){
             $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$OI.'&IdPropietario='.$IdP;
-            $nombre_archivo = $nombre_archivo;
         }else{
             $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin=".$_SESSION["pinC"].'&IdArchivo='.$IdP;
-            $nombre_archivo = $nombre_archivo;
+            // print_r($url_archivo);
+            // print_r('<br>');
         }
-        
+
 
         
         $directorio_destino = "subidasTemp/".$_SESSION["pinC"]."/";
@@ -359,12 +363,14 @@ class Controlador
             mkdir($directorio_destino, 0755, true);
         }
 
-        // Realiza la solicitud HTTP para obtener el contenido del archivo
+        //Realiza la solicitud HTTP para obtener el contenido del archivo
         $response = file_get_contents($url_archivo);
         if ($response === false) {
-            $msgError = 'Error al obtener el archivo desde el servicio web.';
+            return false;
+            
         } else {
             // Específica la ruta donde deseas guardar el archivo
+            $nombre_archivo = str_replace('/','_',$nombre_archivo);
             $rutaGuardado = $directorio_destino.$nombre_archivo; // Reemplaza esto con la ruta y nombre deseado
         
             // Guarda el contenido en un archivo en el servidor
@@ -378,6 +384,8 @@ class Controlador
 
 
     }
+
+    
 
     //funciones de para generar el contenido
     // optimizar el navegar pestañas
@@ -504,7 +512,6 @@ class Controlador
             $this -> navegarPestanas($arrayDatos[0]);
         }elseif($c == 9 && !empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2]) && $this -> miEstado -> tipo_App ==  1){
         //guardar el archivo
-                    
                 $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
                                                     2,
                                                     $this -> miEstado -> IdPropietario,
@@ -518,7 +525,8 @@ class Controlador
                 $this -> miEstado -> IdPropietario = $arrayDatos[1];
                 //print_r(extraerRecursosProyectos($arrayDatos[1]));
                 $this -> miEstado -> datosProyecto = extraerRecursosProyectos($arrayDatos[1]);
-                //$this -> navegarPestanas(7.1);
+                usort($this -> miEstado -> datosProyecto[0], 'compararPorDireccionArbol');
+                $this -> navegarPestanas(7.1);
                 
                 
         }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
@@ -609,11 +617,21 @@ class Controlador
                     if(!isset($this -> miEstado -> anoFiltroVacaciones)){
                         $this -> miEstado -> anoFiltroVacaciones = date("Y");
                     }
+                    $this -> miEstado -> listaAnoFiltroVacaciones = array(date("Y"));
                     foreach($this -> miEstado -> Documentos as $documento){
                         if($documento["tipoDocPortal"] == 8.5){
-                            array_push($arrayAuxiliarHtml,array($documento['Año'],$documento['DiasTotales'],$documento['DiasDisfrutados'],$documento['DiasConcedidos'],$documento['DiasPendientes']));
+                            if($documento['Año'] != date("Y")){
+                                array_push($this -> miEstado -> listaAnoFiltroVacaciones,$documento['Año']);
+                            }
+                            array_push($arrayAuxiliarHtml,array('Año' => $documento['Año'],
+                            'DiasTotales' => $documento['DiasTotales'],
+                            'DiasDisfrutados' => $documento['DiasDisfrutados'],
+                            'DiasConcedidos' => $documento['DiasConcedidos'],
+                            'DiasPendientes' => $documento['DiasPendientes']));
                         }
                     }
+                    
+                    rsort($this -> miEstado -> listaAnoFiltroVacaciones);
                     //print_r($arrayAuxiliarHtml);
                     break;
                 default:
@@ -876,6 +894,24 @@ class Controlador
             }
             //$this -> miEstado -> EstadoJornada = comprueba_jornada_personal();//comprobar el estado actual
             $this -> miEstado -> HistoricoJornada = extraer_JornadaHistorico();// extraer el historico de la jornada
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 11 && $this -> miEstado -> tipo_App == 2){
+            //obtener archivo portal empleado
+            //
+            $nombre_archivo = "";
+            $ejecucionArchivos;
+            if($arrayDatos[3] == "OPDF"){
+                
+            }else{
+                $ejecucionArchivos = $this -> descargaArchivoServicoWeb($arrayDatos[2][0],$arrayDatos[2][1]);
+                if($ejecucionArchivos){
+                    return($ejecucionArchivos);
+                }else{
+                    $msgError = 'Error al obtener el archivo desde el servicio web.';
+                }
+                
+            }
+            
+
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == -1){
             $this -> cerrarSesion();
         }
@@ -888,7 +924,7 @@ class Controlador
             $txtErr = "A:".$this -> miEstado -> tipo_App. "idI :".$this -> miEstado -> IdIdentidad.
             $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario;
         }
-        
+        //
         return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml,$accionJs);
         
     }
