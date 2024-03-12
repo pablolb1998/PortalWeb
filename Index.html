@@ -50,28 +50,20 @@
     <!-- librerias de los graficos/chars -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+
     <!-- link de css -->
     <link rel="stylesheet" href="css/header.css">
   <!--Funciones-->
   <script>
 
-   //Modificación, unica funcion que se deberia llamar 
-//    var eventos = [
-//             {
-//                 title: 'Long Evento',
-//                 start: '2023-09-07T00:00:00',
-//                 end: '2023-09-10T00:00:00',
-//                 backgroundColor: '#800080',
-//                 id: '1'
-//             }]
-
 var eventos = [];
 var signaturePad;
 var cookiesAceptadas;
 var calendar;
+var myChart;
 var map2;
     function dibuja_pagina(arrayDatos = []){
-        //alert(arrayDatos);
+        // document.getElementById('ruedita').style.display = 'block';
         if(cookiesAceptadas == null){
             if(verificarCookiesAceptadas()){
                 cookiesAceptadas = true;
@@ -95,8 +87,9 @@ var map2;
                             seccionBody.innerHTML = respuesta[0];
                            // usar el array de respuesta para cargar los datos de las distintas pestañas
                             if(respuesta[3] != null && respuesta[3] != 0 && respuesta[4]==2){
-                                //alert(respuesta[3]) 
-                                generarGrafico_Barras(respuesta[3]);
+                                calendar = respuesta[3];
+                                generarGrafico_Barras(calendar);
+                                
                             }else if(respuesta[3] != null && respuesta[3] != 0){
                                 for(let evento of respuesta[3]){
                                     let e = {title: evento[0],
@@ -111,7 +104,7 @@ var map2;
                                 dibuja_calendario();
                             }
                             CargarMapaFichaje();
-                            //  CargarMapaFichaje();
+                            // CargarMapaFichaje();
                             //dibuja_calendario();
                             //Mostrar mensaje por pantalla
                             if(respuesta[1] != null && respuesta[1] != ""){
@@ -143,7 +136,7 @@ var map2;
                     alert("Status: " + textStatus); alert("Error: " + errorThrown); 
                 } 
         });
-        
+        // document.getElementById('ruedita').style.display = 'none';
 
     };
 
@@ -168,7 +161,7 @@ var map2;
         var selectedIds = [];
             // Obtén los IDs de los checkboxes seleccionados
             
-            var checkboxes = $('#filtros_dinamicos :input[type="checkbox"]').toArray();;
+            var checkboxes = $('#filtros_dinamicos :input[type="checkbox"]').toArray();
             checkboxes.forEach(function (checkbox) {
                 if (checkbox.checked) {
                     selectedIds.push(Number(checkbox.value));
@@ -184,71 +177,81 @@ var map2;
     }
 
     function generarGrafico_Barras(AniosVacaciones,AnioSelecionado = null) {
-            //  const anioActual = new Date().getFullYear();
-            // //let anioS = 2024;
-            // let datosParaAnio;
-            // // if(AnioSelecionado == null){
-            // //     datosParaAnio = AniosVacaciones.find(([anio]) => anio == 2023);
-            // //     anioS = 2023;
-            // //     //AnioSelecionado = datosParaAnio[0];
-            // // }
-            // var ctx = document.getElementById('nav-graficos').getContext('2d');
-            // var dias;
-            // if(datosParaAnio != null){
-            //     dias = [datosParaAnio[1] == null ? 0 : datosParaAnio[1]
-            //             , datosParaAnio[2] == null ? 0 : datosParaAnio[2]
-            //             , datosParaAnio[3] == null ? 0 : datosParaAnio[3]
-            //             , datosParaAnio[4] == null ? 0 : datosParaAnio[4]
-            //             ];
-            // }else{
+             const anioActual = new Date().getFullYear();
+            // let anioS = 2024;
+            let datosParaAnio;
+            if(AnioSelecionado == null){
+                datosParaAnio = AniosVacaciones.find((anio) => anio['Año'] == anioActual);
+                anioS = anioActual;
+            //     alert(datosParaAnio);
+            //      //AnioSelecionado = datosParaAnio[0];
+            }else{
+                datosParaAnio = AniosVacaciones.find((anio) => anio['Año'] == AnioSelecionado);
+                anioS = AnioSelecionado;
+            }
+            var ctx = document.getElementById('nav-graficos').getContext('2d');
+            var dias;
+            if(datosParaAnio != null){
+                dias = [datosParaAnio['DiasTotales'] == null ? 0 : datosParaAnio['DiasTotales']
+                        , datosParaAnio['DiasDisfrutados'] == null ? 0 : datosParaAnio['DiasDisfrutados']
+                        , datosParaAnio['DiasConcedidos'] == null ? 0 : datosParaAnio['DiasConcedidos']
+                        , datosParaAnio['DiasPendientes'] == null ? 0 : datosParaAnio['DiasPendientes']
+                        ];
+            }else{
 
-            //     dias = [0,0,0,0];
-            // }
-           
-            // //dias = [0,0,0,0];
-            // var myChart = new Chart(ctx, {
-            //     type: 'bar',
-            //     data: {
-            //         labels: ['Días Totales', 'Días Disfrutados', 'Días Concedidos', 'Dias Pendientes'],
-            //         datasets: [{
-            //             label:  'Vacaciones de '+ anioS,
-            //             data: dias,
-            //             backgroundColor: [
-            //                 'rgba(139, 69, 19, 0.2)', // Color para días totales marron
-            //                 'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
-            //                 'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
-            //                 'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
-            //             ],
-            //             borderColor: [
-            //                 'rgba(139, 69, 19, 0.2)', // Color para días totales marron
-            //                 'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
-            //                 'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
-            //                 'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
-            //             ],
-            //             borderWidth: 1
-            //         }]
-            //     },
-            //     options: {
-            //         animation: {
-            //             duration: 0 // Duración de la animación en milisegundos (0 para desactivar)
-            //         },
-            //         responsive: true,
-            //         scales: {
-            //             y: {
-            //                 beginAtZero: true
-            //             }
-            //         },
-                    
-            //     }
-            // });
-            // $('#nav-graficos').css('display','');
-            // // FILTRO DEL CALENDARIO            ];
-            // $('#myTable tr').filter(function() {
-            //    return $(this).data('nombre') !== "Año : "+anioS;
-            // }).addClass('d-none');
+                dias = [0,0,0,0];
+            }
+            
+            // dias = [0,0,0,0];
+            if (myChart) {
+                window.myChart.destroy();
+            }
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Días Totales', 'Días Disfrutados', 'Días Concedidos', 'Dias Pendientes'],
+                    datasets: [{
+                        label:  'Vacaciones de '+anioActual,
+                        data: dias,
+                        backgroundColor: [
+                            'rgba(139, 69, 19, 0.2)', // Color para días totales marron
+                            'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
+                            'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
+                            'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
+                        ],
+                        borderColor: [
+                            'rgba(139, 69, 19, 0.2)', // Color para días totales marron
+                            'rgba(54, 162, 235, 0.2)', // Color para días disfrutados azul
+                            'rgba(75, 192, 192, 0.2)',// Color para días concedidos verde
+                            'rgba(54, 162, 235, 0.2)' // Color para días pendientes amarillo
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+
+            // Actualizar el gráfico después de cambiar el tamaño del canvas
+            
+            filtrarTablaCalendario(anioS);
+            
         }
-
-
+        
+        //cambiar para que filtre el php
+        function filtrarTablaCalendario(anioS){ 
+            $('#dropdownMenuButton').text('Año '+anioS);
+            $('#dropdownMenuButton').data('nombre') == anioS;
+            let contadorVacaciones=0;
+            $('#myTable tr').filter(function() {
+               if($(this).data('nombre') !== "Año : "+anioS){
+                    $(this).addClass('d-none');
+                    contadorVacaciones = 1;
+               }else{
+                    $(this).removeClass('d-none');
+               }
+            })
+        }
+ 
+    
 
 
 
@@ -281,6 +284,9 @@ var map2;
         }
         let cuerpo = document.getElementById("msgError");
         cuerpo.innerHTML = htmlModal;
+
+        let titulomsg = document.getElementById("TituloError");
+        titulomsg.innerHTML = 'Detalles';
 
         $('#popupError').modal('show');
         
@@ -761,7 +767,7 @@ var map2;
         var maxSize = 5 * 1024 * 1024; // 5 MB (en bytes)
         if (this.files[0].size > maxSize) {
             // cambiar por nuestro modal
-            alert('El archivo es demasiado grande. El tamaño máximo permitido es 5 MB.');
+            alert('El archivo demasiado grande. El tamaño máximo es 5 MB.');
             this.value = ''; 
         }
     });
@@ -812,6 +818,9 @@ var map2;
         </div>
       </div>
 
+
+    <!-- Ruedita de carga --> 
+    <!-- <div class="loader" id="ruedita" style="display: none;"></div> -->
 <div id="cuerpo" class="container-fluid px-0"></div>
 
 </body>
