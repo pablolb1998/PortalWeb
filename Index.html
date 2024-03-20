@@ -771,6 +771,37 @@ var map2;
             this.value = ''; 
         }
     });
+
+    // añadir la funcionalidad de estar fijado a la bara superior al hacer scroll
+    $(document).ready(function() {
+        var alturaHedaderOriginal = $('#header_agrupado').outerHeight();
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 0) {
+                $('#header_agrupado').addClass('fixed-top');
+                
+                if ($('#SeparadorHeader').length === 0) {
+                    let elementoSeparador =  $('<div id="SeparadorHeader"><br></div>');
+                    elementoSeparador.insertAfter('#header_agrupado');
+                    $('#header_agrupado img').css('height','50px');
+                    $('#flecha_volver img').css('height','30px');
+                    
+                    $('#SeparadorHeader').css('margin-top', $('#header_agrupado').outerHeight()+'px');
+                    setTimeout(function(){
+                        //simplemente que espere
+                    }, 300);
+                    // $('#header_agrupado img').css('transition','transform 0.3s ease');
+                    // $('#header_agrupado img').css('transform','scale(1)');
+                    
+                }
+
+            } else {
+                $('#header_agrupado').removeClass('fixed-top');
+                //$('#header_agrupado img').removeClass('reduccion');
+                $('#SeparadorHeader').remove();
+                $('#header_agrupado img').css('height','');
+            }
+        });
+    });
 </script>
 </head>
 
