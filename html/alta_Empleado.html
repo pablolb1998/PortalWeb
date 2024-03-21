@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Portal Cliente</title>
+  <title>Portal del Empleado</title>
   <!-- font awesome  -->
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
     <!--Librerias de bootstrap-->
@@ -75,18 +75,6 @@
         this.classList.toggle('fa-eye-slash');
 
     })    
-    
-    //Jquery para mostrar el modelo de factura
-    $(document).on("click","#ImgInterrogacion",function(event){
-
-      var imageUrl = '../Img/PortalEmpleado/Documentos/cabecera_factura.png';
-    
-    // Abre una nueva ventana o pestaña para mostrar la imagen
-    window.open(imageUrl, '_blank');
-
-    })
-
-    
 
  /********* ------------------------------------------------------------- ************/
     if (window.history.replaceState) { // verificamos disponibilidad
@@ -115,6 +103,8 @@
       </div>
 
 <div id="cuerpo" class="container-fluid px-0">
+   
+    <header></header>
     <br>
     <div class="container text-center">
       <div class="row">
@@ -172,10 +162,8 @@
         </div>
       </div>
     </section>
-    
-    <br>
-    <br>
-    <br>
+    <footer></footer>  
+  
 </div>
 
 </body>
