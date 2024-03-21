@@ -11,6 +11,13 @@ if(isset($_POST['firmaDataUrl']) && $_POST['Id'] && $_POST['IdP'] && $_POST['IdT
     // Ruta donde se guardará la imagen (ajusta según tus necesidades)
     $directorio = 'subidasTemp/'.$_SESSION["pinC"];
     $rutaImagen = 'subidasTemp/'.$_SESSION["pinC"].'/'.$_POST['Id'].'.png';
+
+    $host = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
+    $requestUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+    $urlCompleta = "https://$host$requestUri";
+    $ruta = str_replace('FirmarArchivo.php','',$urlCompleta);
+
+
     if (!is_dir($directorio)) {
         mkdir($directorio, 0755, true);
         chown($directorio, 'www-data');
@@ -25,7 +32,7 @@ if(isset($_POST['firmaDataUrl']) && $_POST['Id'] && $_POST['IdP'] && $_POST['IdT
                     $_POST['IdTp'],
                     $_SESSION["pinC"].'_'.$_POST['Id'].'.png',
                     $_POST['Id'],
-                    'http://www.areadecliente.de/php/prueba/PortalWeb/php'.$rutaImagen,
+                    $ruta.$rutaImagen,
                     $_POST['IPc'],
                     $_POST['BBDD']
     )){

@@ -15,11 +15,12 @@ if(isset($_FILES["Archivo"])){
         chown($directorioDestino, 'www-data');
     }
 
-    if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], $directorioDestino . $_FILES["Archivo"]["name"] )){
-        // $externalContent = file_get_contents('https://api64.ipify.org?format=json');
-        // $externalData = json_decode($externalContent);
-        $ruta = $_SERVER['HTTP_HOST'].'empleado/php/';
-        $ruta = $_SERVER['HTTP_HOST'].'/php/';
+    if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], $directorioDestino . str_replace([' ', '/'] ,['','_'] ,$_FILES["Archivo"]["name"]) )){
+        $host = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
+        $requestUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        $urlCompleta = "https://$host$requestUri";
+        $ruta = str_replace('GestionSubidaArchivos.php','',$urlCompleta);
+        
         echo $ruta.$directorioDestino.$_FILES["Archivo"]["name"];
     } else {
         echo false;

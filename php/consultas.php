@@ -84,7 +84,35 @@ function compruebaSociedades($Id){
     }
     sqlsrv_close( $conn );
 }
+//Comprobar la version de la BBDD si esta actualizada
+function compararVersionBBDD(){
+    $versionBBDD = '';
+    $versionID = '';
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $sql =  "SELECT TOP 1 (IdActualizacionBD) AS IdActualizacionBD FROM dbo.ActualizacionBD ORDER BY IdActualizacionBD DESC";
+    $stmt = sqlsrv_query($conn, $sql);
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        $versionBBDD = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);    
+    }
+    sqlsrv_close( $conn );
+    $conn2 = ConexionBD('85.214.41.17,23459','IntecoDistribucion');
+    $sql =  "SELECT TOP 1 (IdActualizacionBD) AS IdActualizacionBD FROM dbo.ActualizacionBD ORDER BY IdActualizacionBD DESC";
+    $stmt = sqlsrv_query($conn2, $sql);
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        $versionID = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+    }
+    sqlsrv_close( $conn2 );
 
+    if($versionBBDD == $versionID || $_SESSION["pinC"] == 123654){
+        return true;
+    }else{
+        return false;
+    }
+}
 //cambiar contraseña
 function cambiarContrasena( $CVieja, $Cnueva){
     $conn = ConexionBD($_SESSION["Controlador"]->miEstado->IP, $_SESSION["Controlador"]->miEstado->bbdd);
@@ -486,7 +514,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //7 - Nominas
-        $sql7 = "SELECT IdPersonalSalario AS id,Fecha  AS descripcion,Pagado  AS descripcion2, CAST(Liquido AS VARCHAR)+'€' AS descripcionLateral,color,'Bruto :'+CAST(SalarioBruto AS VARCHAR)+'€' AS descripcion3,
+        $sql7 = "SELECT IdPersonalSalario AS id ,Fecha  AS descripcion,Pagado  AS descripcion2, CAST(Liquido AS VARCHAR)+'€' AS descripcionLateral,color,'Bruto :'+CAST(SalarioBruto AS VARCHAR)+'€' AS descripcion3,
         FechaRegistro AS FechaInicio, FechaRegistro AS FechaFin,IdArchivo as NumeroArchivos
         FROM dbo.vw_selectSalariosAppsheet
         WHERE IdPersonal = ? ORDER BY FechaRegistro DESC";
@@ -518,7 +546,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //8_5 resumen anual vacaciones
-        $sql8_5 = "SELECT IdPersonal,DiasTotales,DiasDisfrutados,DiasDenegados,DiasConcedidos,DiasPendientes,Año
+        $sql8_5 = "SELECT IdPersonal AS id,DiasTotales,DiasDisfrutados,DiasDenegados,DiasConcedidos,DiasPendientes,Año
         FROM dbo.vw_PEVacacionesResumenAnual
         WHERE IdPersonal = ? ORDER BY Año DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -609,7 +637,6 @@ function exec_up_Tiempos_Insert($lat = '',$long = ''){
         die;
     } 
     sqlsrv_close( $conn );
-
 }
 
 function exect_Insert_From_Dinamico($arrayValores){

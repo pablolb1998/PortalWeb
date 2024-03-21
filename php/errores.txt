@@ -1,0 +1,36 @@
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error: Error intencional
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error: Error intencional
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error: Error intencional
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error: Error intencional
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error: Error intencional
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error: Error intencional
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error: Error intencional
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error: Error intencional
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\Clases\controlador.php:163: Creation of dynamic property Estado::$FechaAlbaranes is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaAlbaranes is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaAlbaranes is deprecated
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+[2024-03-20 14:32:05] -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaAlbaranes is deprecated
+[2024-03-20 14:32:05] -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaAlbaranes is deprecated -> Error: Error intencional
+Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+[2024-03-20 14:32:46] -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaAlbaranes is deprecated
+[2024-03-20 14:32:46] -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaAlbaranes is deprecated -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated
+[2024-03-20 14:33:16] -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaPresupuestos is deprecated -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaAlbaranes is deprecated
+[2024-03-20 14:33:16] -> Error [8192] en C:\xampp\htdocs\portaldel\php\index.php:12: Creation of dynamic property Estado::$FechaAlbaranes is deprecated -> 

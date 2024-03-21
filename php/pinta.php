@@ -7,58 +7,37 @@ $filtro3;
 $nombre_cliente;
 
 ////////////////////////////////////
-// putenv("CABECERA".'!');
-// if (null !== getenv('CABECERA')) {
-//     $cabecera = "../html/header.html";
-//     $fileheader = fopen($cabecera, "r");
-//     $cabecera = fread($fileheader, filesize($cabecera));
-//     putenv("CABECERA = $cabecera");
-// } 
-// print_r(getenv('CABECERA'));
-// $headertext =  getenv('CABECERA');
-
 function pinta_contenido($estado){
     
     $titulo = ""; 
-    $cabecera = "";
+    $cabecera = "../html/header.html";
     $fileheadertext = "";
+    $headerCliente = "";
+    $footerCliente = "";
     switch ($estado) {
         case 0:
+            $cabecera = "";
             $filename = "../html/login.html";
             break;
         case 0.5:
-
+            $cabecera = "";
             $filename = "../html/campo_cif.html";
     
             break;
         case 1:
             $titulo = "Selecciona Sociedad";
             $filename = "../html/sociedades.html";
-            $cabecera = "../html/header.html";
             break;
         case 2:
             $titulo = $_SESSION["Controlador"] -> miEstado -> NombreSociedad;
-            $cabecera = "../html/header.html";
-            
-            switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
-                case 1:
-                    //$filename = "../html/secciones_Cliente.html";
-                    break;
-                case 2:
-                    //$filename = "../html/secciones_Empleado.html";
-                    break;
-            }
-            
             break;  
         case 3:
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:
                     $titulo = "Mis Presupuestos";
-                    $cabecera = "../html/header.html";
                     $filename = "../html/documentos.html";
                     break;
                 case 2:
-                    $cabecera = "../html/header.html";
                     break;
 
             }
@@ -67,66 +46,54 @@ function pinta_contenido($estado){
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:
                     $titulo = "Mis  Pedidos";
-                    $cabecera = "../html/header.html";
                     $filename = "../html/documentos.html";
                     break;
                 case 2:
                     $titulo = $_SESSION["Controlador"] -> miEstado -> NombreSociedad;
-                    $cabecera = "../html/header.html";
                     //$filename = "../html/secciones_Empleado_02.html";
                     break;
             }
             break;
         case 4.1:
             $titulo = "Asistencias";
-            $cabecera = "../html/header.html";
             $filename = "../html/documentos.html";
             break;
         case 4.3:
             $titulo = "Contratos";
-            $cabecera = "../html/header.html";
             $filename = "../html/documentos.html";
             break;
         case 4.4:
             $titulo = "Documentos";
-            $cabecera = "../html/header.html";
             $filename = "../html/documentos.html";
             break;
         case 4.5:
             $titulo = "Formación";
-            $cabecera = "../html/header.html";
             $filename = "../html/documentos.html";
             break;
         case 4.6:
             $titulo = "Incidencias";
-            $cabecera = "../html/header.html";
             $filename = "../html/documentos.html";
             break;
         case 4.7:
             $titulo = "Material";
-            $cabecera = "../html/header.html";
             $filename = "../html/documentos.html";
             break;
         case 4.8:
             $titulo = "Nóminas";
-            $cabecera = "../html/header.html";
             $filename = "../html/documentos.html";
             break;
         case 4.9:
             $titulo = "Vacaciones";
-            $cabecera = "../html/header.html";
             $filename = "../html/vacacionesTabs.html";
             break;    
         case 5:
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:
                     $titulo = "Mis Albaranes";
-                    $cabecera = "../html/header.html";
                     $filename = "../html/documentos.html";
                     break;
                 case 2:
                     $titulo = $_SESSION["Controlador"] -> miEstado -> NombreSociedad;
-                    $cabecera = "../html/header.html";
                     $filename = "../html/Estado_Jornada_Empleado.html";
                     break;
 
@@ -138,13 +105,11 @@ function pinta_contenido($estado){
                 case 1:
                     $titulo = "Mis Facturas";
                     //$_SESSION["tipo_documento"] = 3;
-                    $cabecera = "../html/header.html";
                     $filename = "../html/documentos.html";
                     break;
                 case 2:
                     $titulo = "Mis Facturas";
                     //$_SESSION["tipo_documento"] = 3;
-                    $cabecera = "../html/header.html";
                     $filename = "../html/EstadoJornada.html";
                     break;
             }
@@ -155,13 +120,11 @@ function pinta_contenido($estado){
                 switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                     case 1:
                         $titulo = "Mis Proyectos";
-                        $cabecera = "../html/header.html";
                         $filename = "../html/documentos.html";
                         break;
                     case 2:
                         $titulo = "Mi calendario";
                         $filename = "../html/documentos.html";
-                        $cabecera = "../html/header.html";
                         break;
                 }
             break;
@@ -170,7 +133,6 @@ function pinta_contenido($estado){
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:
                     $titulo = "Proyecto %NombreProyecto%";
-                    $cabecera = "../html/header.html";
                     $filename = "../html/tareasFasesDetalle.html";
                     break;
             }
@@ -179,7 +141,6 @@ function pinta_contenido($estado){
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:    
                     $titulo = "Peticiones";
-                    $cabecera = "../html/header.html";
                     $filename = "../html/documentos.html";
                     break;
             }
@@ -187,21 +148,17 @@ function pinta_contenido($estado){
         case 9:
             switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
                 case 1:  
-                      
                     $titulo = "Archivos";
-                    $cabecera = "../html/header.html";
                     $filename = "../html/documentos.html";
                     break;
             }
             break;
         case 10:        
             $titulo = "Cambiar Contraseña";
-            $cabecera = "../html/header.html";
             $filename = "../html/cambiarContrasena.html";
             break;
         case 11:        
             $titulo = "Reestablecer Contraseña";
-            $cabecera = "../html/header.html";
             $filename = "../html/reestablecerContrasenaCampos.html";
             break;
         default:
@@ -212,10 +169,17 @@ function pinta_contenido($estado){
   
 
     if ($cabecera != "") {
-        //fileheader = fopen($cabecera, "r");
-        //$filesizeheader = filesize($cabecera);
-        //$fileheadertext = fread($fileheader, $filesizeheader);
-        $fileheadertext = $_SESSION["Controlador"] -> miEstado -> header;
+        $fileheadertext = '';
+        if(!isset($_SESSION["header"])){
+            $fileheader = fopen($cabecera, "r");
+            $filesizeheader = filesize($cabecera);
+            $fileheadertext = fread($fileheader, $filesizeheader);
+            fclose($fileheader);
+        }else{
+            $fileheadertext = $_SESSION["header"];
+        }
+        
+        //$fileheadertext = $_SESSION["Controlador"] -> miEstado -> header;
 
         if($_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
             $titulo.=' / Nueva';
@@ -239,6 +203,7 @@ function pinta_contenido($estado){
         $filesize = filesize($filename);
         $filetext = fread($file, $filesize);
         $filetext =  $fileheadertext. $filetext;
+        fclose($file);
     }else{
         $filetext = $fileheadertext.cargarSeccionesDinamicas();
     }
@@ -250,15 +215,14 @@ function pinta_contenido($estado){
     // $filesizef = filesize($filename);
     // $footer = fread($footer, $filesizef);
     if($_SESSION["Controlador"] -> miEstado -> Estado == 11){
-        $filetext = str_replace(['div class="btn-group d-flex" >','id="flecha_volver" class="col-2'],['div class="btn-group d-none" >','class="col-2 d-none'],$filetext);
-        
+        $filetext = str_replace(['div class="btn-group d-flex" >','id="flecha_volver" class="col-2'],['div class="btn-group d-none" >','class="col-2 d-none'],$filetext);   
     }
 
     //optimizar aqui
     if (in_array($_SESSION["Controlador"] -> miEstado -> Estado, array(1, 2, 3, 4, 5, 6, 7,7.1, 8, 9)) || ($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 )) {
         if ($_SESSION["Controlador"] -> miEstado -> Estado == 1){
             //Pestaña de sociedades del portal del comercial
-            return $filetext.muestra_sociedades();
+            $filetext = $filetext.muestra_sociedades();
 
         }elseif(in_array($_SESSION["Controlador"] -> miEstado -> Estado , array(3, 4, 5, 6, 7, 8, 9)) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
             //Documentos portal del comercial
@@ -275,7 +239,7 @@ function pinta_contenido($estado){
             $filetext = str_replace('<span id="filtros_dinamicos">',cargaFiltros(),$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicafiltros()',$filetext);
             
-            return str_replace('%LineasE%',muestra_documentos(),$filetext);
+            $filetext = str_replace('%LineasE%',muestra_documentos(),$filetext);
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7.1 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 1){
             $idpt = $_SESSION["Controlador"] -> miEstado -> IdPropietario;
             $nombreP =  array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($elemento) use ($idpt) {
@@ -283,7 +247,7 @@ function pinta_contenido($estado){
             });
             $nombreP = array_values($nombreP);
             $filetext = str_replace('%NombreProyecto%',$nombreP[0]['Descripcion'],$filetext);
-            return pinta_TareasRecursos_Cliente($filetext);
+            $filetext = pinta_TareasRecursos_Cliente($filetext);
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 2 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
             // elegir la pestaña de la jornad++++a correspondiente switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
             switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
@@ -294,7 +258,6 @@ function pinta_contenido($estado){
                     $filetext = str_replace('id="pestanaEnJornada" style="display: none;">','id="pestanaEnJornada" style="display: flex;">',$filetext);
                     break;
             }
-            return $filetext;
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 3 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         // añadir los filtros a el calendario
             $arrayFiltros = [
@@ -318,18 +281,16 @@ function pinta_contenido($estado){
                     $txt_filtros .= '<button onclick="" style="color:black;" class="dropdown-item" id="'.$valor["idTipoDoc"].'" >'.$valor["Descripcion"].'</button>';
                 }
             }
-            return $txt_filtros;
-
-
+            $filetext = $txt_filtros;
         }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 && !in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(4.9) ) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Pestañas de navegacion
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
             $filetext = str_replace('%LineasE%',DibujaLineas_PortalEmpleado(),$filetext);
-            return   $filetext;
+            $filetext = $filetext;
             
         }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(4.9) ) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
-            return DibujaPestanaVacaciones_Empleado($filetext);
+            $filetext = DibujaPestanaVacaciones_Empleado($filetext);
         //}elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Generar los formularios
             //return $filetext.cargaFormularioDinamico();
@@ -387,9 +348,6 @@ function pinta_contenido($estado){
               </div>
             </div>
         </div>';
-
-            return $filetext;
-
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 0){
         
         //Pestaña de calendario (Pepe)
@@ -402,14 +360,12 @@ function pinta_contenido($estado){
                                 </span>';
             $filetext = str_replace('<span id="filtros_dinamicos">',$filtrosCalendario,$filetext);
             $filetext = str_replace('%FuncionFiltrar%','aplicaFiltrosCalendario()',$filetext);
-            return $filetext.'<div id="calendar"></div></div></div></div>';
+            $filetext.'<div id="calendar"></div></div></div></div>';
             //<button onclick="dibuja_pagina([0,3])" style="all: initial;position:fixed;right:13%;bottom:10px;cursor: pointer;" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1){
         //selección de el tipo de documneto
             
-            return $filetext.cargarSeleccionDocumentosCalendario();
-        }else{
-            return $filetext;
+            $filetext.cargarSeleccionDocumentosCalendario();
         }
     } else {
         
@@ -423,10 +379,23 @@ function pinta_contenido($estado){
         }else{
             $filetext = str_replace("%logoImg%",'https://esquio.es/wp-content/uploads/elementor/thumbs/logo-esquio-pq0g3tu6khq6p3k32wrm4q6iwu2nqga9msxptholvk.png',$filetext);
         }
-        return $filetext;
+        
     }
-
-    fclose($file);
+    //Adición del header del cliente 
+    if($cabecera == "" && isset($_SESSION['headerCliente'])){
+        $filetext = $_SESSION['headerCliente'].$filetext;
+    }elseif($cabecera != "" && isset($_SESSION['headerCliente'])){
+        $filetext = str_replace('%headerCliente%',$_SESSION['headerCliente'],$filetext);
+    }elseif($cabecera != ""){
+         $filetext = str_replace('%headerCliente%','',$filetext);
+    }
+    //Adición del footer del cliente
+    if(isset($_SESSION['footerCliente'])){
+        $filetext .= '<br>'.$_SESSION['footerCliente'];
+    }
+    
+    return $filetext;
+    
 }
 
 function muestra_sociedades(){
@@ -1000,7 +969,7 @@ function DibujaLineas_PortalEmpleado(){
                     $acciones_linea_pintar = str_replace('%ImgArchivos%',$imgRutaCarpeta,$acciones_linea_pintar);
                 }
                 // incluir la accion de abrir el formulario de firma
-                if(isset($valor["Firmable"]) && $valor["Firmable"] === 1 && ( !isset($valor["Firmado"]) || $valor["Firmado"] == 0 ) ){
+                if(isset($valor["Firmable"]) && $valor["Firmable"] === 1 && (!isset($valor["Firmado"]) || $valor["Firmado"] == 0 ) ){
                     $tipoD;
                     if($_SESSION["Controlador"] -> miEstado -> IdTipoPropietario == 30){
                         $tipoD = 1;
