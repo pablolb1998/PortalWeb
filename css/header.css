@@ -4,9 +4,7 @@
     all: unset;
     cursor: pointer;
 }
-#nav-graficos{
-    min-height: 700px;
-}
+
     
 #flecha_volver:focus {
     outline: revert;
@@ -102,6 +100,32 @@
     z-index: 150;
   }
 
+
+  /* Estilo para el indicador de carga (spinner) */
+  #ruedita {
+    position: fixed;
+    z-index: 7;
+    top: 50%;
+    left: 50%;
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    width: 120px;
+    height: 120px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+  }
+  
+  /* Safari */
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 /*css para eliminar el paddig por defecto de boostrap */
 /* @media screen and (min-width: 600px) { /* setting default row and cols values for non mobile screens */
   /*  .row {
