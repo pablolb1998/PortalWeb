@@ -9,7 +9,7 @@ class Controlador
     public $miEstado;
     //valor por defecto en caso de no recibir
     function __construct($Estado = null){
-        
+        $this -> obtenerDatosInicio();
         $_SESSION["pinC"] = $_COOKIE['pinCPortalE'];
 
         if(isset($_COOKIE['LogoUsuarioPortalE'])){
@@ -26,15 +26,15 @@ class Controlador
                                         "observaciones" => 0,
                                         "añadir" => 0);
         $this -> miEstado -> tipo_App = $_SESSION["TipoPortal"];
-        if(isset($_SESSION["header"])){
-            $this -> miEstado -> header = $_SESSION["header"];
-            $_SESSION["header"] = null;
-        }else{
-            $header_Empresa = '../html/header.html';
-            $header = fopen($header_Empresa, "r");
-            $this -> miEstado -> header = fread($header,filesize($header_Empresa));
-            fclose($header);
-        }
+        // if(isset($_SESSION["header"])){
+        //     $this -> miEstado -> header = $_SESSION["header"];
+        //     $_SESSION["header"] = null;
+        // }else{
+        //     $header_Empresa = '../html/header.html';
+        //     $header = fopen($header_Empresa, "r");
+        //     $this -> miEstado -> header = fread($header,filesize($header_Empresa));
+        //     fclose($header);
+        // }
         
         //$this -> miEstado -> Estado = $IP;
     }
@@ -42,6 +42,32 @@ class Controlador
     function __destruct(){
         $_SESSION["Controlador"] = $this;
     }
+    function obtenerDatosInicio(){
+        $dirEmpresa = './../'.$_COOKIE['EmpresaPD'];
+        $datosConn = file_get_contents($dirEmpresa."/datosInicio.json");
+        $datosConn = json_decode($datosConn, true);
+        $_SESSION["NombreM"] = $datosConn["NombreM"];
+        if($datosConn["imgLogo"] != ""){
+            $_SESSION["imgLogo"] = $datosConn["imgLogo"];
+        }
+        $_SESSION["TipoPortal"] = $datosConn["TipoPortal"];
+
+        //comprobar si existe el header y el footer
+        if(file_exists($dirEmpresa.'/html/header.html')){
+            $fileheader = fopen($dirEmpresa.'/html/header.html', "r");
+            $filesizeheader = filesize($dirEmpresa.'/html/header.html');
+            $fileheadertext = fread($fileheader, $filesizeheader);
+            $_SESSION['headerCliente'] = $fileheadertext;
+        }
+        if(file_exists($dirEmpresa.'/html/footer.html')){
+            $filefooter = fopen($dirEmpresa.'/html/footer.html', "r");
+            $filesizefooter = filesize($dirEmpresa.'/html/footer.html');
+            $filefootertext = fread($filefooter, $filesizefooter);
+            $_SESSION['footerCliente'] = $filefootertext;
+        }
+
+    }
+    
     function almacenarDocumentos($doc){
         $this -> miEstado["documentos"] = $doc;
     }
@@ -70,7 +96,6 @@ class Controlador
         }elseif ($_SESSION["pinC"] == '65814415D75C') {
             $this -> miEstado -> IP = '81.169.167.5,23459';
         }
-            
         $this -> miEstado -> bbdd = $datosBBDD[0]["BBDD"];
     }
 
@@ -109,6 +134,10 @@ class Controlador
             return false;
         }
         
+    }
+
+    function comprobarVersion(){
+        return compararVersionBBDD();
     }
 
     //llama a la funcion que extrae los documentos y llena la clase estado con los mismos
@@ -207,7 +236,7 @@ class Controlador
             }
             //reinicializar variables
             $this -> miEstado -> nombreDocumentoPadre = null;
-            $this -> miEstado -> IdPropietario = null;
+            $this -> miEstado -> IdPropietario = null; 
         }else{
             array_unshift($this -> miEstado -> EstadosAnteriores , $this -> miEstado -> Estado);
             $this -> miEstado -> Estado = $ps;
@@ -339,9 +368,13 @@ class Controlador
     function subirArchivosServicioWeb($pin,$IdtipoPropietario,$idPropietario,$idArchivoTipo,$url,$nombre_archivo){
         $url = "http://onixsw.esquio.es:8080/Funciones.aspx?SubirArchivo=1&pin=".$pin.
         "&IdTipoPropietario=".$IdtipoPropietario.'&IdPropietario='.$idPropietario.
-        '&IdArchivoTipo='.$idArchivoTipo.'&URL=http://'.urlencode($url).'&NombreArchivo='.$nombre_archivo;
-        
-        $response = file_get_contents($url);
+        '&IdArchivoTipo='.$idArchivoTipo.'&URL='.urlencode($url).'&NombreArchivo='.$nombre_archivo;
+    
+        try {
+            $response = file_get_contents($url);
+        } catch (\Throwable $th) {
+            $platano=1;
+        }
         return true;
     }
 
@@ -354,7 +387,7 @@ class Controlador
             // print_r($url_archivo);
             // print_r('<br>');
         }
-
+ 
 
         
         $directorio_destino = "subidasTemp/".$_SESSION["pinC"]."/";
@@ -398,33 +431,26 @@ class Controlador
         
         $this -> comprobarBBDD($_SESSION["pinC"]);
         $nav = "";
-        if($c === 0 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1){
-            //PORTAL CLIENTE
+        if($c === 0 && !empty($arrayDatos) && $arrayDatos[0] != -1 && ($this -> miEstado -> tipo_App == 1 || $this -> miEstado -> tipo_App == 2)){
+            //PORTAL CLIENTE/EMPLEADO
             //inicia sesión y navega entre pestañas del portal del comercial
                 $InicioS = $this -> IniciarSesion($arrayDatos[0], $arrayDatos[1]);
+                $programaActualizado = $this -> comprobarVersion();
+                
                 $nav = 0;
-                if(count($this -> miEstado -> lista_sociedades) == 1 && $InicioS){
+                if(count($this -> miEstado -> lista_sociedades) == 1 && $InicioS && $programaActualizado){
                     $nav = 2;
                     $this -> setSociedad($this -> miEstado -> lista_sociedades[0]["idSociedad"]);
-                }elseif($InicioS){
+                }elseif($InicioS && $this -> miEstado -> tipo_App == 1 && $programaActualizado){
+                    // LISTA SOCIEDADES
                     $nav = 1;
+                }elseif($programaActualizado == false){
+                    $msgError = 'Es necesario actualizar el programa.';
                 }else{
                     $msgError = "Usuario o contraseña Incorrectos" ;
                 }
                 
                 $this -> navegarPestanas($nav);
-        }elseif($c === 0 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2){
-            //PORTAL EMLEADO
-            $InicioS = $this -> IniciarSesion($arrayDatos[0], $arrayDatos[1]);
-
-            $nav=0;
-            if($InicioS){
-                $nav = 2;
-                $this -> setSociedad($this -> miEstado -> lista_sociedades[0]["idSociedad"]);
-            }else{
-                $msgError = "Usuario o contraseña Incorrectos" ;
-            }
-            $this -> navegarPestanas($nav);
         }elseif($this -> miEstado -> tipo_App == 1.5 && ($c === 0 ||($c === 0.5 && empty($arrayDatos))) ){
         //PORTAL CLIENTE DESCARGAR DOC
             //DESCARGAR DOCUMENTO MEDIANTE CIF
@@ -758,7 +784,7 @@ class Controlador
                 $nombre_archivo = $arrayDatos[2][1];
             }
             
-
+            $nombre_archivo = str_replace('/','_',$nombre_archivo);
             
             $directorio_destino = "subidasTemp/".$_SESSION["pinC"]."/";
             // Verificar si el directorio existe, si no, crearlo
@@ -801,11 +827,12 @@ class Controlador
             }
             $this -> miEstado -> cargarForm = 1;
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $c == 4.4  && $this -> miEstado -> tipo_App == 2 && isset($arrayDatos[2])){
-        //portal del empleado marcar como dirmado  documento (optimizar)
-            
-            foreach($this -> miEstado -> Documentos as $doc){
+        //portal del empleado marcar como Firmado  documento (optimizar)
+            //investigar por que funciona
+            foreach($this -> miEstado -> Documentos as $indice => $doc){
                 if($doc['id'] == $arrayDatos[2] && $doc['tipoDocPortal'] == 3 ){
-                    $doc['Firmado'] = 1;
+                
+                    $this->miEstado->Documentos[$indice]['Firmado'] = 1;
                 }
             }
 
@@ -924,9 +951,9 @@ class Controlador
             $txtErr = "A:".$this -> miEstado -> tipo_App. "idI :".$this -> miEstado -> IdIdentidad.
             $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario;
         }
-        //
-        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml,$accionJs);
         
+       // return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml,$accionJs);
+        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App),$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml,$accionJs);
     }
 }
     
