@@ -1,17 +1,21 @@
 <?php
 require_once 'consultas.php';
 if(isset($_GET['a']) && isset($_GET['b']) && isset($_GET['c'])){
-    $pin = $_GET['c'];
+    $dirEmpresa = '../'.$_GET['c'];
+    $datosConn = file_get_contents($dirEmpresa."/datosInicio.json");
+    $datosConn = json_decode($datosConn, true);
+
+    $pin = $datosConn["pinC"];
     $usuario = $_GET['b'];
     $IdIdentidad = $_GET['a'];
     $Ip;
-    $datosBBDD = comprobarBD($pin,'sa','Iiaslgv52d');
+    $datosBBDD = comprobarBD($pin);
     if(!isset($datosBBDD[0]["Puerto"])){
         $Ip = $datosBBDD[0]["Servidor"];
     }else{
         $Ip = $datosBBDD[0]["Servidor"].','.$datosBBDD[0]["Puerto"];
     }
-    $datosBBDD = comprobarBD($pin,'sa','Iiaslgv52d');
+    $datosBBDD = comprobarBD($pin);
     if(confirmarUsuarioSeguridadUnificada($Ip,$datosBBDD[0]["BBDD"],$IdIdentidad,$usuario)){
         header('Location:../Index.html');
     }

@@ -13,8 +13,7 @@ if(isset($_GET['a']) && isset($_GET['b'])&& isset($_GET['c'])){
     $_SESSION["Controlador"] -> miEstado -> Estado = 11;
     $_SESSION["Controlador"] -> miEstado -> IdIdentidad = $_GET['a'];
     $fechaCaducidad = time() + (365 * 24 * 60 * 60);
-    setcookie("pinCPortalE", $_GET['b'], $fechaCaducidad, "/");
-    setcookie("TipoPortalE",  $_GET['c'] , $fechaCaducidad, "/");
+    setcookie("EmpresaPD", $_GET['b'], $fechaCaducidad, "/");
 header('Location:../Index.html');
 exit;
 }

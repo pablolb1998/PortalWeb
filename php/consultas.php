@@ -97,7 +97,7 @@ function compararVersionBBDD(){
         $versionBBDD = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);    
     }
     sqlsrv_close( $conn );
-    $conn2 = ConexionBD('85.214.41.17,23459','IntecoDistribucion');
+    $conn2 = ConexionBD('85.214.41.17,23459','IntecoDistribucion',"sa","Iiaslgv52d");
     $sql =  "SELECT TOP 1 (IdActualizacionBD) AS IdActualizacionBD FROM dbo.ActualizacionBD ORDER BY IdActualizacionBD DESC";
     $stmt = sqlsrv_query($conn2, $sql);
     if ($stmt === false) {
@@ -152,6 +152,7 @@ function cambiarContrasena( $CVieja, $Cnueva){
     //var_dump($usu);
     sqlsrv_close( $conn );
 }
+
 function reestablecerContrasenaConfirmar($Cnueva){
     $conn = ConexionBD($_SESSION["Controlador"]->miEstado->IP, $_SESSION["Controlador"]->miEstado->bbdd);
     $sql = "EXECUTE dbo.SeguridadUnificada_Identidad_Update_Contrasena @IdIdentidad = ?,
@@ -531,7 +532,7 @@ function extraerDocPersonal_Masivo(){
         }
     //8 - Vacaciones
         $sql8 = "SELECT IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcionLateral,  Estado2 AS descripcion2, color2 as color,'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
-        FechaInicio,FechaFin
+        FechaInicio,FechaFin,Año as AñoV
         FROM dbo.vw_PEVacaciones
         WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -560,11 +561,37 @@ function extraerDocPersonal_Masivo(){
                 array_push($DatosBD, $row);
             }
         }
+    
+    //9 Proyectos a los que tiene acceso el personal
+        $sql9 = "SELECT IdProyecto AS id,
+        Nombre AS descripcion,
+        case
+            when Estado=0 THEN 'Iniciado'
+            --when Estado=2 Then 'Cerrado'
+            Else 'en espera'
+        End  AS descripcionLateral,
+        CONVERT(VARCHAR(50),FechaCreacion,103) AS descripcion2,
+        'GREEN' AS color
+        FROM dbo.Proyectos
+        where Estado = 0
+        ORDER BY FechaCreacion DESC";
+        $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
+        //$parm = array($IdCliente);
+        $stmt = sqlsrv_query($conn,$sql9,$parm);
+        if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }else{
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $row["tipoDocPortal"] = 9;
+                array_push($DatosBD, $row);
+            }
+        }
 
-   
-   
-    return $DatosBD;
+        
+    
     sqlsrv_close( $conn );
+    return $DatosBD;
+    
 
 }
 
@@ -603,12 +630,70 @@ function extraerDropdownsFormsValores(){
     sqlsrv_close( $conn );
 }
 
+function extraerFasesProyectos(){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    
+    $Fases = array();
+    $TiposTareas = array();
+    $ProyectosMaterialesTipos = array();
+    $Articulos = array();
+    $sql = "SELECT pt.IdProyectoTarea,p.IdProyecto,pt.Codigo +' - '+ pt.Nombre AS Descripcion FROM ProyectosTareas pt 
+                    INNER JOIN dbo.Proyectos p ON p.IdProyecto = pt.IdProyecto 
+                    WHERE p.Estado = 0 AND	pt.FechaFin IS NULL
+                    ORDER BY pt.Codigo";
+
+    $stmt = sqlsrv_query($conn,$sql);
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($Fases, $row);
+        }
+    }
+    $sql2 = "SELECT IdProduccionTipoTarea,
+            Nombre 
+            FROM dbo.ProduccionTiposTareas
+            WHERE TareaMontaje = 1";
+
+    $stmt2 = sqlsrv_query($conn,$sql2);
+    if ($stmt2 === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        while ($row = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC)) {
+            array_push($TiposTareas, $row);
+        }
+    }
+
+    $sql3 = "SELECT IdProyectoMaterialTipo,Nombre FROM dbo.ProyectosMaterialesTipos";
+
+    $stmt3 = sqlsrv_query($conn,$sql3);
+    if ($stmt3 === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        while ($row = sqlsrv_fetch_array($stmt3, SQLSRV_FETCH_ASSOC)) {
+            array_push($ProyectosMaterialesTipos, $row);
+        }
+    }
+
+    $sql4 = "SELECT idArticulo,Descripcion FROM dbo.Articulos WHERE Gasto=1 AND MovimientoStock = 0";
+
+    $stmt4 = sqlsrv_query($conn,$sql4);
+    if ($stmt4 === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }else{
+        while ($row = sqlsrv_fetch_array($stmt4, SQLSRV_FETCH_ASSOC)) {
+            array_push($Articulos, $row);
+        }
+    }
+    
+    return array($Fases,$TiposTareas,$ProyectosMaterialesTipos,$Articulos);
+}
+
 //iniciar o finalizar jornada
-function exec_up_Tiempos_Insert($lat = '',$long = ''){
+function exec_up_Tiempos_Insert($lat = '',$long = '' , $horaLocal = null){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $sql = "DECLARE @IdTiempo INT,
     @FechaVisualizacion DATETIME;
-
     EXEC up_Tiempos_Insert
     @IdTiempo = @IdTiempo OUTPUT,
 	@IdSociedad = ?,
@@ -619,7 +704,12 @@ function exec_up_Tiempos_Insert($lat = '',$long = ''){
     @FechaImputacion = ?,
     @Latitud = ?,                     
     @Longitud = ?,
+    @Observaciones = ?,
     @FechaVisualizacion = @FechaVisualizacion OUTPUT";
+    $horaFormateada = '';
+    if($horaLocal != null){
+        $horaFormateada = 'Hora Geolocalizacion : '.date('H:i', strtotime($horaLocal));
+    }
     $parm = array($_SESSION["Controlador"] -> miEstado -> id_sociedad, 
             $_SESSION["Controlador"] -> miEstado ->EstadoJornada[2],
             $_SESSION["Controlador"] -> miEstado -> IdPersonal,
@@ -627,7 +717,8 @@ function exec_up_Tiempos_Insert($lat = '',$long = ''){
             $_SESSION["Controlador"] -> miEstado ->EstadoJornada[0],
             date('Ymd H:i:s'),
             $lat,
-            $long);
+            $long,
+            $horaFormateada);
     // print_r($parm);
     // print_r('<br>');
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
@@ -661,7 +752,7 @@ function exect_Insert_From_Dinamico($arrayValores){
             }
         }
         
-        $sql .=$sql2;
+        $sql .= $sql2;
         //print_r($sql);
         //print_r($arrayValores);
         $parm = $arrayValores;
@@ -719,7 +810,7 @@ function exect_Insert_From_Dinamico($arrayValores){
                 case 4.9:
                 
                     $sqlReturn = "SELECT top 1 IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcionLateral,  Estado2 AS descripcion2, color2 as color,'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
-                    FechaInicio,FechaFin
+                    FechaInicio,FechaFin,Año as AñoV
                     FROM dbo.vw_PEVacaciones
                     WHERE IdPersonal = ? ORDER BY IdPersonalVacaciones DESC";
                     $tipoDoc = 8;
@@ -746,6 +837,77 @@ function exect_Insert_From_Dinamico($arrayValores){
     }
     
     sqlsrv_close( $conn );
+}
+
+function insertProyectosTareaMaterial($arrayDatos){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $sql = "";
+    $parm = array();
+    if($arrayDatos[0] == 1){
+            $sql = " INSERT INTO dbo.PETiemposProyectosAppSheet
+        (IdPETiemposProyectosAppSheet,
+        IdProyecto,
+        IdProyectoTarea,
+        IdTipoTarea,
+        FechaInicio,
+        FechaFin,
+
+        IdTipoHora,
+        Fecha,
+        IdPersonal,
+        IdIdentidad
+        
+        )
+        VALUES
+        (?,?,?,?,?,?,?,GETDATE(),?,?)";
+
+        $parm = array(
+            $randomNumber = rand(10000, 999999),
+            $arrayDatos[1],
+        $arrayDatos[2],
+        $arrayDatos[3],
+        date('Ymd H:i:s', strtotime($arrayDatos[4]) ),
+        date('Ymd H:i:s', strtotime($arrayDatos[5]) ),
+        69,
+        $_SESSION["Controlador"] -> miEstado -> IdPersonal,
+        $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+
+    }else{
+        $sql = "DECLARE @FECHA SMALLDATETIME = GETDATE(),
+                @IdProyectoMaterial INT
+        EXECUTE dbo.up_ProyectosMateriales_Insert
+        @IdProyectoMaterial = @IdProyectoMaterial OUTPUT,
+        @IdProyecto = ?,
+        @IdProyectoTarea = ?,
+        @IdProyectoMaterialTipo = ?, 
+        @IdArticulo = ?, 
+        @Descripcion = ?, 
+        @Cantidad = ?,
+        @Coste = ?,
+        @Fecha =?,
+        @IdPersonal = ?,
+        @IdIdentidad = ?";
+
+        $parm = array($arrayDatos[1],
+        $arrayDatos[6],
+        $arrayDatos[7],
+        $arrayDatos[8],
+        $arrayDatos[9],
+        $arrayDatos[10],
+        $arrayDatos[11],
+        date('Ymd H:i:s', strtotime($arrayDatos[12]) ),
+        $_SESSION["Controlador"] -> miEstado -> IdPersonal,
+        $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+    }
+    $stmt = sqlsrv_prepare($conn, $sql, $parm);
+    if (!sqlsrv_execute($stmt)) {
+        die(print_r(sqlsrv_errors(), true));
+        return false;
+        die;
+    }else{
+        return 1;
+    }   
+
 }
 
 function comprobarBD($c){
@@ -843,6 +1005,8 @@ function confirmarUsuarioSeguridadUnificada($Ip,$bd,$IdIdent,$usu){
 }
 
 function comprobarUsuarioSURecuperacionContrasena($Ip,$bd,$email){
+    $link = '';
+    $msg = '';
     $row;
     $tipousu;
     $conn = ConexionBD($Ip,$bd);
@@ -858,9 +1022,15 @@ function comprobarUsuarioSURecuperacionContrasena($Ip,$bd,$email){
         $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
     }
     if(isset($row) && $row != null && $row != ''){
-            $link = 'http://www.areadecliente.de/php/reestablecerContrasenaCompletar.php?a='.$row['IdIdentidad'].'&b='.$_COOKIE['pinCPortalE'].'&c='.$_COOKIE['TipoPortalE'];
+        if($_COOKIE['TipoPortalE'] = 1){
+            $link = 'https://www.areadecliente.de/php/reestablecerContrasenaCompletar.php?a='.$row['IdIdentidad'].'&b='.$_COOKIE['EmpresaPD'].'&c='.$_COOKIE['TipoPortalE'];
+            $msg = 'Reestablecimiento contraseña del Area de cliente de '.$_SESSION["NombreM"].'.';
+        }elseif($_COOKIE['TipoPortalE'] = 2){
+            $link = 'https://www.tuportal.de/empleado/php/reestablecerContrasenaCompletar.php?a='.$row['IdIdentidad'].'&b='.$_COOKIE['EmpresaPD'].'&c='.$_COOKIE['TipoPortalE'];
+            $msg = 'Reestablecimiento contraseña del Portal del empleado de '.$_SESSION["NombreM"].'.';
+        }
             if($_COOKIE['pinCPortalE'] == 123654){
-                $link = 'http://localhost/portaldecliente/php/reestablecerContrasenaCompletar.php?a='.$row['IdIdentidad'].'&b='.$_COOKIE['pinCPortalE'].'&c='.$_COOKIE['TipoPortalE'];
+                $link = 'http://localhost/portaldecliente/php/reestablecerContrasenaCompletar.php?a='.$row['IdIdentidad'].'&b='.$_COOKIE['EmpresaPD'].'&c='.$_COOKIE['TipoPortalE'];
             }
             //$link = 'localhost/portaldecliente/php/ActivadorUsuariosCliente.php?a='.$UsuarioCreado.'&c='.$Ip.'&d='. $datosBBDD[0]["BBDD"].'&b='.$arratLogin[2];
            // echo $link;
@@ -870,7 +1040,7 @@ function comprobarUsuarioSURecuperacionContrasena($Ip,$bd,$email){
             $plantilla = fread($file, $filesize);
             $htmlCorreo = str_replace(["%Usuario%","%LinkActivacionPortal%"],[$email,$link],$plantilla);
         
-        if(execute_EnviarMail_CreacionUsuario($email,$htmlCorreo,'Reestablecimiento contraseña del Area de cliente')){
+        if(execute_EnviarMail_CreacionUsuario($email,$htmlCorreo,$msg)){
             return true;
         }
     }

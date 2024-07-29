@@ -1,7 +1,7 @@
 <?php
 
 
-function ConexionBD( $server = "192.168.204.111", $bd = "OnixInteco",$un = "sa", $ps = "Iiaslgv52d")
+function ConexionBD( $server = "192.168.204.111", $bd = "OnixInteco",$un = "UsuarioProgramaBP", $ps = "^*TMLQLcc11*^")
     {
         //Variables que sacaremos de la BBDD de wordpress
                 $bbdd = $bd;
