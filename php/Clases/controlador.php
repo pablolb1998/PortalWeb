@@ -164,7 +164,6 @@ class Controlador
                     break;
                 case 3 :
                     if(empty($this -> miEstado -> FechaFacturas)){
-                        
                         $primeraEjecucion = true;
                     }
                     $this -> miEstado -> FechaFacturas = $fecha;
@@ -213,8 +212,8 @@ class Controlador
         $this -> miEstado -> NombreSociedad = $ns; 
     }
     // iniciar o finalizar la jornada segun el estadp 
-    function iniciarFinalizarJornada($lat = null,$long = null ){
-        exec_up_Tiempos_Insert($lat,$long);
+    function iniciarFinalizarJornada($lat = null,$long = null, $horaLocal = null ){
+        exec_up_Tiempos_Insert($lat,$long,$horaLocal);
         if($this -> miEstado -> EstadoJornada[0] == 1){
             $this -> miEstado -> EstadoJornada[0] = 0;
         }else{
@@ -290,6 +289,11 @@ class Controlador
         $this -> miEstado -> acciones["modalVisualizar"] = 0;
         $this -> miEstado -> acciones["VisualizarDetalles"] = 0;
         $this -> miEstado -> acciones["modificar"] = 0;
+        $this -> miEstado -> acciones["modalVisualizarLineaCustom"] = 0;
+        //*******************/
+                //Acciones personaizadas de cada formulario//
+        //******************/
+        $this -> miEstado -> acciones["accionCustom1"] = 0;
         if($this -> miEstado -> tipo_App == 2){
             //Portal del empleado
             switch ($this -> miEstado -> Estado) {   
@@ -328,6 +332,11 @@ class Controlador
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["desplegado"] = 1;
                     $this -> miEstado -> acciones["modalVisualizar"] = 1;
+                    break;
+                case 6:
+                    $this -> miEstado -> acciones["desplegado"] = 1;
+                    $this -> miEstado -> acciones["accionCustom1"] = 1;
+                    $this -> miEstado -> acciones["modalVisualizarLineaCustom"] = 1;
                     break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
@@ -418,11 +427,24 @@ class Controlador
 
     }
 
-    
+    function calcularVacacionesGraf($añoS){
+        $arrayAuxiliarHtml2 = array();
+        foreach($this -> miEstado -> Documentos as $documento){
+            if($documento["tipoDocPortal"] == 8.5 && $documento['Año'] == $añoS){
+                array_push($arrayAuxiliarHtml2,array('Año' => $documento['Año'],
+                'DiasTotales' => $documento['DiasTotales'],
+                'DiasDisfrutados' => $documento['DiasDisfrutados'],
+                'DiasConcedidos' => $documento['DiasConcedidos'],
+                'DiasPendientes' => $documento['DiasPendientes']));
+            }
+        }         
+        return $arrayAuxiliarHtml2;      
+    }
 
     //funciones de para generar el contenido
     // optimizar el navegar pestañas
     function generarContenido($arrayDatos = array()){
+        //print_r($arrayDatos);
         $arrayAuxiliarHtml = array();
         $accionJs = null;
         $msgError = "" ;
@@ -471,6 +493,7 @@ class Controlador
                         $this -> cerrarSesion();
                         return array('../portaldecliente/Index.html',0,1,$msgError);
                     }else{
+                        $this -> cerrarSesion();
                         return array('../Index.html',0,1,$msgError);
                     }
                         
@@ -500,7 +523,11 @@ class Controlador
                // print_r(pruebaC());
 
         }elseif($c === 1 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 1){
-        //PORTAL CLIENTE coloca los datos de la sociedad seleccionada y navega a la siguiente pestaña
+        //********************************************************************************************//
+                                    //PORTAL CLIENTE //
+        //coloca los datos de la sociedad seleccionada y navega a la siguiente pestaña//
+
+        //********************************************************************************************//
             $this -> setSociedad($arrayDatos[0]);
             $this -> navegarPestanas(2);
         }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1  && $this -> miEstado -> tipo_App == 1) {
@@ -568,6 +595,9 @@ class Controlador
                     $nav = 5;//Pestaña de jornada
                     break;
                 case 3 :
+                    if($this -> miEstado -> datosProyectos == null){
+                        $this -> miEstado -> datosProyectos = extraerFasesProyectos();
+                    }
                     $nav = 6;
                     break;
                 case 4 :
@@ -640,25 +670,17 @@ class Controlador
                     //Vacaciones de personal
                     $this -> miEstado -> IdTipoPropietario = 146;
                     $accionJs = 2;
-                    if(!isset($this -> miEstado -> anoFiltroVacaciones)){
-                        $this -> miEstado -> anoFiltroVacaciones = date("Y");
-                    }
                     $this -> miEstado -> listaAnoFiltroVacaciones = array(date("Y"));
                     foreach($this -> miEstado -> Documentos as $documento){
                         if($documento["tipoDocPortal"] == 8.5){
                             if($documento['Año'] != date("Y")){
                                 array_push($this -> miEstado -> listaAnoFiltroVacaciones,$documento['Año']);
                             }
-                            array_push($arrayAuxiliarHtml,array('Año' => $documento['Año'],
-                            'DiasTotales' => $documento['DiasTotales'],
-                            'DiasDisfrutados' => $documento['DiasDisfrutados'],
-                            'DiasConcedidos' => $documento['DiasConcedidos'],
-                            'DiasPendientes' => $documento['DiasPendientes']));
                         }
-                    }
-                    
+                    }    
+                    $this -> miEstado -> AnioSV = date("Y");
+                    $arrayAuxiliarHtml = $this -> calcularVacacionesGraf($this -> miEstado -> AnioSV);               
                     rsort($this -> miEstado -> listaAnoFiltroVacaciones);
-                    //print_r($arrayAuxiliarHtml);
                     break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
@@ -726,11 +748,12 @@ class Controlador
                 if( !in_array($documento["tipoDocPortal"],array(2,3,4))){
                     $fi;
                     $ff;
+                    //Convertir los nulos a date porque sino peta
                     try{
                        $fi = ($documento["FechaInicio"] ? $documento["FechaInicio"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
                        $ff = ($documento["FechaFin"] ? $documento["FechaFin"] -> format('Y-m-d H:i:s') : '1900-01-01 00:00:00');
                     }catch (e){
-
+                        $msgError = "Error del servidor en la conversión DateTime.";
                     }
                     if($ff && $fi){
                         $dc = array($documento["descripcion"],
@@ -740,13 +763,10 @@ class Controlador
                             $documento["tipoDocPortal"]
                         );
                         array_push($arrayAuxiliarHtml,$dc);
-
                     }
-                    
-
                 }
-                
             }
+        
         //}elseif($this -> miEstado -> Estado == 7  && $this -> miEstado -> tipo_App == 2 && !empty($arrayDatos) &&  $this -> miEstado -> cargarForm == 1){
         // navegacion al formulario correspondiente desde la pestaña de calendario
 
@@ -819,13 +839,13 @@ class Controlador
                 }
                 $this -> cargaDocumentos_Parcial(5);
                 
-                
-        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 2 && !isset($arrayDatos[2])){
-        //Portal empleado cargar Formulario
-            if($this -> miEstado -> Estado != 7){
-                $this -> cargarDatosForm();
-            }
-            $this -> miEstado -> cargarForm = 1;
+        //* LOS FORMULARIOS AHORA VAN POR MODALES, NO POR PESTAÑAS APARTE */        
+        // }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3  && $this -> miEstado -> tipo_App == 2 && !isset($arrayDatos[2])){
+        // //Portal empleado cargar Formulario
+        //     if($this -> miEstado -> Estado != 7){
+        //         $this -> cargarDatosForm();
+        //     }
+        //     $this -> miEstado -> cargarForm = 1;
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $c == 4.4  && $this -> miEstado -> tipo_App == 2 && isset($arrayDatos[2])){
         //portal del empleado marcar como Firmado  documento (optimizar)
             //investigar por que funciona
@@ -835,108 +855,113 @@ class Controlador
                     $this->miEstado->Documentos[$indice]['Firmado'] = 1;
                 }
             }
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 12 && $c == 4.9  && $this -> miEstado -> tipo_App == 2 && isset($arrayDatos[2])){
+            //portal del empleado Cambiar El año selecionado en la pestaña de vacaciones
 
+            $this -> miEstado -> AnioSV = intval($arrayDatos[2]);
+            $arrayAuxiliarHtml = $this -> calcularVacacionesGraf($this -> miEstado -> AnioSV);
+            $accionJs = 2;
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 && $this -> miEstado -> Estado == 6){
+            
+            $resultado = insertProyectosTareaMaterial($arrayDatos[2]);
+            
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 ){
         //portal del empleado guardar o cancelar en la pestaña de formulario
-            $this -> miEstado -> camposFormularios = null;
+            //$this -> miEstado -> camposFormularios = null;
+            
+                if( $this -> miEstado -> Estado == 4.4 ){
+                    $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
+                                                    $this -> miEstado -> IdTipoPropietario,
+                                                    $this -> miEstado -> IdPropietario,
+                                                    $arrayDatos[2][0],
+                                                    $arrayDatos[3],
+                                                    $arrayDatos[4]);
+                }
 
+                if($arrayDatos[2] != 0){
+                    $arrayForm = array_filter($this -> miEstado -> formularios, function ($form) {
+                        return $form["Estado"] == $this -> miEstado -> Estado;
+                    });
+                    
+                    $arrayIntermedio = array_shift($arrayForm);
+                    $arraycampos = $arrayIntermedio["Campos"];
+                    $arrayValores = array();
+                    foreach($arraycampos as $campo){
+                        if($campo["OUTPUT"] == 0 && $campo["Mostrar"] == 0 && $campo["ValorAdicional"] == null){
+                            $valorCampo = isset($campo["VariableAlmacenada"]) ? $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}  : $campo["ValorPorDefecto"];
+                            if($valorCampo == "%now%"){
+                                $valorCampo = date('Ymd H:i:s');
+                            }elseif($valorCampo == '%randmKey%'){
+                                $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                                $claveGenerada = '';
 
-            if( $this -> miEstado -> Estado == 4.4 ){
-               
-                $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
-                                                $this -> miEstado -> IdTipoPropietario,
-                                                $this -> miEstado -> IdPropietario,
-                                                $arrayDatos[2][0],
-                                                $arrayDatos[3],
-                                                $arrayDatos[4]);
-            }
-
-
-
-
-            if($arrayDatos[2] != 0){
-                $arrayForm = array_filter($this -> miEstado -> formularios, function ($form) {
-                    return $form["Estado"] == $this -> miEstado -> Estado;
-                });
-                $arrayIntermedio = array_shift($arrayForm);
-                $arraycampos = $arrayIntermedio["Campos"];
-                $arrayValores = array();
-                foreach($arraycampos as $campo){
-                    if($campo["OUTPUT"] == 0 && $campo["Mostrar"] == 0 && $campo["ValorAdicional"] == null){
-                        $valorCampo = isset($campo["VariableAlmacenada"]) ? $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}  : $campo["ValorPorDefecto"];
-                        if($valorCampo == "%now%"){
-                            $valorCampo = date('Ymd H:i:s');
-                        }elseif($valorCampo == '%randmKey%'){
-                            $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                            $claveGenerada = '';
-
-                            for ($i = 0; $i < 9; $i++) {
-                                $claveGenerada .= $caracteres[rand(0, strlen($caracteres) - 1)];
+                                for ($i = 0; $i < 9; $i++) {
+                                    $claveGenerada .= $caracteres[rand(0, strlen($caracteres) - 1)];
+                                }
+                                $valorCampo = $claveGenerada;
                             }
-                            $valorCampo =$claveGenerada;
+                            array_push($arrayValores,$valorCampo);
+                        }elseif($campo["TipoDatoHtml"] == "file"){
+                            $valorCampo = $arrayDatos[3];
+                            array_push($arrayValores,$valorCampo);
+                        }elseif($campo["Mostrar"] == 1 && $campo["ValorAdicional"] == null){
+                            $valorCampo = array_shift($arrayDatos[2]);
+                            if (DateTime::createFromFormat('Y-m-d\TH:i', $valorCampo) !== false) {
+                                $valorCampo = DateTime::createFromFormat('Y-m-d\TH:i', $valorCampo) -> format('Ymd H:i:s');
+                            }elseif(DateTime::createFromFormat('Y-m-d', $valorCampo) !== false){
+                                $valorCampo = DateTime::createFromFormat('Y-m-d', $valorCampo) -> format('Ymd');
+                            }
+                            array_push($arrayValores,$valorCampo);
                         }
-                        array_push($arrayValores,$valorCampo);
-                    }elseif($campo["TipoDatoHtml"] == "file"){
-                        $valorCampo = $arrayDatos[3];
-                        array_push($arrayValores,$valorCampo);
-                    }elseif($campo["Mostrar"] == 1 && $campo["ValorAdicional"] == null){
-                        $valorCampo = array_shift($arrayDatos[2]);
-                        if (DateTime::createFromFormat('Y-m-d\TH:i', $valorCampo) !== false) {
-                            $valorCampo = DateTime::createFromFormat('Y-m-d\TH:i', $valorCampo) -> format('Ymd H:i:s');
-                        }elseif(DateTime::createFromFormat('Y-m-d', $valorCampo) !== false){
-                            $valorCampo = DateTime::createFromFormat('Y-m-d', $valorCampo) -> format('Ymd');
-                        }
-                        array_push($arrayValores,$valorCampo);
                     }
-                }
-                
-                //subir archivo al direcotrio teporal
-                
+                    
+                    //subir archivo al direcotrio teporal
+                    
 
-                    // $directorio_destino = "archivos_subidos/"; // Ruta donde deseas almacenar los archivos subidos
-                    // $nombre_archivo = $_FILES["archivo"]["name"];
-                    // $_SESSION["DirectorioRaizEmpresa"]
-             
-                $resultadoEjecucion = true;
+                        // $directorio_destino = "archivos_subidos/"; // Ruta donde deseas almacenar los archivos subidos
+                        // $nombre_archivo = $_FILES["archivo"]["name"];
+                        // $_SESSION["DirectorioRaizEmpresa"]
+                
+                    $resultadoEjecucion = true;
 
-               if($arrayIntermedio["Instruccion"] != ""){
-                $resultadoEjecucion = exect_Insert_From_Dinamico($arrayValores);
-               }
-                
-                if($resultadoEjecucion == false ){
-                    $msgError = "Ha ocurrido un error al insertal el registro";
-                }else{
-                    array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
+                if($arrayIntermedio["Instruccion"] != ""){
+                    $resultadoEjecucion = exect_Insert_From_Dinamico($arrayValores);
                 }
-                
-                
-            }
-            $this -> miEstado -> cargarForm = 0;
-        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $this -> miEstado -> Estado == 5 && $this -> miEstado -> tipo_App == 2){
-        //PORTAL Empleado Iniciar/ finalizar jornada en la pestaña de tiempos
-            if(isset($arrayDatos[2]) && isset($arrayDatos[3])){
-                $this -> iniciarFinalizarJornada($arrayDatos[2],$arrayDatos[3]);
-            }else{
-                $this -> iniciarFinalizarJornada();
-            }
-            //$this -> miEstado -> EstadoJornada = comprueba_jornada_personal();//comprobar el estado actual
-            $this -> miEstado -> HistoricoJornada = extraer_JornadaHistorico();// extraer el historico de la jornada
-        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 11 && $this -> miEstado -> tipo_App == 2){
-            //obtener archivo portal empleado
-            //
-            $nombre_archivo = "";
-            $ejecucionArchivos;
-            if($arrayDatos[3] == "OPDF"){
-                
-            }else{
-                $ejecucionArchivos = $this -> descargaArchivoServicoWeb($arrayDatos[2][0],$arrayDatos[2][1]);
-                if($ejecucionArchivos){
-                    return($ejecucionArchivos);
-                }else{
-                    $msgError = 'Error al obtener el archivo desde el servicio web.';
+                    
+                    if($resultadoEjecucion == false ){
+                        $msgError = "Ha ocurrido un error al insertal el registro";
+                    }else{
+                        array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
+                    }
+                    
+                    
                 }
-                
-            }
+                $this -> miEstado -> cargarForm = 0;
+            }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $this -> miEstado -> Estado == 5 && $this -> miEstado -> tipo_App == 2){
+            //PORTAL Empleado Iniciar/ finalizar jornada en la pestaña de tiempos
+                if(isset($arrayDatos[2]) && isset($arrayDatos[3])){
+                    $this -> iniciarFinalizarJornada($arrayDatos[2],$arrayDatos[3],$arrayDatos[4]);
+                }else{
+                    $this -> iniciarFinalizarJornada();
+                }
+                //$this -> miEstado -> EstadoJornada = comprueba_jornada_personal();//comprobar el estado actual
+                $this -> miEstado -> HistoricoJornada = extraer_JornadaHistorico();// extraer el historico de la jornada
+            }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 11 && $this -> miEstado -> tipo_App == 2){
+                //obtener archivo portal empleado
+                //
+                $nombre_archivo = "";
+                $ejecucionArchivos;
+                if($arrayDatos[3] == "OPDF"){
+                    
+                }else{
+                    $ejecucionArchivos = $this -> descargaArchivoServicoWeb($arrayDatos[2][0],$arrayDatos[2][1]);
+                    if($ejecucionArchivos){
+                        return($ejecucionArchivos);
+                    }else{
+                        $msgError = 'Error al obtener el archivo desde el servicio web.';
+                    }
+                    
+                }
             
 
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == -1){
@@ -952,8 +977,8 @@ class Controlador
             $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario;
         }
         
-       // return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml,$accionJs);
-        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App),$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml,$accionJs);
+        return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml,$accionJs);
+        //return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App),$msgError,$abrirNuebaPestaña,$arrayAuxiliarHtml,$accionJs);
     }
 }
     

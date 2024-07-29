@@ -42,6 +42,11 @@ class Estado{
     public $EstadoJornada = array();
     public $HistoricoJornada;
 
+
+    //Portal del empleado Vacaciones
+    public $listaAnoFiltroVacaciones = null;
+    public $AnioSV = null;
+
     //datos navegacion archivos PE
     public $IdTipoPropietario;
     public $IdPropietario;
@@ -55,6 +60,7 @@ class Estado{
     public $IdDocumentoPadre;
     public $archivostiposAccesos;
     public $linkDocumentoSubido;
+    //public $camposFormularios = null;
 
     //Datos de conexion
     public $IP;
@@ -67,6 +73,7 @@ class Estado{
 
     //acciones
     public $acciones = array();
+    public $datosProyectos = array();
 }
 
 ?>
