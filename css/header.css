@@ -3,9 +3,9 @@
 #flecha_volver{
     all: unset;
     cursor: pointer;
+   
 }
-
-    
+ 
 #flecha_volver:focus {
     outline: revert;
 }
@@ -15,8 +15,19 @@
     
 }
 
-/* Estilos iconos */
+/*Boton inicio fin jornada pestaña*/
+#InicioFin_Jornada{
+  all: unset;
+  cursor: pointer;
+  border: none;
+}
 
+#InicioFin_Jornada:hover {
+  transform: scale(1.4);
+  
+}
+
+/* Estilos iconos */
 .pdf_icono{
     width: 1.1%;
     float: right;
@@ -47,6 +58,17 @@
         border: none;
     }
 }
+
+/*css para que el boton quede por encima del footer*/
+.btn_acciones {
+  all: initial;
+  position: fixed;
+  right: 13%;
+  bottom: 10px;
+  cursor: pointer;
+  z-index: 999; 
+}
+
 /* css para eliminar los margenes en movil de boostrap */
 
 #no-margin {
@@ -57,10 +79,6 @@
 #no-padding{
     padding: 0px !important;
 }
-
-
-
-
 
 .c_img{
     border-top-left-radius:var(--bs-border-radius-pill) !important;
@@ -99,9 +117,10 @@
     text-align: center;
     z-index: 150;
   }
-
-
-  /* Estilo para el indicador de carga (spinner) */
+  #header_agrupado img{
+    transition: height 0.5s ease; 
+  }
+  /* Estilo para el indicador de carga (spinner)(no funciona) */
   #ruedita {
     position: fixed;
     z-index: 7;
@@ -112,7 +131,8 @@
     border-top: 16px solid #3498db;
     width: 120px;
     height: 120px;
-    -webkit-animation: spin 2s linear infinite; /* Safari */
+    /* Safari */
+    -webkit-animation: spin 2s linear infinite; 
     animation: spin 2s linear infinite;
   }
   
@@ -126,26 +146,9 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
-/*css para eliminar el paddig por defecto de boostrap */
-/* @media screen and (min-width: 600px) { /* setting default row and cols values for non mobile screens */
-  /*  .row {
-      margin-left: -15px;
-      margin-right: -15px;
-  }
-  
-    .row [class*='col']{
-      padding-left: 15px;
-      padding-right: 15px;
-    }
-  
-  } */
-  /*  setting rows margin and cols padding to 0 for mobile screens */
- /* .row {  
-    margin-left: 0;
-    margin-right: 0;
-  }
-  
-  .row [class*='col']{
-    padding-left: 0;
-    padding-right: 0;
-  }  */
+ 
+  /*Estilos Full calendar*/
+  .fc-daygrid-day-frame{
+    max-height: 50px; /* Establece el máximo de altura para cada semana */
+    margin-bottom: 0; /* Elimina el margen inferior entre las semanas */
+}
