@@ -531,7 +531,12 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //8 - Vacaciones
-        $sql8 = "SELECT IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcionLateral,  Estado2 AS descripcion2, color2 as color,'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
+        $sql8 = "SELECT IdPersonalVacaciones AS id,
+        EstadoV  AS descripcion, 
+        RangoFechas  AS descripcionLateral,  
+        Estado2 AS descripcion2, 
+        color2 as color,
+        'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
         FechaInicio,FechaFin,Año as AñoV
         FROM dbo.vw_PEVacaciones
         WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
@@ -564,7 +569,7 @@ function extraerDocPersonal_Masivo(){
     
     //9 Proyectos a los que tiene acceso el personal
         $sql9 = "SELECT IdProyecto AS id,
-        Nombre AS descripcion,
+        ISNULL(Codigo,'')+' '+ISNULL(Nombre,'')  AS descripcion,
         case
             when Estado=0 THEN 'Iniciado'
             --when Estado=2 Then 'Cerrado'
@@ -663,9 +668,7 @@ function extraerFasesProyectos(){
             array_push($TiposTareas, $row);
         }
     }
-
     $sql3 = "SELECT IdProyectoMaterialTipo,Nombre FROM dbo.ProyectosMaterialesTipos";
-
     $stmt3 = sqlsrv_query($conn,$sql3);
     if ($stmt3 === false) {
         die(print_r(sqlsrv_errors(), true));
@@ -675,7 +678,7 @@ function extraerFasesProyectos(){
         }
     }
 
-    $sql4 = "SELECT idArticulo,Descripcion FROM dbo.Articulos WHERE Gasto=1 AND MovimientoStock = 0";
+    $sql4 = "SELECT idArticulo,Descripcion FROM dbo.Articulos WHERE Gasto = 1 AND MovimientoStock = 0";
 
     $stmt4 = sqlsrv_query($conn,$sql4);
     if ($stmt4 === false) {
@@ -687,6 +690,56 @@ function extraerFasesProyectos(){
     }
     
     return array($Fases,$TiposTareas,$ProyectosMaterialesTipos,$Articulos);
+}
+
+function extraerRecursosFaseProyecto($idProyecto,$FaseMaterial){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $DatosBD = array();
+
+    if($FaseMaterial == 0) {
+        $sql= "SELECT T.IdProyectoRecurso AS id,T.IdProyectoTarea,
+                CONVERT(VARCHAR(50), t.FechaInicio, 103)+' - '+CONVERT(VARCHAR(50), t.FechaFin, 103) AS descripcion2,
+                CAST(T.Duracion AS VARCHAR(50))+' horas' AS descripcionLateral,
+                Duracion,ISNULL(pt.Nombre,pt.nombre) AS descripcion,t.Fecha AS fecha 
+                FROM dbo.ProyectosRecursos T
+                INNER JOIN proyectos Pr ON Pr.IdProyecto = T.IdProyecto
+                left JOIN dbo.ProyectosTareas pt ON pt.IdProyectoTarea=t.IdProyectoTarea
+                WHERE T.IdProyecto = ? AND T.idpersonal = ?";
+        $parm = array($idProyecto,$_SESSION["Controlador"] -> miEstado -> IdPersonal);
+        $stmt = sqlsrv_query($conn,$sql,$parm);
+
+
+        if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }else{
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $row["tipoDocPortal"] = 9.1;
+                array_push($DatosBD, $row);
+            }
+        }
+    }else{
+        $sql= " SELECT PM.IdProyectoMaterial AS id,PM.IdProyectoTarea,
+                CONVERT(VARCHAR(50), PM.Fecha, 103) AS descripcion2,
+                'Cant: ' + CONVERT(VARCHAR(50),PM.Cantidad) AS descripcionLateral,
+				PM.Descripcion AS descripcion,PM.Fecha AS fecha 
+                FROM dbo.ProyectosMateriales PM
+                INNER JOIN proyectos Pr ON Pr.IdProyecto = PM.IdProyecto
+                INNER JOIN dbo.ProyectosTareas pt ON pt.IdProyectoTarea=PM.IdProyectoTarea
+                WHERE PM.IdProyecto = ? AND PM.idpersonal = ?";
+        $parm = array($idProyecto,$_SESSION["Controlador"] -> miEstado -> IdPersonal);
+        $stmt = sqlsrv_query($conn,$sql,$parm);
+        if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }else{
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $row["tipoDocPortal"] = 9.2;
+                array_push($DatosBD, $row);
+            }
+        }
+
+    }
+    return($DatosBD);
+    sqlsrv_close( $conn );
 }
 
 //iniciar o finalizar jornada
@@ -719,8 +772,6 @@ function exec_up_Tiempos_Insert($lat = '',$long = '' , $horaLocal = null){
             $lat,
             $long,
             $horaFormateada);
-    // print_r($parm);
-    // print_r('<br>');
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
     if (!sqlsrv_execute($stmt)) {
         die(print_r(sqlsrv_errors(), true));
@@ -839,11 +890,11 @@ function exect_Insert_From_Dinamico($arrayValores){
     sqlsrv_close( $conn );
 }
 
-function insertProyectosTareaMaterial($arrayDatos){
+function insertProyectosTareaMaterial($MaterialProyecto,$arrayDatos){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $sql = "";
     $parm = array();
-    if($arrayDatos[0] == 1){
+    if($MaterialProyecto == 6.1){
             $sql = " INSERT INTO dbo.PETiemposProyectosAppSheet
         (IdPETiemposProyectosAppSheet,
         IdProyecto,
@@ -862,12 +913,12 @@ function insertProyectosTareaMaterial($arrayDatos){
         (?,?,?,?,?,?,?,GETDATE(),?,?)";
 
         $parm = array(
-            $randomNumber = rand(10000, 999999),
-            $arrayDatos[1],
-        $arrayDatos[2],
-        $arrayDatos[3],
-        date('Ymd H:i:s', strtotime($arrayDatos[4]) ),
-        date('Ymd H:i:s', strtotime($arrayDatos[5]) ),
+        $randomNumber = rand(10000, 999999),
+        $_SESSION["Controlador"] -> miEstado -> IdPropietario,
+        $arrayDatos[0],
+        $arrayDatos[1],
+        date('Ymd H:i:s', strtotime($arrayDatos[2]) ),
+        date('Ymd H:i:s', strtotime($arrayDatos[3]) ),
         69,
         $_SESSION["Controlador"] -> miEstado -> IdPersonal,
         $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
@@ -887,15 +938,14 @@ function insertProyectosTareaMaterial($arrayDatos){
         @Fecha =?,
         @IdPersonal = ?,
         @IdIdentidad = ?";
-
-        $parm = array($arrayDatos[1],
-        $arrayDatos[6],
-        $arrayDatos[7],
-        $arrayDatos[8],
-        $arrayDatos[9],
-        $arrayDatos[10],
-        $arrayDatos[11],
-        date('Ymd H:i:s', strtotime($arrayDatos[12]) ),
+        $parm = array($_SESSION["Controlador"] -> miEstado -> IdPropietario,
+        $arrayDatos[0],
+        $arrayDatos[1],
+        $arrayDatos[2],
+        $arrayDatos[3],
+        $arrayDatos[4],
+        $arrayDatos[5],
+        date('Ymd H:i:s', strtotime($arrayDatos[6]) ),
         $_SESSION["Controlador"] -> miEstado -> IdPersonal,
         $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
     }
@@ -907,6 +957,7 @@ function insertProyectosTareaMaterial($arrayDatos){
     }else{
         return 1;
     }   
+
 
 }
 

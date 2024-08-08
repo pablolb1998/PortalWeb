@@ -114,6 +114,30 @@ function pinta_contenido($estado){
             }
                 
             break;
+        case 6.1:
+            switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
+                case 1:
+                    break;
+                case 2:
+                    $titulo = "Tiempos";
+                    //$_SESSION["tipo_documento"] = 3;
+                    $filename = "../html/documentos.html";
+                    break;
+            }
+                
+            break;
+        case 6.2:
+            switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
+                case 1:
+                    break;
+                case 2:
+                    $titulo = "Recurso";
+                    //$_SESSION["tipo_documento"] = 3;
+                    $filename = "../html/documentos.html";
+                    break;
+            }
+                
+            break;
         case 7:
                
                 switch($_SESSION["Controlador"] -> miEstado -> tipo_App){
@@ -219,7 +243,7 @@ function pinta_contenido($estado){
     }
 
     //optimizar aqui
-    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado, array(1, 2, 3, 4, 5, 6, 7,7.1, 8, 9)) || ($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 )) {
+    if (in_array($_SESSION["Controlador"] -> miEstado -> Estado, array(1, 2, 3, 4, 5, 6,6.1,6.2, 7,7.1, 8, 9)) || ($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 )) {
         if ($_SESSION["Controlador"] -> miEstado -> Estado == 1){
             //Pestaña de sociedades del portal del comercial
             $filetext = str_replace('%ListaSociedades%',muestra_sociedades(),$filetext);  
@@ -282,7 +306,7 @@ function pinta_contenido($estado){
             }
             //$filetext = str_replace() $txt_filtros;
         }elseif( 
-            (($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 ) || $_SESSION["Controlador"] -> miEstado -> Estado == 6)
+            (($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 ) || in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(6,6.1,6.2) ))
             && !in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(4.9) ) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 
             && $_SESSION["Controlador"] -> miEstado -> cargarForm == null  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2
         ){
@@ -798,6 +822,7 @@ function pinta_TareasRecursos_Cliente($html){
 function DibujaLineas_PortalEmpleado(){
     //optimizar al cambiar la manera de almacenar los documentos y los filtros "array_filter()"
         $arrayDoc = array();
+        $conArrayExterno = 0;
         $tipoDocf = 0;
         $acciones_linea = '';
         $acciones_globales = '';
@@ -816,7 +841,7 @@ function DibujaLineas_PortalEmpleado(){
         // }
         if($_SESSION["Controlador"] -> miEstado -> acciones["accionCustom1"] == 1){
             $acciones_linea .= ObtenAccionesPersonalizadas();
-            $acciones_globales .= cargaFormularioCustom();
+            //$acciones_globales .= cargaModalesCustom();
             $conAccionesPersonalizadas = 1;
         } 
         if($_SESSION["Controlador"] -> miEstado -> acciones["modalVisualizarLineaCustom"] = 1){
@@ -833,6 +858,26 @@ function DibujaLineas_PortalEmpleado(){
             $acciones_globales .= '<button onclick="cargarModalFormularioDinamico()" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
             $acciones_globales .= cargaFormularioDinamico2();
         }
+
+        //Visualizador modal custom 
+        if($_SESSION["Controlador"] -> miEstado -> acciones["anadirLineaCustom"] == 1){
+            $Nombreform = "";
+            switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
+                case 6.2:
+                    $Nombreform = "'modalFormularioMaterialesProyectos'";
+                    break;
+                
+                default:
+                    $Nombreform = "'modalFormularioTiemposProyectos'";
+                    break;
+            }
+            ;
+            //modalFormularioMaterialesProyectos
+            $acciones_globales .= '<button onclick="cargarModalFormularioDinamico('.$Nombreform.')" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
+            $acciones_globales .= cargaModalesCustom();
+        }
+        
+
         if($_SESSION["Controlador"] -> miEstado -> Estado == 4.4){
             //$acciones_linea = '<a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin='.$_SESSION["pinC"].'&IdArchivo=%IdProp%" target="_blank">
             //<img class="pdf_icono" src="%imgTipoArchivo%"></a>';
@@ -870,6 +915,14 @@ function DibujaLineas_PortalEmpleado(){
             case 6 :
                 $tipoDocf = 9;
                 break;
+            case 6.1 :
+                $tipoDocf = 9.1;
+                $conArrayExterno = 1;
+                break;
+            case 6.2 :
+                $tipoDocf = 9.2;
+                $conArrayExterno = 1;
+                break;
             case 7 :
                 $tipoDocf = 4; 
                 break;
@@ -879,10 +932,13 @@ function DibujaLineas_PortalEmpleado(){
         }
     
         // funcion para aplicar un filtro a cada elemento del array
-        $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
-            return $docF["tipoDocPortal"] == $tipoDocf;
-        });
-        
+        if($conArrayExterno == 1){
+            $arrayDoc = $_SESSION["Controlador"] -> miEstado -> arrayDatosAux;
+        }else{
+            $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
+                return $docF["tipoDocPortal"] == $tipoDocf;
+            });
+        }
         //print_r($arrayDoc);
         //print_r($_SESSION["Controlador"] -> miEstado -> IdTipoPropietario);
         //print_r($_SESSION["Controlador"] -> miEstado -> IdPropietario);
@@ -1051,20 +1107,21 @@ function DibujaLineas_PortalEmpleado(){
                 //pintar cada linea
                 $listaDoc .= '<tr  id="'.$id.'" data-nombre="'.$pseudoI.'">';
                 $listaDoc .= '<td class="col-7"><div class="Identificador" name="Identificador"><h5>'. $descripcion_icono.'<h5>';
-                if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
-                    $listaDoc .= '<details>';
-                    
-                }else{
-                    $listaDoc .= '<details open>';
-                    
+                if($_SESSION["Controlador"] -> miEstado -> acciones["SinDesplegable"] == 0){
+                    if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
+                        $listaDoc .= '<details>';
+                        
+                    }else{
+                        $listaDoc .= '<details open>';
+                        
+                    }
+                    $listaDoc .='<summary></summary>';
+                    $listaDoc .='<p> <span style="color:'.$color.';">' . $descripcion2 . '</span><br>';
+                    $listaDoc .= $descripcion3 . $descripcion4.'</p>';
+                    if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
+                        $listaDoc .= '</details>';
+                    }
                 }
-                $listaDoc .='<summary></summary>';
-                $listaDoc .='<p> <span style="color:'.$color.';">' . $descripcion2 . '</span><br>';
-                $listaDoc .= $descripcion3 . $descripcion4.'</p>';
-                if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
-                    $listaDoc .= '</details>';
-                }
-                
                 $listaDoc .= '</div></td><td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;color:'.$color.';"><h5>'. $descripcionLateral.'<h5>';
                 $listaDoc .= '<div class="mt-1">' . $acciones_linea_pintar . '</div>';
                 $listaDoc .= '</div></td></tr>'; 
@@ -1387,6 +1444,7 @@ function cargaFormularioDinamico2(){
     $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
         return $form["Estado"] == $_SESSION["Controlador"] -> miEstado -> Estado;
     });
+
     $arrayIntermedio = array_shift($arrayForm);
     $arrayCamposForm = $arrayIntermedio["Campos"];
     
@@ -1403,13 +1461,13 @@ function cargaFormularioDinamico2(){
     }
     $camposForm = '';
     //GENERAR LA VARIABLE DE MODAL
-    if(!isset($_SESSION["PlantillaModal"])){
+    if(!isset($_SESSION["PlantillaModalForm"])){
         $fileModal = fopen('../html/PlantillaModalFormulario.html', "r");
         $filesizeModal = filesize('../html/PlantillaModalFormulario.html');
-        $_SESSION["PlantillaModal"] = fread($fileModal, $filesizeModal);
+        $_SESSION["PlantillaModalForm"] = fread($fileModal, $filesizeModal);
         fclose($fileModal);
     }
-    $PlantillaModal = $_SESSION["PlantillaModal"];
+    $PlantillaModal = $_SESSION["PlantillaModalForm"];
     
 
     $formularioConArchivos = false;
@@ -1487,25 +1545,38 @@ function cargaFormularioDinamico2(){
     return $camposForm;
 }
 
-function cargaFormularioCustom(){
+function cargaModalesCustom(){
     
-    if(!isset($_SESSION["PlantillaModal"])){
+    if(!isset($_SESSION["PlantillaModalForm"])){
         $fileModal = fopen('../html/PlantillaModalFormulario.html', "r");
         $filesizeModal = filesize('../html/PlantillaModalFormulario.html');
-        $_SESSION["PlantillaModal"] = fread($fileModal, $filesizeModal);
+        $_SESSION["PlantillaModalForm"] = fread($fileModal, $filesizeModal);
+        fclose($fileModal);
+    }
+    if(!isset($_SESSION["PlantillaForm"])){
+        $fileModal = fopen('../html/PlantillaModal.html', "r");
+        $filesizeModal = filesize('../html/PlantillaModal.html');
+        $_SESSION["PlantillaForm"] = fread($fileModal, $filesizeModal);
         fclose($fileModal);
     }
     
-    $PlantillaModal = $_SESSION["PlantillaModal"];
+    $PlantillaModal = $_SESSION["PlantillaModalForm"];
+    $PlantillaModalListado = $_SESSION["PlantillaForm"];
+    $nombre_Form = "";
     switch ($_SESSION["Controlador"] -> miEstado -> Estado){
-        case 6:
-            $ModalTiempos = str_replace('modalFormularioDinamico','modalFormularioTiemposProyectos',$PlantillaModal);
+        case 6.1:
+            $nombre_Form = "Nuevo tiempo de fase";
+            $Modal = str_replace('modalFormularioDinamico','modalFormularioTiemposProyectos',$PlantillaModal);
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
             $camposForm .= '<label for="IdProyectoTarea" class="form-label">Fase</label>';
             $camposForm .= '<select class="form-select border-secondary" aria-label="Fase" id="IdProyectoTarea">';
             $existeSelecion = 1;
             $camposForm .= '<option value="" selected></option>';
-            foreach($_SESSION["Controlador"] -> miEstado -> datosProyectos[0] as $valorSelecionable){
+
+            $arrayDc = array_filter($_SESSION["Controlador"] -> miEstado -> datosProyectos[0], function ($valorDropdown){
+                return $valorDropdown["IdProyecto"] ==  $_SESSION["Controlador"] -> miEstado -> IdPropietario;
+            });
+            foreach($arrayDc as $valorSelecionable){
                 switch ($existeSelecion){
                     case 0:
                         $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
@@ -1517,8 +1588,16 @@ function cargaFormularioCustom(){
                 }
                 $existeSelecion = 1;
             }
-            $camposForm .= '</select></div><br>';
+            
+            $camposForm .= '</select></div>';
 
+            
+
+            // $camposForm .= '<div class="text-danger d-none" id="modalFormularioTiemposProyectos_cadenas">';
+            // foreach($_SESSION["Controlador"] -> miEstado -> datosProyectos[0] as $valorSelecionable){                    
+            //     $camposForm .= '(#)'.$valorSelecionable['IdProyectoTarea'].'(#)'.$valorSelecionable['Descripcion'].'(#)';
+            // }
+            // $camposForm .= '</div>';
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
             $camposForm .= '<label for="IdTipoTarea" class="form-label">Tipo de tarea</label>';
             $camposForm .= '<select class="form-select border-secondary" aria-label="Fase" id="IdTipoTarea">';
@@ -1546,90 +1625,99 @@ function cargaFormularioCustom(){
                             <div class=" d-none" id="FechaFin_condiciones">';
             $camposForm .=  "$('#FechaFin').val() &gt; $('#FechaInicio').val() </div>";
             $camposForm .=   '<div class="text-danger d-none" id="FechaFin_msgError">La fecha de fin no puede ser menor que la fecha de inicio</div></div>';
-
+        
+            break;
+        case 6.2:
             /*****************************************/
             /*****MODAL DE MATERIALES DE PROYECTOS****/
             /*****************************************/
-
-            $ModalMateriales = str_replace('modalFormularioDinamico','modalFormularioMaterialesProyectos',$PlantillaModal);
-            $camposForm2 .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
-            $camposForm2 .= '<label for="IdProyectoTarea" class="form-label">Fase</label>';
-            $camposForm2 .= '<select class="form-select border-secondary" aria-label="Fase" id="IdProyectoTarea">';
+            $nombre_Form = "Nuevo recurso de fase";
+            $Modal = str_replace('modalFormularioDinamico','modalFormularioMaterialesProyectos',$PlantillaModal);
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
+            $camposForm .= '<label for="IdProyectoTarea" class="form-label">Fase</label>';
+            $camposForm .= '<select class="form-select border-secondary" aria-label="Fase" id="IdProyectoTarea">';
             $existeSelecion = 1;
-            $camposForm2 .= '<option value="" selected></option>';
-            foreach($_SESSION["Controlador"] -> miEstado -> datosProyectos[0] as $valorSelecionable){
+            $camposForm .= '<option value="" selected></option>';
+
+            
+            $arrayDc = array_filter($_SESSION["Controlador"] -> miEstado -> datosProyectos[0], function ($valorDropdown){
+                return $valorDropdown["IdProyecto"] ==  $_SESSION["Controlador"] -> miEstado -> IdPropietario;
+            });
+            foreach($arrayDc as $valorSelecionable){
                 switch ($existeSelecion){
                     case 0:
-                        $camposForm2 .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'" selected>'.$valorSelecionable['Descripcion'].'</option>';
+                        $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
                         
                         break;
                     default:
-                        $camposForm2 .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
+                        $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
                         break;
                 }
                 $existeSelecion = 1;
             }
-            $camposForm2 .= '</select></div>';
+            
+            $camposForm .= '</select></div>';
 
-            $camposForm2 .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
-            $camposForm2 .= '<label for="IdProyectoMaterialTipo" class="form-label">Tipo de Artículo</label>';
-            $camposForm2 .= '<select class="form-select border-secondary" aria-label="IdProyectoMaterialTipo" id="IdProyectoMaterialTipo">';
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
+            $camposForm .= '<label for="IdProyectoMaterialTipo" class="form-label">Tipo de Artículo</label>';
+            $camposForm .= '<select class="form-select border-secondary" aria-label="IdProyectoMaterialTipo" id="IdProyectoMaterialTipo">';
             $existeSelecion = 1;
+            
             foreach($_SESSION["Controlador"] -> miEstado -> datosProyectos[2] as $valorSelecionable){
                 
                 switch ($existeSelecion){
                     case 0:
-                        $camposForm2 .= '<option value="'.$valorSelecionable['IdProyectoMaterialTipo'].'" selected>'.$valorSelecionable['Nombre'].'</option>';
+                        $camposForm .= '<option value="'.$valorSelecionable['IdProyectoMaterialTipo'].'" selected>'.$valorSelecionable['Nombre'].'</option>';
                         
                         break;
                     default:
-                        $camposForm2 .= '<option value="'.$valorSelecionable['IdProyectoMaterialTipo'].'">'.$valorSelecionable['Nombre'].'</option>';
+                        $camposForm .= '<option value="'.$valorSelecionable['IdProyectoMaterialTipo'].'">'.$valorSelecionable['Nombre'].'</option>';
                         break;
                 }
                 $existeSelecion = 1;
             }
-            $camposForm2 .= '</select></div>';
+            $camposForm .= '</select></div>';
 
-            $camposForm2 .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
-            $camposForm2 .= '<label for="IdArticulo" class="form-label">Artículo de gasto</label>';
-            $camposForm2 .= '<select class="form-select border-secondary" aria-label="IdArticulo" id="IdArticulo">';
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
+            $camposForm .= '<label for="IdArticulo" class="form-label">Artículo de gasto</label>';
+            $camposForm .= '<select class="form-select border-secondary" aria-label="IdArticulo" id="IdArticulo">';
             $existeSelecion = 1;
             foreach($_SESSION["Controlador"] -> miEstado -> datosProyectos[3] as $valorSelecionable){
                 switch ($existeSelecion){
                     case 0:
-                        $camposForm2 .= '<option value="'.$valorSelecionable['idArticulo'].'" selected>'.$valorSelecionable['Descripcion'].'</option>';
+                        $camposForm .= '<option value="'.$valorSelecionable['idArticulo'].'" selected>'.$valorSelecionable['Descripcion'].'</option>';
                         
                         break;
                     default:
-                        $camposForm2 .= '<option value="'.$valorSelecionable['idArticulo'].'">'.$valorSelecionable['Descripcion'].'</option>';
+                        $camposForm .= '<option value="'.$valorSelecionable['idArticulo'].'">'.$valorSelecionable['Descripcion'].'</option>';
                         break;
                 }
                 $existeSelecion = 1;
             }
-            $camposForm2 .= '</select></div>';
+            $camposForm .= '</select></div>';
 
-            $camposForm2 .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Descripcion" class="form-label">Descripción</label><input type="text" class="form-control border-secondary" id="Descripcion" aria-describedby="Descripción" value="" required=><div class="text-danger d-none" id="Descripcion_msgError">El campo no puede estar vacío.</div></div>';
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Descripcion" class="form-label">Descripción</label><input type="text" class="form-control border-secondary" id="Descripcion" aria-describedby="Descripción" value="" required=><div class="text-danger d-none" id="Descripcion_msgError">El campo no puede estar vacío.</div></div>';
             
-            $camposForm2 .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Cantidad" class="form-label">Cantidad</label><input type="Number" class="form-control border-secondary" id="Cantidad" aria-describedby="Cantidad" value="0.00" step="0.01" required>';
-            $camposForm2 .= '<div class=" d-none" id="Cantidad_condiciones">'."$('#Cantidad').val() &gt; 0</div>".'<div class="text-danger d-none" id="Cantidad_msgError">La cantidad ha de ser mayor que 0.</div></div>';
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Cantidad" class="form-label">Cantidad</label><input type="Number" class="form-control border-secondary" id="Cantidad" aria-describedby="Cantidad" value="0.00" step="0.01" required>';
+            $camposForm .= '<div class=" d-none" id="Cantidad_condiciones">'."$('#Cantidad').val() &gt; 0</div>".'<div class="text-danger d-none" id="Cantidad_msgError">La cantidad ha de ser mayor que 0.</div></div>';
 
-            $camposForm2 .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Coste" class="form-label">Coste</label><input type="Number" class="form-control border-secondary" id="Coste" aria-describedby="Coste" value="0.00" step="0.01" required>';
-            $camposForm2 .= '<div class=" d-none" id="Coste_condiciones">'."$('#Coste').val() &gt; 0</div>".'<div class="text-danger d-none" id="Coste_msgError">El coste ha de ser mayor que 0.</div></div>';
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Coste" class="form-label">Coste</label><input type="Number" class="form-control border-secondary" id="Coste" aria-describedby="Coste" value="0.00" step="0.01" required>';
+            $camposForm .= '<div class=" d-none" id="Coste_condiciones">'."$('#Coste').val() &gt; 0</div>".'<div class="text-danger d-none" id="Coste_msgError">El coste ha de ser mayor que 0.</div></div>';
 
 
-            $camposForm2 .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="">
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="">
                                 <label for="Fecha" class="form-label">Fecha</label>
                                 <input type="datetime-local" class="form-control border-secondary" id="Fecha" aria-describedby="Fecha Inicio" value="" required>
                                 <div class="text-danger d-none" id="Fecha_msgError">Fecha necesaria.</div></div><br>';
-            
-
-
-            return str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%'],['',$camposForm,"Nuevo tiempo de fase"],$ModalTiempos).
-                     str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%'],['',$camposForm2,"Nuevo gasto"],$ModalMateriales);
+           
             break;
         default:
             break;    
     }
+    //$ModalListado = str_replace('%descForm%','modalListadoProyectos',$PlantillaModalListado);
+            
+
+    return str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%'],['',$camposForm,"Nuevo tiempo de fase"],$Modal);
 }
 
 function PintaArrayValuesSelect($idLinea,$acciones_linea_pintar){
@@ -1727,6 +1815,26 @@ function cargarSeccionesDinamicas(){
     return $pestanaSecciones;
 }
 
+function cargarCustomGridModal($arrayPintar){
+    $tabla = '<table class="table table-striped table-bordered-bottom" id="cuerpo"><tbody id="myTable">';
+    foreach($arrayPintar as $elemento){
+        $tabla .= '<tr id="67" data-nombre="">';
+        $tabla .= '<td class="col-7">';
+        $tabla .= '<div class="Identificador" name="Identificador">';
+        $tabla .= '<h5>24300119 prueba</h5>';
+        $tabla .= '<h5><details open=""><summary></summary>';
+        $tabla .= '<p> <span style="color:GREEN;">19/01/2024</span><br></p>';
+        $tabla .= '</details></h5></div></td><td class="col-5">';
+        $tabla .= '<div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;color:GREEN;">';
+        $tabla .= '<h5>Iniciado</h5>';
+        $tabla .= '<h5><div class="mt-1">';
+        $tabla .= '<button  style="all: initial;width:54px;cursor: pointer;">';
+        $tabla .= '<img class="pdf_icono" src="Img/IconosAcciones/CodigoBarras.png"></button>';
+        $tabla .= '</div></h5></div></td></tr>';
+    }
+    $tabla .= '</tbody></table>';
+    return $tabla;
+}
 
 //cargar el formulario de firma
 function cargarFormularioFirma(){
@@ -1741,8 +1849,9 @@ function ObtenAccionesPersonalizadas(){
     $accionesPersonalizada = "";
     switch ($_SESSION["Controlador"] -> miEstado -> Estado){
         case 6:
-            $accionesPersonalizada .= '<button onclick="cargarModalFormularioDinamico('."'modalFormularioTiemposProyectos'".',%ListaValuesForm%,%IdProp%)" style="all: initial;width:54px;cursor: pointer;"><img class="pdf_icono" src="Img/IconosAcciones/TiemposUsuario.png"></button>';    
-            $accionesPersonalizada .= '<button onclick="cargarModalFormularioDinamico('."'modalFormularioMaterialesProyectos'".',%ListaValuesForm%,%IdProp%)" style="all: initial;width:54px;cursor: pointer;"><img class="pdf_icono" src="Img/IconosAcciones/CodigoBarras.png"></button>';    
+            $accionesPersonalizada .= '<button onclick="dibuja_pagina([6.1,%IdProp%])" style="all: initial;width:54px;cursor: pointer;"><img class="pdf_icono" src="Img/IconosAcciones/TiemposUsuario.png"></button>';    
+            //$accionesPersonalizada .= '<button onclick="cargarModalFormularioDinamico('."'modalFormularioTiemposProyectos'".',%ListaValuesForm%,%IdProp%)" style="all: initial;width:54px;cursor: pointer;"><img class="pdf_icono" src="Img/IconosAcciones/TiemposUsuario.png"></button>';    
+            $accionesPersonalizada .= '<button onclick="dibuja_pagina([6.2,%IdProp%])" style="all: initial;width:54px;cursor: pointer;"><img class="pdf_icono" src="Img/IconosAcciones/CodigoBarras.png"></button>';    
             break;
         default:
             break;    
