@@ -9,8 +9,9 @@ class Estado{
     //variables documentos
     public $tipo_documento;
     public $filtrado_estado;
-
+    
     public $nombreDocumentoPadre;
+    
 
     //public $documentos = array();
     public $punteros;
@@ -51,6 +52,7 @@ class Estado{
     public $IdTipoPropietario;
     public $IdPropietario;
     
+    
     //generador formularios
     public $cargarForm;
     public $formularios = array();
@@ -74,6 +76,8 @@ class Estado{
     //acciones
     public $acciones = array();
     public $datosProyectos = array();
+
+    public $arrayDatosAux = array();
 }
 
 ?>
