@@ -64,77 +64,107 @@ var signaturePad;
 var cookiesAceptadas;
 var calendar;
 var map2;
-    function dibuja_pagina(arrayDatos = []){
-        // document.getElementById('ruedita').style.display = 'block';
-        if(cookiesAceptadas == null){
-            if(verificarCookiesAceptadas()){
-                cookiesAceptadas = true;
-            }else{
-                document.getElementById('cookie-modal').style.display = 'block';
-            }
+var datosAuxiliares = [];
+var cadenaAuxiliar = "";
+var dibujaPaginaBloqueado = false;
+//arrayDatos(ElContenidoHtml[0],ElMensajedeError[1],Accion[2],ArrayAuxiliar[3],$accionJs)
+async function dibuja_pagina(arrayDatos = []) {
+    if (dibujaPaginaBloqueado) {
+        return;
+    }
+    dibujaPaginaBloqueado = true; 
+    // mostrar u ocultar coookies   
+    if (cookiesAceptadas == null) { 
+        if (verificarCookiesAceptadas()) {
+            cookiesAceptadas = true;
+        } else {
+            document.getElementById('cookie-modal').style.display = 'block';
         }
-        $.ajax({
-              //Informacion que le mandamos al PHP.
-                data:{ arrayDatos : arrayDatos},    
-                url:   'php/index.php', 
-                type:  'POST', 
-                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve.Área
+    } 
+
+    try {
+        await new Promise((resolve, reject) => {
+            $.ajax({
+                data: { arrayDatos: arrayDatos },
+                url: 'php/index.php',
+                type: 'POST',
+                success: function(response) {
                     try {
-                    let respuesta = JSON.parse(response);
-                        //Pintar de forma normal y corriente
-                        if(respuesta[2] == 0){
-                            seccionBody = document.getElementById("cuerpo");
-                            seccionBody.innerHTML = respuesta[0];
-                           // usar el array de respuesta para cargar los datos de las distintas pestañas
-                            if(respuesta[4]==2){
-                                generarGrafico_Barras(respuesta[3][0]);
-                            }else if(respuesta[3] != null && respuesta[3] != 0){
-                                for(let evento of respuesta[3]){
-                                    let e = {title: evento[0],
-                                            start: evento[1],
-                                            end: evento[2],
-                                            backgroundColor: evento[3],
-                                            id : evento[4]};    
-                                    eventos.push(e);
-                                }
-                                
-                                dibuja_calendario(respuesta[3]);
+                        let respuesta = JSON.parse(response);
+                        /***************************************/
+                        // Si el elemento 2 es 0 pinta la pestaña y luego realiza las acciones correspondientes
+                        /***************************************/
+                        if (respuesta[2] == 0) {
+                            let seccionBody = document.getElementById("cuerpo");
+                            if(respuesta[0] != 0 && respuesta[0] != null ){
+                                seccionBody.innerHTML = respuesta[0];
                             }
-                            CargarMapaFichaje();
+                            /***************************************/
+                            // Usar Accion s que viene de php para elegir la accion que realizar
+                            /***************************************/
+                            if(respuesta[3] != null && respuesta[3] != 0){
+                                switch (respuesta[4]) {
+                                    case 2:
+                                        generarGrafico_Barras(respuesta[3][0]);
+                                        break;
+                                    case 1:
+                                        for (let evento of respuesta[3]) {
+                                            let e = {
+                                                title: evento[0],
+                                                start: evento[1],
+                                                end: evento[2],
+                                                backgroundColor: evento[3],
+                                                id: evento[4]
+                                            };
+                                            eventos.push(e);
+                                        }
+                                        dibuja_calendario(respuesta[3]);
+                                        break;
+                                }
+                            }
                             
-                            //Mostrar mensaje por pantalla
-                            if(respuesta[1] != null && respuesta[1] != ""){
+                            CargarMapaFichaje();
+                            /***************************************/
+                            // Mostrar mensaje por pantalla
+                            /***************************************/
+                            if (respuesta[1] != null && respuesta[1] != "" && respuesta[1] != 0) {
                                 document.getElementById("msgError").innerHTML = respuesta[1];
                                 $('#popupError').modal('show');
-                                //var popupError = document.getElementById('popupError');
-                                //popupError.modal('show');
                             }
-                        //Redirigir a otra pagina
-                        }else{
-                            if(respuesta[1] == 0){
-                                if(respuesta[3] != null && respuesta[3] != ''){
+                        }else if(respuesta[2] == 3){
+
+                        } else {
+                            if (respuesta[1] == 0) {
+                                if (respuesta[3] != null && respuesta[3] != '') {
                                     alert(respuesta[3]);
                                 }
-                                
+
                                 window.location.replace(respuesta[0]);
-                            }else if(respuesta[1] == 1){
+                            } else if (respuesta[1] == 1) {
                                 window.open(respuesta[0], '_blank');
                             }
-                            
                         }
+                        resolve(); 
                     } catch (error) {
-                        seccionBody = document.getElementById("cuerpo");
+                        let seccionBody = document.getElementById("cuerpo");
                         seccionBody.innerHTML = response;
+                        reject(error); // Rechazar la promesa en caso de error en el procesamiento de la respuesta
                     }
-                    
                 },
-                error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                    alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-                } 
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    //alert("Status: " + textStatus);
+                    //alert("Error: " + errorThrown);
+                    reject(new Error("Fallo la conexion con el servidor")); // Rechazar la promesa en caso de error AJAX
+                }
+            });
         });
-        // document.getElementById('ruedita').style.display = 'none';
 
-    };
+    } catch (error) {
+        console.error('Error en la función dibuja_pagina:', error);
+    } finally {
+        dibujaPaginaBloqueado = false;
+    }
+}
 
     //aplicar filtros portal del cliente (Modificar)
     function aplicafiltros(f){
@@ -508,13 +538,12 @@ var map2;
     }
     //funcion asincrona para llamar a la api de hora local
     async function obtenerHoraLocal(lat, lon) {
-            var TIMEZONEDB_API_KEY = 'XY0CA8W8ZRCV';
-            var url = `http://api.timezonedb.com/v2.1/get-time-zone?key=${TIMEZONEDB_API_KEY}&format=json&by=position&lat=${lat}&lng=${lon}`;
+            var url = `http://api.timezonedb.com/v2.1/get-time-zone?key=XY0CA8W8ZRCV&format=json&by=position&lat=${lat}&lng=${lon}`;
             try {
                 var response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error('Error al obtener hora local');
-                }
+                //if (!response.ok) {
+                //    throw new Error('Error al obtener hora local');
+                //}
                 var data = await response.json();
                 var fechaHoraLocal = data.formatted;
                 return fechaHoraLocal;
@@ -533,8 +562,8 @@ var map2;
             } catch (error) {
                 dibuja_pagina([0,0]);
             }
-        
     }
+
     function CargarMapaFichaje(){
         if($("#map").length){
             try{
@@ -543,9 +572,7 @@ var map2;
                 $('#map').hide();
                 console.log(e);
             }
-        }
-        
-           
+        }        
     }
     function EditarPosicionMapa(posicion){
         
@@ -604,48 +631,21 @@ var map2;
         
     }
     
-    function cargarModalFormularioDinamico(nombreFormulario = null, idsDropdownAceptados = null,idRegistro = null) {
-        if (nombreFormulario == null && idsDropdownAceptados == null) {
+    function cargarModalFormularioDinamico(nombreFormulario = null,idRegistro = null) {
+        if (nombreFormulario == null ) {
             $('#modalFormularioDinamico').modal('show');
-        } else if (nombreFormulario != null && idsDropdownAceptados == null) {
-            $('#'+nombreFormulario).modal('show');
-        } else {
+        }  else {
             $('#'+nombreFormulario).modal('show');
             
-            $('#'+nombreFormulario).on('shown.bs.modal', function () {
-                
-                let contador = 0;
-                $('select', this).each(function() {
-                    let opcionesAceptadas = idsDropdownAceptados[contador];
-                    if(opcionesAceptadas.length != 0){
-                        $(this).find('option').each(function() {
-                            if (opcionesAceptadas.includes(parseInt($(this).val()))) {
-                                $(this).show();
-                            } else {
-                                $(this).hide();
-                            }
-                        });
-                    }
-                    contador += 1;
-                });
-                let valorModal;
-                if(idRegistro != null){
-                    switch (nombreFormulario) {
-                        case 'modalFormularioMaterialesProyectos':
-                            valorModal = 2
-                            break;
-                    
-                        default:
-                            valorModal = 1
-                            break;
-                    }
-                    let accion = "SubmitModalForm(1,"+idRegistro+","+valorModal+","+nombreFormulario+")";
-                    $(this).find('#SubmitModalForm').attr('onclick', accion);
-                }
-            });
         }
     }
 
+
+
+    // async function  verListadoCustom(IdModal,IdPropietarioModal,accionPHP){
+    //     varhtmlModal = await dibuja_pagina([0,1,IdPropietarioModal]);
+    //     $('#'+IdModal).modal('show');
+    // }
 
     function cargarModalFirma(Id,TipoF,IdP,IdTp,IdS,IPc,BBDD){
         //elemento.addEventListener('touchmove', miFuncion, { passive: true });
