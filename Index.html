@@ -181,6 +181,14 @@ async function dibuja_pagina(arrayDatos = []) {
         dibuja_pagina([0,tipo,filtro]);
     }
 
+    // aplicar filtros actualizado
+    function aplicaFiltradoHeader(){
+        var textoBuscado = $("#TxtBoxInputBuscarHeader").val();
+        //alert(textoBuscado);
+        dibuja_pagina([0,4,textoBuscado]);
+    }
+
+
     //aplicar los filtros del calendario
     function aplicaFiltrosCalendario(){
         
@@ -202,6 +210,21 @@ async function dibuja_pagina(arrayDatos = []) {
             calendar.addEventSource(filteredEvents);
     }
 
+   //cambiar para que filtre el php
+   function filtrarTablaCalendario(anioS){ 
+            $('#dropdownMenuButton').text('Año '+anioS);
+            $('#dropdownMenuButton').data('nombre') == anioS;
+            let contadorVacaciones=0;
+            $('#myTable tr').filter(function() {
+               if($(this).data('nombre') !== "Año : "+anioS){
+                    $(this).addClass('d-none');
+                    contadorVacaciones = 1;
+               }else{
+                    $(this).removeClass('d-none');
+               }
+            })
+        }
+ 
     function generarGrafico_Barras(AniosVacaciones) {
             
             let datosParaAnio = AniosVacaciones;
@@ -261,26 +284,6 @@ async function dibuja_pagina(arrayDatos = []) {
             
         }
         
-        //cambiar para que filtre el php
-        function filtrarTablaCalendario(anioS){ 
-            $('#dropdownMenuButton').text('Año '+anioS);
-            $('#dropdownMenuButton').data('nombre') == anioS;
-            let contadorVacaciones=0;
-            $('#myTable tr').filter(function() {
-               if($(this).data('nombre') !== "Año : "+anioS){
-                    $(this).addClass('d-none');
-                    contadorVacaciones = 1;
-               }else{
-                    $(this).removeClass('d-none');
-               }
-            })
-        }
- 
-    
-
-
-
-
     function aceptarCookies() {
     // Establecer una cookie llamada "cookiesAceptadas" con un valor de "true"
         document.cookie = "cookiesPortalEsquioAceptadas=true; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
@@ -293,18 +296,25 @@ async function dibuja_pagina(arrayDatos = []) {
     for (var i = 0; i < cookies.length; i++) {
       var cookie = cookies[i].trim();
       if (cookie.startsWith("cookiesPortalEsquioAceptadas=")) {
-        return true; // La cookie ya está establecida
+        return true;
       }
     }
-    return false; // La cookie no está establecida
+    return false; 
   }
+
+    function abrirTxtBoxBuscar(){
+        $("#TxtHeaderPrincipal").toggleClass("d-none");
+        $("#TxtBoxBuscarHeader").toggleClass("d-none");
+        $("#LupaHeader").toggleClass("d-none");
+        $("#CruzHeader").toggleClass("d-none");   
+    }
 
     function cargarModalDetalles(labels,valores){
         let campos = labels;
         let len = campos.length;
         let htmlModal=''
         for(let i = 0; i < len; i++){
-           
+            
             htmlModal += '<div class="mb-3"> <label for="message-text" class="col-form-label" style="font-size:13px;">'+campos[i]+':</label><p class="form-control" >'+valores[i]+'</p></div>';
         }
         let cuerpo = document.getElementById("msgError");
@@ -642,11 +652,6 @@ async function dibuja_pagina(arrayDatos = []) {
 
 
 
-    // async function  verListadoCustom(IdModal,IdPropietarioModal,accionPHP){
-    //     varhtmlModal = await dibuja_pagina([0,1,IdPropietarioModal]);
-    //     $('#'+IdModal).modal('show');
-    // }
-
     function cargarModalFirma(Id,TipoF,IdP,IdTp,IdS,IPc,BBDD){
         //elemento.addEventListener('touchmove', miFuncion, { passive: true });
         var parentWidth;
@@ -726,8 +731,10 @@ async function dibuja_pagina(arrayDatos = []) {
     });
     
 
- /********* ------------------------------------------------------------- ************/
-    if (window.history.replaceState) { // verificamos disponibilidad
+    //****************************************************************************************/
+                        // Evitar que recargue al enviar un formulario
+    //****************************************************************************************/
+    if (window.history.replaceState) {
         window.history.replaceState(null, null, window.location.href);
     }
 
@@ -740,8 +747,9 @@ async function dibuja_pagina(arrayDatos = []) {
             this.value = ''; 
         }
     });
-
-    // añadir la funcionalidad de estar fijado a la bara superior al hacer scroll
+    //****************************************************************************************/
+    // añadir la funcionalidad  al header de estar fijado a la bara superior al hacer scroll
+    //****************************************************************************************/
     $(document).ready(function() {
         var alturaHedaderOriginal = $('#header_agrupado').outerHeight();
         //$('#header_agrupado img').addClass('reduccion_header');
@@ -753,7 +761,7 @@ async function dibuja_pagina(arrayDatos = []) {
                     elementoSeparador.insertAfter('#header_agrupado');
                     $('#header_agrupado img').css('height','100px');
                     $('#InicioFin_Jornada').css('height','');
-                    $('#flecha_volver img').css('height','30px');
+                    $('.flecha_volver img').css('height','30px');
                     $('#SeparadorHeader').css('margin-top', $('#header_agrupado').outerHeight()+'px');
                     setTimeout(function(){
                         //simplemente que espere
