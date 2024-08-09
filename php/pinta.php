@@ -217,6 +217,16 @@ function pinta_contenido($estado){
 
     //cargar el nombre del usuario
     $nombre_usu = '<hr size="1px" color="grey"/><li class="dropdown-item">'.$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo.'</li>';
+    if($_SESSION["Controlador"] -> miEstado -> acciones["accionBuscarMenu"] == 1 ){
+        $fileheadertext = str_replace('%accionBuscarHeader%','',$fileheadertext);
+    }else{
+        $fileheadertext = str_replace('%accionBuscarHeader%','d-none',$fileheadertext);
+    }
+    
+    //cargar el permiso de buscar 
+    
+    
+    
     $fileheadertext = str_replace('<li class="d-none" id="%NombreUsu%"></li>',$nombre_usu,$fileheadertext);
 
 
@@ -237,10 +247,10 @@ function pinta_contenido($estado){
     // $footer = fopen("../html/footer.html", "r");
     // $filesizef = filesize($filename);
     // $footer = fread($footer, $filesizef);
-    if($_SESSION["Controlador"] -> miEstado -> Estado == 11){
-        $filetext = str_replace(['div class="btn-group d-flex" >','id="flecha_volver" class="col-2'],['div class="btn-group d-none" >','class="col-2 d-none'],$filetext);   
+    // if($_SESSION["Controlador"] -> miEstado -> Estado == 11){
+    //     $filetext = str_replace(['div class="btn-group d-flex" >',' class="flecha_volver col-2'],['div class="btn-group d-none" >','class="col-2 d-none'],$filetext);   
     
-    }
+    // }
 
     //optimizar aqui
     if (in_array($_SESSION["Controlador"] -> miEstado -> Estado, array(1, 2, 3, 4, 5, 6,6.1,6.2, 7,7.1, 8, 9)) || ($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 )) {
@@ -930,10 +940,79 @@ function DibujaLineas_PortalEmpleado(){
                 $tipoDocf = 1;
                 break;
         }
-    
+
         // funcion para aplicar un filtro a cada elemento del array
-        if($conArrayExterno == 1){
+        $CadenaFiltro = $_SESSION["Controlador"] -> miEstado -> CadenaFiltro;
+        if($conArrayExterno == 1 && $CadenaFiltro != null){
+            $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> arrayDatosAux, function ($docF) use($CadenaFiltro) {
+                $resultado2 = "";
+                $resultado3 = "";
+                $resultado4 = "";
+                $resultadoLateral = "";
+
+                if (isset($docF["descripcion2"]) && $docF["descripcion2"] instanceof DateTime) {
+                    $resultado2 = $docF["descripcion2"]->format('d/m/Y');
+                } else {
+                    $resultado2 = isset($docF["descripcion2"]) ? $docF["descripcion2"] : '';
+                }
+                if (isset($docF["descripcion3"]) && $docF["descripcion3"] instanceof DateTime) {
+                    $resultado3 = $docF["descripcion3"]->format('d/m/Y');
+                } else {
+                    $resultado3 = isset($docF["descripcion3"]) ? $docF["descripcion3"] : '';
+                }
+                if (isset($docF["descripcion4"]) && $docF["descripcion4"] instanceof DateTime) {
+                    $resultado4 = $docF["descripcion4"]->format('d/m/Y');
+                } else {
+                    $resultado4 = isset($docF["descripcion4"]) ? $docF["descripcion4"] : '';
+                }
+                if (isset($docF["descripcionLateral"]) && $docF["descripcionLateral"] instanceof DateTime) {
+                    $resultadoLateral = $docF["descripcionLateral"]->format('d/m/Y');
+                } else {
+                    $resultadoLateral = isset($docF["descripcionLateral"]) ? $docF["descripcionLateral"] : '';
+                }
+            
+                // Comprobación de la cadena de filtro en las descripciones
+                return str_contains(
+                    strtoupper($docF["descripcion"].'#'.$docF["descripcion2"].'#'.$resultadoLateral.'#'.$resultado2.'#'.$resultado3.'#'.$resultado4),
+                    strtoupper($CadenaFiltro)
+                );
+            });
+        }elseif($conArrayExterno == 1){
             $arrayDoc = $_SESSION["Controlador"] -> miEstado -> arrayDatosAux;
+        }elseif($CadenaFiltro != null){
+                $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf,$CadenaFiltro) {
+                $resultado2 = "";
+                $resultado3 = "";
+                $resultado4 = "";
+                $resultadoLateral = "";
+
+                if (isset($docF["descripcion2"]) && $docF["descripcion2"] instanceof DateTime) {
+                    $resultado2 = $docF["descripcion2"]->format('d/m/Y');
+                } else {
+                    $resultado2 = isset($docF["descripcion2"]) ? $docF["descripcion2"] : '';
+                }
+                if (isset($docF["descripcion3"]) && $docF["descripcion3"] instanceof DateTime) {
+                    $resultado3 = $docF["descripcion3"]->format('d/m/Y');
+                } else {
+                    $resultado3 = isset($docF["descripcion3"]) ? $docF["descripcion3"] : '';
+                }
+                if (isset($docF["descripcion4"]) && $docF["descripcion4"] instanceof DateTime) {
+                    $resultado4 = $docF["descripcion4"]->format('d/m/Y');
+                } else {
+                    $resultado4 = isset($docF["descripcion4"]) ? $docF["descripcion4"] : '';
+                }
+                if (isset($docF["descripcionLateral"]) && $docF["descripcionLateral"] instanceof DateTime) {
+                    $resultadoLateral = $docF["descripcionLateral"]->format('d/m/Y');
+                } else {
+                    $resultadoLateral = isset($docF["descripcionLateral"]) ? $docF["descripcionLateral"] : '';
+                }
+            
+                // Comprobación de la cadena de filtro en las descripciones
+                return $docF["tipoDocPortal"] == $tipoDocf && str_contains(
+                    strtoupper($docF["descripcion"].'#'.$docF["descripcion2"].'#'.$resultadoLateral.'#'.$resultado2.'#'.$resultado3.'#'.$resultado4),
+                    strtoupper($CadenaFiltro)
+                );
+            });
         }else{
             $arrayDoc = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
                 return $docF["tipoDocPortal"] == $tipoDocf;
@@ -1278,12 +1357,12 @@ function cargarJornadaHistorico(){
             $acciones_linea_pintar = '';
             if(isset( $valor['LongLat_Entrada'])){
                 $longlat_entrada = explode(",", $valor['LongLat_Entrada']);
-                $acciones_linea_pintar .= '<button id="flecha_volver" onclick="mostrarMapaJornadafichaje('.$longlat_entrada[0].','.$longlat_entrada[1].')" class="align-self-end"><img src="Img/UbicacionEntrada.png" alt="BotonVerMapaJornada"></button>';
+                $acciones_linea_pintar .= '<button onclick="mostrarMapaJornadafichaje('.$longlat_entrada[0].','.$longlat_entrada[1].')" class="flecha_volver align-self-end"><img src="Img/UbicacionEntrada.png" alt="BotonVerMapaJornada"></button>';
                 //$acciones_linea_pintar .= '<a href="https://www.google.com/maps/place/'.$longlat_entrada[0].','.$longlat_entrada[1].'" target="_blank"><img src="Img/UbicacionEntrada.png"></a>';
             }   
             if(isset( $valor['LongLat_Salida'])){
                 $longlat_salida = explode(",", $valor['LongLat_Salida']);
-                $acciones_linea_pintar .= '<button id="flecha_volver" onclick="mostrarMapaJornadafichaje('.$longlat_salida[0].','.$longlat_salida[1].')" class="align-self-end"><img src="Img/UbicacionSalida.png" alt="BotonVerMapaJornada"></button>';
+                $acciones_linea_pintar .= '<button onclick="mostrarMapaJornadafichaje('.$longlat_salida[0].','.$longlat_salida[1].')" class="flecha_volver align-self-end"><img src="Img/UbicacionSalida.png" alt="BotonVerMapaJornada"></button>';
                 //$acciones_linea_pintar .= '<a href="https://www.google.com/maps/place/'.$longlat_salida[0].','.$longlat_salida[1].'" target="_blank"><img src="Img/UbicacionSalida.png" style="margin-left: 5px;"></a>';
             }
             $color = '';   
