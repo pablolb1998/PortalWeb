@@ -1,16 +1,16 @@
 /*\\datos\APLIS\ARCHIVOS ONIX\Esquio20\
 /* Flecha del header */
-#flecha_volver{
+.flecha_volver{
     all: unset;
     cursor: pointer;
    
 }
  
-#flecha_volver:focus {
+.flecha_volver:focus {
     outline: revert;
 }
 
-#flecha_volver:hover {
+#flecha_header:hover {
     transform: scale(1.4);
     
 }
