@@ -34,3 +34,52 @@
     </div>
   </div>
 </div>
+<div id="panelDeslizable" class="panel-deslizable">
+  <div class="panel-contenido ">
+      <h3>Filtros</h3>
+      <br>
+   
+    <h5 onclick="toggleContentPorId('EstadoPanelDeslizable')" class="aparienciaBoton">Tipo </h5>
+    <div class="container">
+  <div class="row mb-3">
+    <div class="col-6 d-flex justify-content-end">
+      <input type="checkbox" class="btn-check" value="1" id="btn1" autocomplete="off" checked>
+      <label class="btn btn-check-vacaciones-tipos w-100" for="btn1">Concedidos</label>
+    </div>
+    <div class="col-6 d-flex justify-content-start">
+      <input type="checkbox" class="btn-check" value="3" id="btn2" autocomplete="off" checked>
+      <label class="btn btn-check-vacaciones-tipos w-100" for="btn2">Disfrutados</label>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-6 d-flex justify-content-end">
+      <input type="checkbox" class="btn-check" value="0" id="btn3" autocomplete="off" checked>
+      <label class="btn btn-check-vacaciones-tipos w-100" for="btn3">Denegados</label>
+    </div>
+    <div class="col-6 d-flex justify-content-start">
+      <input type="checkbox" class="btn-check" value="4" id="btn4" autocomplete="off" checked>
+      <label class="btn btn-check-vacaciones-tipos w-100" for="btn4">Festivos</label>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-6 offset-3 d-flex justify-content-center">
+      <input type="checkbox" class="btn-check" value="2" id="btn7" autocomplete="off" checked>
+      <label class="btn btn-check-vacaciones-tipos w-100" for="btn7">Pendientes</label>
+    </div>
+  </div>
+      <br>
+      
+      <div class="row mb-3">
+        <div class="col-6 d-flex justify-content-end">
+            <button class="btn btn-primary w-100" onclick="aplicaFiltradoHeader()">Aplicar</button>
+        </div>
+        <div class="col-6 d-flex justify-content-start">
+            <button class="btn btn-secondary w-100" onclick="desplegarPanelFiltros()">Cancelar</button>
+        </div>
+    </div>
+      
+    
+  </div>
+</div>
+</div>
