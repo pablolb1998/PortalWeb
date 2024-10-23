@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Área del Cliente</title>
-  <!-- font awesome  -->
+    <!-- font awesome  -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
     <!--Librerias de bootstrap-->
-        <!--css-->
+    <!--css-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-        <!--jquery-->
+    <!--jquery-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" 
         crossorigin="anonymous"></script>
     <!--jquery-->
@@ -47,6 +47,9 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/es.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.js"></script>
+    <!--Librerias click calendario-->
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+    <script src="https://unpkg.com/tippy.js@6"></script>
 
     <!-- librerias de los graficos/chars -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -182,37 +185,67 @@ async function dibuja_pagina(arrayDatos = []) {
     }
 
     // aplicar filtros actualizado
-    function aplicaFiltradoHeader(){
-        var textoBuscado = $("#TxtBoxInputBuscarHeader").val();
-        //alert(textoBuscado);
-        dibuja_pagina([0,4,textoBuscado]);
-    }
-
-
-    //aplicar los filtros del calendario
-    function aplicaFiltrosCalendario(){
-        
+    function aplicaFiltradoHeader(ValorBusqueda = null){
+        var textoBuscado = '';
+        if(ValorBusqueda == null){
+            textoBuscado = $("#TxtBoxInputBuscarHeader").val();
+        }
         var selectedIds = [];
-            // Obtén los IDs de los checkboxes seleccionados
-            
-            var checkboxes = $('#filtros_dinamicos :input[type="checkbox"]').toArray();
+              // Obtén los IDs de los checkboxes seleccionados
+            var checkboxes = $('#panelDeslizable :input[type="checkbox"]').toArray();
             checkboxes.forEach(function (checkbox) {
                 if (checkbox.checked) {
                     selectedIds.push(Number(checkbox.value));
                 }
             });
+            
+        
+        if(selectedIds != []){
+            
+            dibuja_pagina([0,4,textoBuscado,selectedIds]);
+        }else{
+            dibuja_pagina([0,4,textoBuscado,[]]);
+        };
+    }
+
+    function desplegarPanelFiltros() {
+    const panel = document.getElementById("panelDeslizable");
+    const currentTransform = window.getComputedStyle(panel).transform;
+    
+    if (currentTransform === "none" || currentTransform === "matrix(1, 0, 0, 1, 0, 0)") {
+        // Si el transform es "none" o "matrix(1, 0, 0, 1, 0, 0)", el panel está en su posición inicial (visible)
+        panel.style.transform = "translateX(100%)"; // Ocultar el panel moviéndolo hacia la derecha
+    } else {
+        // Si el transform es diferente, el panel está oculto (fuera de la vista)
+        panel.style.transform = "translateX(0)"; // Mostrar el panel moviéndolo hacia la izquierda
+    }
+}
+    //aplicar los filtros del calendario
+    function aplicaFiltrosCalendario(){
+        
+        var selectedIds = [];
+              // Obtén los IDs de los checkboxes seleccionados
+            var checkboxes = $('#panelDeslizable :input[type="checkbox"]').toArray();
+            checkboxes.forEach(function (checkbox) {
+                if (checkbox.checked) {
+                    selectedIds.push(Number(checkbox.value));
+                }
+            });
+            
             // Filtra los eventos por los IDs seleccionados
+            
             var filteredEvents = eventos.filter(function (evento) {
                 return selectedIds.includes(evento.id);
             });
-            // Actualiza el calendario con los eventos filtrados
+            // // Actualiza el calendario con los eventos filtrados
             calendar.removeAllEvents();
             calendar.addEventSource(filteredEvents);
+            desplegarPanelFiltros()
     }
 
    //cambiar para que filtre el php
    function filtrarTablaCalendario(anioS){ 
-            $('#dropdownMenuButton').text('Año '+anioS);
+            $('#dropdownMenuButton').text('Año '+ anioS);
             $('#dropdownMenuButton').data('nombre') == anioS;
             let contadorVacaciones=0;
             $('#myTable tr').filter(function() {
@@ -224,7 +257,7 @@ async function dibuja_pagina(arrayDatos = []) {
                }
             })
         }
- 
+    
     function generarGrafico_Barras(AniosVacaciones) {
             
             let datosParaAnio = AniosVacaciones;
@@ -249,6 +282,8 @@ async function dibuja_pagina(arrayDatos = []) {
 
                 dias = [0,0,0,0];
             }
+            console.log(dias);
+            
             var myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -272,6 +307,12 @@ async function dibuja_pagina(arrayDatos = []) {
                     }]
                 },
                 options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0 
+                        }
+                    },
                     animation: {
                         duration: 1
                     }
@@ -327,6 +368,38 @@ async function dibuja_pagina(arrayDatos = []) {
         
     }
 
+
+    //calcula diferencia en fechas 
+    function calcularDiferenciaHoras() {
+    var fechaInicio = $(".formulario_modal #FechaInicio").val();
+    var fechaFin = $("#FechaFin").val(); // Este puede estar fuera o dentro de la clase
+    var diferenciaHorasField = document.getElementById("DiferenciaHoras");
+    var diferenciaHorascampolabel = document.getElementById("DiferenciaHorasCampo");
+    var errorMsgFin = document.getElementById("FechaFin_msgError");
+
+    if (fechaInicio && fechaFin) {
+        var inicio = new Date(fechaInicio);
+        var fin = new Date(fechaFin);
+
+        if (fin > inicio) {
+            var diferenciaMs = fin - inicio; // Diferencia en milisegundos
+            var diferenciaTotalMin = Math.floor(diferenciaMs / (1000 * 60)); // Diferencia total en minutos
+            var horas = Math.floor(diferenciaTotalMin / 60);
+            var minutos = diferenciaTotalMin % 60;
+
+            var minutosFormateados = minutos.toString().padStart(2, '0');
+            errorMsgFin.classList.add("d-none");
+            diferenciaHorascampolabel.classList.remove("d-none");
+            diferenciaHorasField.value = horas + ":" + minutosFormateados ;
+        }else{
+            diferenciaHorasField.value = "";
+            diferenciaHorascampolabel.classList.add("d-none");
+            errorMsgFin.classList.remove("d-none");
+        }
+        }
+    }
+    //esto peta arreglar mañana
+    $(document).on("change",".formulario_modal #FechaFin",calcularDiferenciaHoras);
 
     $(document).on("submit", ".formulario_sociedades", function (event) {
         event.preventDefault();
@@ -511,7 +584,7 @@ async function dibuja_pagina(arrayDatos = []) {
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             initialDate: formattedDate,
-            dayHeaderFormat: { weekday: 'long'},
+            dayHeaderFormat: getDayHeaderFormat(),
             dayMaxEventRows: 3,
             headerToolbar: {
                 left: 'prev',
@@ -522,15 +595,36 @@ async function dibuja_pagina(arrayDatos = []) {
                 month: 'Mes',
                 today: 'Hoy'
             },
-            events: eventos, 
+            events: eventos,
+            eventClick: function(info) {
+                
+                tippy(info.el, {
+                    content: info.event.title, // Aquí puedes usar el texto completo
+                    trigger: 'click', // Cambia a 'mouseenter' si prefieres hover
+                    placement: 'top', 
+                    size: 'large'
+                });
+
+                // Mostrar el tooltip manualmente
+                tippy(info.el);
+                tippy.show()
+            },
             locale: 'es',
             firstDay: 1,
-            contentHeight: '700px' ,
+            contentHeight: '600px' ,
             
             fixedWeekCount: false,
             showNonCurrentDates: false
         });
         calendar.render();
+    }
+    //Formato calendario
+    function getDayHeaderFormat() {
+    
+        const mobileFormat = { weekday: 'short' }; // Abreviado
+        const desktopFormat = { weekday: 'long' }; // Completo
+
+        return window.matchMedia("(max-width: 768px)").matches ? mobileFormat : desktopFormat;
     }
     //Manejo de la golocalización
 
@@ -548,17 +642,19 @@ async function dibuja_pagina(arrayDatos = []) {
     }
     //funcion asincrona para llamar a la api de hora local
     async function obtenerHoraLocal(lat, lon) {
-            var url = `http://api.timezonedb.com/v2.1/get-time-zone?key=XY0CA8W8ZRCV&format=json&by=position&lat=${lat}&lng=${lon}`;
+            var url = `https://api.timezonedb.com/v2.1/get-time-zone?key=XY0CA8W8ZRCV&format=json&by=position&lat=${lat}&lng=${lon}`;
             try {
+                
                 var response = await fetch(url);
-                //if (!response.ok) {
-                //    throw new Error('Error al obtener hora local');
-                //}
+                if (!response.ok && response == null) {
+                    throw new Error('Error al obtener hora local');
+                }
+                
                 var data = await response.json();
                 var fechaHoraLocal = data.formatted;
                 return fechaHoraLocal;
             } catch (error) {
-                alert('Error al obtener la hora local');
+                alert('Error al obtener la hora local, asegurese de tener la ubicación activada');
                 return null;
             }
     }
@@ -679,6 +775,12 @@ async function dibuja_pagina(arrayDatos = []) {
         btnsv.setAttribute("onclick","guardarFirma("+Id+","+TipoF+","+IdP+","+IdTp+","+IdS+",'"+IPc+"','"+BBDD+"')");
     }
 
+    function toggleContentPorId(contentId) {
+            // Muestra el contenido seleccionado
+            $('#'+contentId).toggleClass("d-none");
+            //$('#'+contentId+"IMG").toggleClass("rotar_imagen_90");
+        }
+
    
     function guardarFirma(Id,TipoF,IdP,IdTp,IdS,IPc,BBDD){
         var canvas = document.getElementById("signature-pad");
@@ -700,7 +802,12 @@ async function dibuja_pagina(arrayDatos = []) {
                 },
             success: function(response) {
                 if(response == 1){
-                    alert("Archivo firmado con exito");
+                    if(IdP == 25){
+                        alert("Nómina firmada con exito");
+                    }else{
+                        alert("Documento firmado con exito");
+                    }
+                    
                     $('#ModalFirma').hide();
                     $('.modal-backdrop').hide();
                     $('body').css({
@@ -759,7 +866,7 @@ async function dibuja_pagina(arrayDatos = []) {
                 if ($('#SeparadorHeader').length === 0) {
                     let elementoSeparador =  $('<div id="SeparadorHeader"><br></div>');
                     elementoSeparador.insertAfter('#header_agrupado');
-                    $('#header_agrupado img').css('height','100px');
+                    //$('#header_agrupado img').css('height','100px');
                     $('#InicioFin_Jornada').css('height','');
                     $('.flecha_volver img').css('height','30px');
                     $('#SeparadorHeader').css('margin-top', $('#header_agrupado').outerHeight()+'px');
@@ -798,7 +905,7 @@ async function dibuja_pagina(arrayDatos = []) {
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button> 
-              <!-- <button type="button" class="btn btn-primary">Aceptar</button>-->
+              <!---->
             </div>
           </div>
         </div>
@@ -825,6 +932,7 @@ async function dibuja_pagina(arrayDatos = []) {
         </div>
       </div>
 
+    
 
     <!-- Ruedita de carga --> 
     <!-- <div class="loader" id="ruedita" style="display: none;"></div> -->
