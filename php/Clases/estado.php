@@ -23,6 +23,7 @@ class Estado{
     public $FiltrosDoc = array();
     
     public $CadenaFiltro;
+    public $IdsTiposFiltro = array();
     public $tipofiltro;
 
     

@@ -92,18 +92,18 @@ class Controlador
         }
         //pruebas
         if($_SESSION["pinC"] == 123654){
-                $this -> miEstado -> IP = '192.168.204.111';
+                $this -> miEstado -> IP = '192.168.204.239';
         }elseif ($_SESSION["pinC"] == '65814415D75C') {
             $this -> miEstado -> IP = '85.215.231.65,23459';
         }
         $this -> miEstado -> bbdd = $datosBBDD[0]["BBDD"];
     }
-
+        
     function IniciarSesion($usr, $pass){
         //si no encuentra usuario devuelve false
         $datosSesion = comprueba_usuario($usr, $pass);
         $IdTipoApp;
-    
+        
         if($datosSesion != false){
             $this -> miEstado -> nombre_descriptivo = $datosSesion[2];
             $this -> miEstado -> IdIdentidad = $datosSesion[4];
@@ -127,6 +127,7 @@ class Controlador
                 $IdTipoApp = 33;
                 $this -> cargarDatosForm();
             }
+            
             crearRegistroEntrada_SeguridadUnificada($this -> miEstado -> IdIdentidad,$IdTipoApp);
             return true;
         }else{
@@ -241,6 +242,7 @@ class Controlador
             $this -> miEstado -> Estado = $ps;
         }
         $this -> miEstado -> CadenaFiltro = null;
+        $this -> miEstado -> IdsTiposFiltro = array();
         $this -> cargarPermisosAcciones();
     }
 
@@ -265,6 +267,7 @@ class Controlador
         }
         
     }
+
 
     function cargarDatosForm(){
         //generar los formularios dinamicamente
@@ -294,7 +297,7 @@ class Controlador
         $this -> miEstado -> acciones["anadirLineaCustom"] = 0;
         $this -> miEstado -> acciones["accionBuscarMenu"] = 0;
         //*******************/
-                //Acciones personaizadas de cada formulario//
+                //Acciones personalizadas de cada formulario//
         //******************/
         $this -> miEstado -> acciones["accionCustom1"] = 0;
         if($this -> miEstado -> tipo_App == 2){
@@ -305,43 +308,43 @@ class Controlador
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["desplegado"] = 1;
                     //$this -> miEstado -> acciones["modalVisualizar"] = 1;
-                    $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
+                    //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.3 :
                     $this -> miEstado -> acciones["archivos"] = 1;
-                    $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
+                    //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.4 :
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
-                    $this -> miEstado -> acciones["modalVisualizar"] = 1;
+                    //$this -> miEstado -> acciones["modalVisualizar"] = 1;
                     break;
                 case 4.5:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["modalVisualizar"] = 1;
-                    $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
+                    //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.6:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["modalVisualizar"] = 1;
-                    $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
+                    //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.7:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     //$this -> miEstado -> acciones["modalVisualizar"] = 1;
-                    $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
+                    //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.8:
                     $this -> miEstado -> acciones["archivos"] = 1;
-                    $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
-                    $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
+                    //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.9:
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["desplegado"] = 1;
                     $this -> miEstado -> acciones["modalVisualizar"] = 1;
+                    $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 6:
                     $this -> miEstado -> acciones["desplegado"] = 1;
@@ -356,6 +359,9 @@ class Controlador
                 case 6.2:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLineaCustom"] = 1;
+                    break;
+                case 7:
+                    $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
@@ -479,8 +485,8 @@ class Controlador
         //inicia sesión y navega entre pestañas del portal del comercial
         //********************************************/
                 $InicioS = $this -> IniciarSesion($arrayDatos[0], $arrayDatos[1]);
-                $programaActualizado = $this -> comprobarVersion();
-                
+                //$programaActualizado = $this -> comprobarVersion();
+                $programaActualizado = true;
                 $nav = 0;
                 if(count($this -> miEstado -> lista_sociedades) == 1 && $InicioS && $programaActualizado){
                     $nav = 2;
@@ -1003,9 +1009,17 @@ class Controlador
             }
             $this -> miEstado -> cargarForm = 0;
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 4  && $this -> miEstado -> tipo_App == 2){
+        //********************************************/
+        //PORTAL EMPLEADO Filtrar por cadena de txt o ids  
+        //********************************************/
+            $this -> miEstado -> IdsTiposFiltro = array();
+
             $this -> miEstado -> CadenaFiltro = null;
             if($arrayDatos[2] != null && $arrayDatos[2] != ''){
                 $this -> miEstado -> CadenaFiltro = $arrayDatos[2];
+            }
+            if(!empty($arrayDatos[3])){
+                $this -> miEstado -> IdsTiposFiltro = $arrayDatos[3];
             }
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $this -> miEstado -> Estado == 5 && $this -> miEstado -> tipo_App == 2){
         //********************************************/
