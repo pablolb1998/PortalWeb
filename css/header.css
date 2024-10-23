@@ -69,6 +69,19 @@
   z-index: 999; 
 }
 
+ .btn-check-vacaciones-tipos {
+  background-color: #f0f0f0; 
+  color: #696969;
+  border-color: #a8a8a8; 
+  transition: all 0.3s ease; 
+}
+
+.btn-check:checked + .btn-check-vacaciones-tipos {
+  background-color: #f0f0f0; 
+  color: #000;
+  border-color: #000; 
+} 
+
 /* css para eliminar los margenes en movil de boostrap */
 
 #no-margin {
@@ -120,22 +133,7 @@
   #header_agrupado img{
     transition: height 0.5s ease; 
   }
-  /* Estilo para el indicador de carga (spinner)(no funciona) */
-  #ruedita {
-    position: fixed;
-    z-index: 7;
-    top: 50%;
-    left: 50%;
-    border: 16px solid #f3f3f3;
-    border-radius: 50%;
-    border-top: 16px solid #3498db;
-    width: 120px;
-    height: 120px;
-    /* Safari */
-    -webkit-animation: spin 2s linear infinite; 
-    animation: spin 2s linear infinite;
-  }
-  
+
   /* Safari */
   @-webkit-keyframes spin {
     0% { -webkit-transform: rotate(0deg); }
@@ -151,4 +149,73 @@
   .fc-daygrid-day-frame{
     max-height: 50px; /* Establece el máximo de altura para cada semana */
     margin-bottom: 0; /* Elimina el margen inferior entre las semanas */
+}
+
+#TxtBoxBuscarHeader {
+  position: relative;
+}
+
+#TxtBoxBuscarHeader input {
+  padding-right: 40px; /* Espacio para el botón de la lupa */
+}
+
+#LupaHeader2 {
+  position: absolute;
+  right: 10px;
+  top: 45%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+#LupaHeader3 {
+
+  top: 45%;
+  transform: translateY(-50%);
+
+}
+
+
+/* Panel deslizable desde la derecha */
+.panel-deslizable {
+  position: fixed;
+  top: 0;
+  right: 0; /* Cambiado de left a right */
+  height: 100%;
+  background-color: white;
+  z-index: 1000;
+  transform: translateX(100%); /* Oculto inicialmente fuera de la vista hacia la derecha */
+  transition: transform 0.3s ease; /* Efecto de deslizamiento */
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+}
+
+/* Ancho del panel según el dispositivo */
+@media (max-width: 767px) { /* Para móviles */
+  .panel-deslizable {
+      width: 70%;
+  }
+}
+
+@media (min-width: 768px) { /* Para ordenadores */
+  .panel-deslizable {
+      width: 20%;
+  }
+}
+
+.panel-contenido {
+  padding: 20px;
+}
+
+.aparienciaBoton {
+  cursor: pointer; /* Cambia el cursor a una mano al pasar por encima */
+}
+
+.rotar_imagen_90 {
+  transform: rotate(90deg);
+}
+.seccion-panelDeslizable{
+  margin-left: 20px;
 }
