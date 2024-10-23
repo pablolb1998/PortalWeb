@@ -211,7 +211,7 @@ function pinta_contenido($estado){
         }
         $fileheadertext = str_replace("%NombreE%",$titulo,$fileheadertext);
         if($_SESSION["Controlador"] -> miEstado -> Estado == 2){
-            $fileheadertext = str_replace('class="col-2"','class="col-2 d-none"',$fileheadertext);
+            $fileheadertext = str_replace('class="col-2 flecha_volver"','class="col-2 flecha_volver d-none"',$fileheadertext);
         }
     }
 
@@ -219,8 +219,12 @@ function pinta_contenido($estado){
     $nombre_usu = '<hr size="1px" color="grey"/><li class="dropdown-item">'.$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo.'</li>';
     if($_SESSION["Controlador"] -> miEstado -> acciones["accionBuscarMenu"] == 1 ){
         $fileheadertext = str_replace('%accionBuscarHeader%','',$fileheadertext);
+        if(in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(7,4.9))) {
+            $fileheadertext = str_replace('abrirTxtBoxBuscar','desplegarPanelFiltros',$fileheadertext);
+        }
     }else{
         $fileheadertext = str_replace('%accionBuscarHeader%','d-none',$fileheadertext);
+        
     }
     
     //cargar el permiso de buscar 
@@ -240,10 +244,6 @@ function pinta_contenido($estado){
     }else{
         $filetext = $fileheadertext.cargarSeccionesDinamicas();
     }
-    
-    
-
-
     // $footer = fopen("../html/footer.html", "r");
     // $filesizef = filesize($filename);
     // $footer = fread($footer, $filesizef);
@@ -251,7 +251,7 @@ function pinta_contenido($estado){
     //     $filetext = str_replace(['div class="btn-group d-flex" >',' class="flecha_volver col-2'],['div class="btn-group d-none" >','class="col-2 d-none'],$filetext);   
     
     // }
-
+    
     //optimizar aqui
     if (in_array($_SESSION["Controlador"] -> miEstado -> Estado, array(1, 2, 3, 4, 5, 6,6.1,6.2, 7,7.1, 8, 9)) || ($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 )) {
         if ($_SESSION["Controlador"] -> miEstado -> Estado == 1){
@@ -558,11 +558,11 @@ function muestra_documentos(){
 
             //filtro por tipo 1 de filtro es decir string 
             if($_SESSION["Controlador"] -> miEstado -> CadenaFiltro !== null && $_SESSION["Controlador"] -> miEstado -> tipofiltro == 1){
-            
                 $arrayDoc = array_filter($arrayDoc, function ($docF) use($arrayDoc) {
                     return str_contains(strtolower($docF["Descripcion"]),strtolower($_SESSION["Controlador"] -> miEstado -> CadenaFiltro));
                 });
             }
+
             
             //filtro por tipo 2 de filtro es estado del doc 
             if($_SESSION["Controlador"] -> miEstado -> CadenaFiltro !== null && $_SESSION["Controlador"] -> miEstado -> tipofiltro == 2 ){
@@ -570,6 +570,8 @@ function muestra_documentos(){
                     return $docF["Estado"] == $_SESSION["Controlador"] -> miEstado -> CadenaFiltro;
                 });
             }
+            
+
             // funcion para reinedxarlo 
             $arrayDoc = array_values($arrayDoc);
        
@@ -1018,6 +1020,19 @@ function DibujaLineas_PortalEmpleado(){
                 return $docF["tipoDocPortal"] == $tipoDocf;
             });
         }
+
+        //filtro por tipo 3 de filtro es decir Tipo de documento//Estado
+        //print_r($_SESSION["Controlador"] -> miEstado -> IdsTiposFiltro); 
+        if(!empty($_SESSION["Controlador"] -> miEstado -> IdsTiposFiltro)){
+            //print_r($_SESSION["Controlador"]->miEstado->IdsTiposFiltro);
+            //print_r($arrayDoc);
+            
+            $arrayDoc = array_filter($arrayDoc, function ($docF) use ($idsTiposFiltroLower) {
+                return in_array($docF["Estado"],  $_SESSION["Controlador"]->miEstado->IdsTiposFiltro);
+            });
+            
+        }
+
         //print_r($arrayDoc);
         //print_r($_SESSION["Controlador"] -> miEstado -> IdTipoPropietario);
         //print_r($_SESSION["Controlador"] -> miEstado -> IdPropietario);
@@ -1693,18 +1708,21 @@ function cargaModalesCustom(){
                 }
                 $existeSelecion = 1;
             }
-            $camposForm .= '</select></div><br>';
+            $camposForm .= '</select></div>';
 
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="">
                                 <label for="FechaInicio" class="form-label">Fecha Inicio</label>
                                 <input type="datetime-local" class="form-control border-secondary" id="FechaInicio" aria-describedby="Fecha Inicio" value="" required>
-                                <div class="text-danger d-none" id="FechaInicio_msgError">Fecha Inicio necesaria.</div></div><br>';
+                                <div class="text-danger d-none" id="FechaInicio_msgError">Fecha Inicio necesaria.</div></div>';
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="FechaFin" class="form-label">Fecha Fin</label>
                             <input type="datetime-local" class="form-control border-secondary" id="FechaFin" aria-describedby="Fecha Fin" value="" required>
                             <div class=" d-none" id="FechaFin_condiciones">';
             $camposForm .=  "$('#FechaFin').val() &gt; $('#FechaInicio').val() </div>";
             $camposForm .=   '<div class="text-danger d-none" id="FechaFin_msgError">La fecha de fin no puede ser menor que la fecha de inicio</div></div>';
-        
+            $camposForm .=  '<div id="DiferenciaHorasCampo" class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg d-none">
+                                <label for="DiferenciaHoras" class="form-label">Total en Horas</label>
+                                <input type="text" class="form-control border-secondary" id="DiferenciaHoras" readonly>
+                            </div>';
             break;
         case 6.2:
             /*****************************************/

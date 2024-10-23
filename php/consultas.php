@@ -537,7 +537,8 @@ function extraerDocPersonal_Masivo(){
         Estado2 AS descripcion2, 
         color2 as color,
         'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
-        FechaInicio,FechaFin,Año as AñoV
+        FechaInicio,FechaFin,Año as AñoV,
+        Estado
         FROM dbo.vw_PEVacaciones
         WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -571,7 +572,7 @@ function extraerDocPersonal_Masivo(){
         $sql9 = "SELECT IdProyecto AS id,
         ISNULL(Codigo,'')+' '+ISNULL(Nombre,'')  AS descripcion,
         case
-            when Estado=0 THEN 'Iniciado'
+            when Estado = 0 THEN 'Iniciado'
             --when Estado=2 Then 'Cerrado'
             Else 'en espera'
         End  AS descripcionLateral,
@@ -690,6 +691,9 @@ function extraerFasesProyectos(){
     }
     
     return array($Fases,$TiposTareas,$ProyectosMaterialesTipos,$Articulos);
+}
+function ExtraccionSOldadoRyan($vehiculo,$lat,$lon){
+
 }
 
 function extraerRecursosFaseProyecto($idProyecto,$FaseMaterial){
