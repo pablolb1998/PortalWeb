@@ -59,6 +59,28 @@ function comprobarPermisosUsuarios(){
     sqlsrv_close( $conn );
 }
 
+function comprobarConfiguracionesAdicionalesUsuarios(){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $arrayConfiguraciones = array();
+    $sql = "SELECT IdValor
+    FROM SeguridadUnificada_ValorConfiguracionEnlace  
+    WHERE IdIdentidad = ?;";
+    $parm = array($_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+    $stmt = sqlsrv_prepare($conn, $sql, $parm);
+    //print_r($stmt);
+    if (!sqlsrv_execute($stmt)) {
+        return false;
+        die;
+    } else {
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($arrayConfiguraciones, $row['IdValor']);
+        }
+        return $arrayConfiguraciones;
+    }
+    sqlsrv_close( $conn );
+}
+
+
 //Mostrar las sociedades a la que este vinculado el cliente
 function compruebaSociedades($Id){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
@@ -70,6 +92,7 @@ function compruebaSociedades($Id){
         
         $sql = "SELECT S.idSociedad,S.NombreFiscal FROM Personal P 
         INNER JOIN dbo.Sociedades S ON P.idSociedad = S.idSociedad WHERE idpersonal =?;";
+
     }
     $ListaSociedades = array();
     $parm = array($Id);
@@ -466,6 +489,24 @@ function extraerDocPersonal_Masivo(){
                 array_push($DatosBD, $row);
             }
         }
+    //3.5 - Observaciones
+        $sql2 = "SELECT IdObservacion AS id, 
+        Descripcion AS descripcion,
+        Fecha AS descripcionLateral,
+        IdTipoPropietario,IdPropietario
+        FROM dbo.vw_PEObservaciones 
+        WHERE idpersonal = ? ORDER BY Fecha DESC";
+        $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
+        //$parm = array($IdCliente);
+        $stmt = sqlsrv_query($conn,$sql2,$parm);
+        if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }else{
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $row["tipoDocPortal"] = 3.5;
+                array_push($DatosBD, $row);
+            }
+        }
     //4 - Formacion
         $sql2 = "SELECT IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3
         FROM dbo.vw_PEFormacion
@@ -536,7 +577,6 @@ function extraerDocPersonal_Masivo(){
         RangoFechas  AS descripcionLateral,  
         Estado2 AS descripcion2, 
         color2 as color,
-        'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
         FechaInicio,FechaFin,Año as AñoV,
         Estado
         FROM dbo.vw_PEVacaciones
@@ -643,10 +683,14 @@ function extraerFasesProyectos(){
     $TiposTareas = array();
     $ProyectosMaterialesTipos = array();
     $Articulos = array();
-    $sql = "SELECT pt.IdProyectoTarea,p.IdProyecto,pt.Codigo +' - '+ pt.Nombre AS Descripcion FROM ProyectosTareas pt 
-                    INNER JOIN dbo.Proyectos p ON p.IdProyecto = pt.IdProyecto 
-                    WHERE p.Estado = 0 AND	pt.FechaFin IS NULL
-                    ORDER BY pt.Codigo";
+    $sql = "SELECT IdProyectoTarea,IdProyecto,DireccionArbolNombre AS Descripcion, CuentaOF
+            from vw_Fases_select_appsheet 
+            ";
+            //where CuentaOF <> 0
+    // $sql = "SELECT pt.IdProyectoTarea,p.IdProyecto,pt.Codigo +' - '+ pt.Nombre AS Descripcion FROM ProyectosTareas pt 
+    //                 INNER JOIN dbo.Proyectos p ON p.IdProyecto = pt.IdProyecto 
+    //                 WHERE p.Estado = 0 AND	pt.FechaFin IS NULL
+    //                 ORDER BY pt.Codigo";
 
     $stmt = sqlsrv_query($conn,$sql);
     if ($stmt === false) {
@@ -792,6 +836,7 @@ function exect_Insert_From_Dinamico($arrayValores){
         return $form["Estado"] == $_SESSION["Controlador"] -> miEstado -> Estado;
     });
  
+
     $arrayEjecutable = array_shift($arrayForm);
 
     if ($arrayEjecutable["Instruccion"] == "INSERT_UP") {
@@ -806,12 +851,26 @@ function exect_Insert_From_Dinamico($arrayValores){
                 $sql2 .= ' ?,';
             }
         }
-        
         $sql .= $sql2;
-        //print_r($sql);
-        //print_r($arrayValores);
+    }elseif($arrayEjecutable["Instruccion"] == "EXECUTE"){
+        $sql .= "DECLARE @".$arrayEjecutable['Campos'][0]["Variable"]." INT ";
+        $sql .= "EXECUTE ".$arrayEjecutable["Pro_Tabla"].' ';
+
+        for ($i = 0; $i < count($arrayEjecutable['Campos']); $i++){
+            if($i == (count($arrayEjecutable['Campos']) - 1) ){
+                $sql .= '@'.$arrayEjecutable['Campos'][$i]["Variable"].' = ?';
+            }elseif($arrayEjecutable['Campos'][$i]["OUTPUT"] == 0){
+                $sql .= '@'.$arrayEjecutable['Campos'][$i]["Variable"].' = ?,';
+                
+            }else{
+                $sql .= '@'.$arrayEjecutable['Campos'][$i]["Variable"]." = ".'@'.$arrayEjecutable['Campos'][$i]["Variable"]." OUTPUT," ;
+            }
+        }
+    }
+
         $parm = $arrayValores;
         $stmt = sqlsrv_prepare($conn, $sql, $parm);
+        
         if (!sqlsrv_execute($stmt)) {
             die(print_r(sqlsrv_errors(), true));
             return false;
@@ -836,8 +895,17 @@ function exect_Insert_From_Dinamico($arrayValores){
                     WHERE idpersonal = ? ORDER BY IdArchivo DESC" ;
                     $tipoDoc = 3;
                     break;
-                    
+                case 4.45:
+                    $sqlReturn = "SELECT TOP 1 IdObservacion AS id, 
+                                Descripcion AS descripcion,
+                                Fecha AS descripcionLateral,
+                                IdTipoPropietario,IdPropietario
+                                FROM dbo.vw_PEObservaciones 
+                                WHERE idpersonal = ? ORDER BY IdObservacion DESC" ;
+                    $tipoDoc = 3.5;
                     break;
+                    
+                   
                 case 4.5:
                     
                     $sqlReturn = "SELECT TOP 1  IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3
@@ -887,11 +955,72 @@ function exect_Insert_From_Dinamico($arrayValores){
                 return $valoresInsertados;
             }
         }
-       
-
-    }
-    
     sqlsrv_close( $conn );
+}
+
+function exect_Insert_From_DinamicoSubidaArchivos($arrayValores,$ruta){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $sql = 'INSERT INTO dbo.PEArchivosAuxiliar
+    (
+        IdArchivoAppsheet,
+        IdIdentidad,
+        Link,
+        IdPropietario,
+        IdTipoPropietario,
+        IdArchivosTipo   
+    )
+    VALUES
+    (   ?,
+        ?,?,?,?,?
+        )';
+
+    $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $claveGenerada = '';
+
+    for ($i = 0; $i < 9; $i++) {
+        $claveGenerada .= $caracteres[rand(0, strlen($caracteres) - 1)];
+    }
+    $claveGenerada;
+    
+    $parm = array($claveGenerada, 
+            $_SESSION["Controlador"] -> miEstado -> IdIdentidad,
+            $ruta,
+            $_SESSION["Controlador"] -> miEstado -> IdPropietarioAuxiliar,
+            $_SESSION["Controlador"] -> miEstado -> IdTipoPropietario,
+            $arrayValores[0]);
+    // print_r($parm);
+    // print_r($sql);
+    $stmt = sqlsrv_prepare($conn, $sql, $parm);
+
+    if (!sqlsrv_execute($stmt)) {
+        die(print_r(sqlsrv_errors(), true));
+        return false;
+        die;
+    }else{
+        $valoresInsertados = array();
+        $sqlReturn = "";
+        $tipoDoc = 0;
+        
+        $sqlReturn = "SELECT TOP 1 IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
+        IdTipoPropietario,IdPropietario,Documento, Firmable ,Firmado
+        FROM dbo.vw_PEArchivosPersonal 
+        WHERE idpersonal = ? ORDER BY IdArchivo DESC" ;
+        $tipoDoc = 3;
+        $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
+        sqlsrv_free_stmt($stmt);
+        $stmt = sqlsrv_query($conn, $sqlReturn, $parm);
+        if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }else{
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $row["tipoDocPortal"] = $tipoDoc;
+                array_push($valoresInsertados, $row);
+            }
+            return $valoresInsertados;
+        }
+    }
+     sqlsrv_close( $conn );
+        
 }
 
 function insertProyectosTareaMaterial($MaterialProyecto,$arrayDatos){
@@ -984,6 +1113,8 @@ function comprobarBD($c){
     }
     sqlsrv_close( $conn );
 }
+
+
 
 
 

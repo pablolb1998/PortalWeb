@@ -33,7 +33,7 @@ if(isset($_FILES["Archivo"])){
                 chown($directorioDestino, 'www-data');
             }
    
-            if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], $directorioDestino . str_replace([' ', '/'] ,['','_'] ,$_FILES["Archivo"]["name"]) )){
+            if (move_uploaded_file($_FILES["Archivo"]["tmp_name"], $directorioDestino . str_replace([' ', '/'] ,['_','_'] ,$_FILES["Archivo"]["name"]) )){
                 $host = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
                 $requestUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
                 $urlCompleta = "https://$host$requestUri";

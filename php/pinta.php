@@ -65,6 +65,10 @@ function pinta_contenido($estado){
             $titulo = "Documentos";
             $filename = "../html/documentos.html";
             break;
+        case 4.45:
+            $titulo = "Observaciones";
+            $filename = "../html/documentos.html";
+            break;
         case 4.5:
             $titulo = "Formación";
             $filename = "../html/documentos.html";
@@ -157,6 +161,7 @@ function pinta_contenido($estado){
                 case 1:
                     $titulo = "Proyecto %NombreProyecto%";
                     $filename = "../html/tareasFasesDetalle.html";
+                    
                     break;
             }
             break;
@@ -221,6 +226,7 @@ function pinta_contenido($estado){
         $fileheadertext = str_replace('%accionBuscarHeader%','',$fileheadertext);
         if(in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(7,4.9))) {
             $fileheadertext = str_replace('abrirTxtBoxBuscar','desplegarPanelFiltros',$fileheadertext);
+            
         }
     }else{
         $fileheadertext = str_replace('%accionBuscarHeader%','d-none',$fileheadertext);
@@ -229,10 +235,14 @@ function pinta_contenido($estado){
     
     //cargar el permiso de buscar 
     
-    
+    if(in_array(74,$_SESSION["Controlador"] -> miEstado -> configuracionesUsuario)){
+        $fileheadertext = str_replace('%CargarUsuario%','<li onclick="" class="dropdown-item">Consultar usuario</li>',$fileheadertext);
+    }else{
+        $fileheadertext = str_replace('%CargarUsuario%','',$fileheadertext);
+    }
     
     $fileheadertext = str_replace('<li class="d-none" id="%NombreUsu%"></li>',$nombre_usu,$fileheadertext);
-
+    
 
 
     if(isset($filename) && $filename != "" ){
@@ -293,27 +303,27 @@ function pinta_contenido($estado){
             }
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 3 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //añadir los filtros a el calendario No funciona
-            $arrayFiltros = [
-                ["idTipoDoc" => 1,
-                "Descripcion" => "Asistencias"],
-                ["idTipoDoc" => 2,
-                "Descripcion" => "Contratos"],
-                ["idTipoDoc" => 4,
-                "Descripcion" => "Formación"],
-                ["idTipoDoc" => 5,
-                "Descripcion" => "Incidencias"],
-                ["idTipoDoc" => 6,
-                "Descripcion" => "Material"]
-            ];
+            // $arrayFiltros = [
+            //     ["idTipoDoc" => 1,
+            //     "Descripcion" => "Asistencias"],
+            //     ["idTipoDoc" => 2,
+            //     "Descripcion" => "Contratos"],
+            //     ["idTipoDoc" => 4,
+            //     "Descripcion" => "Formación"],
+            //     ["idTipoDoc" => 5,
+            //     "Descripcion" => "Incidencias"],
+            //     ["idTipoDoc" => 6,
+            //     "Descripcion" => "Material"]
+            // ];
         
-            // funcion para reinedxarlo 
+            // // funcion para reinedxarlo 
             
-            $txt_filtros = '<span id="filtros_dinamicos">';
-            if(count($arrayFiltros)>0){
-                foreach($arrayFiltros as $valor){ 
-                    $txt_filtros .= '<button onclick="" style="color:black;" class="dropdown-item" id="'.$valor["idTipoDoc"].'" >'.$valor["Descripcion"].'</button>';
-                }
-            }
+            // $txt_filtros = '<span id="filtros_dinamicos">';
+            // if(count($arrayFiltros)>0){
+            //     foreach($arrayFiltros as $valor){ 
+            //         $txt_filtros .= '<button onclick="" style="color:black;" class="dropdown-item" id="'.$valor["idTipoDoc"].'" >'.$valor["Descripcion"].'</button>';
+            //     }
+            // }
             //$filetext = str_replace() $txt_filtros;
         }elseif( 
             (($_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4 ) || in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(6,6.1,6.2) ))
@@ -327,6 +337,9 @@ function pinta_contenido($estado){
             
         }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(4.9) ) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
+            if($_SESSION["Controlador"] -> miEstado -> AnioSV == 0){
+                $filetext = str_replace('class="nav-link" id="tab2"','class="nav-link d-none" id="tab2"', $filetext);
+            }
             $filetext = DibujaPestanaVacaciones_Empleado($filetext);
         //}elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 1 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Generar los formularios
@@ -455,14 +468,16 @@ function muestra_documentos(){
     if($_SESSION["Controlador"] -> miEstado -> acciones["descarga"] == 1 ){
         $acciones_linea .= '<a onclick="dibuja_pagina([0,4,[%id%,%Origen_impresion%,'."'%codigo%.pdf'".'],'."'OPDF'".'])" ><img class="pdf_icono" src="Img/descarga_pdf.png"></a>';
     }
-    if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
-        
+    if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){      
         $acciones_linea .= '<a onclick="dibuja_pagina([9,%id%])" style="all: initial;cursor: pointer;"><img class="pdf_icono" src="%ImgArchivos%"></a>';
         
     }
     if($_SESSION["Controlador"] -> miEstado -> acciones["adjunto"] == 1 ){
         $acciones_linea .= '<a onclick="dibuja_pagina([0,4,[%id%,'."'%codigo%'".'],'."'OA'".'])" style="all: initial;cursor: pointer;"><img class="pdf_icono" src="Img/descarga_generica.png"></a>';    
     
+    }
+    if($_SESSION["Controlador"] -> miEstado -> acciones["observaciones"] == 1 ){
+        $acciones_linea .= '<a onclick="cargarModalDetalles(%LabelMostrar%,%ValorMostar%)" style="all: initial;cursor: pointer;"><img class="pdf_icono" src="Img/IconosAcciones/verDetalles.png"></a>';
     }
     if($_SESSION["Controlador"] -> miEstado -> acciones["modalVisualizar"] == 1 ){
         $acciones_linea .= '<a onclick="cargarModalDetalles(%LabelMostrar%,%ValorMostar%)" style="all: initial;cursor: pointer;"><img class="pdf_icono" src="Img/verDetalles.png"></a>';
@@ -859,16 +874,20 @@ function DibujaLineas_PortalEmpleado(){
         if($_SESSION["Controlador"] -> miEstado -> acciones["modalVisualizarLineaCustom"] = 1){
             $accionModalPersonalizadaOnClick = 1;
         }
-        if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
-            $acciones_linea .= '<button onclick="dibuja_pagina([4.4,%IdProp%])"    style="all: initial;cursor: pointer;"><img class="pdf_icono" src="%ImgArchivos%"></button>';    
-        }
         if($_SESSION["Controlador"] -> miEstado -> acciones["observaciones"] == 1 ){
-            $acciones_linea .= '<a href="#" target="_blank"><img class="pdf_icono" src="Img/Observaciones.png"></a>';    
+            $acciones_linea .= '<button onclick="dibuja_pagina([4.45,%IdProp%])"    style="all: initial;cursor: pointer;"><img class="pdf_icono" src="Img/IconosAcciones/verDetalles.png"></button>';    
+        }
+        if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
+            $acciones_linea .= '<button onclick="dibuja_pagina([4.4,%IdProp%])"    style="all: initial;cursor: pointer; padding: 0; border: none; margin: 0;"><img class="pdf_icono" src="%ImgArchivos%"></button>';    
         }
         if($_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"] == 1){
             //dibuja_pagina([0,3])
             $acciones_globales .= '<button onclick="cargarModalFormularioDinamico()" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
             $acciones_globales .= cargaFormularioDinamico2();
+            
+        }
+        if($_SESSION["Controlador"] -> miEstado -> adjuntarDocumentoFormAutomatico == 1 ){
+            $acciones_globales .= obtenerFormularioAdjuntos();
         }
 
         //Visualizador modal custom 
@@ -907,6 +926,9 @@ function DibujaLineas_PortalEmpleado(){
                 break;
             case 4.4 :
                 $tipoDocf = 3;
+                break;
+            case 4.45 :
+                $tipoDocf = 3.5;
                 break;
             case 4.5:
                 $tipoDocf = 4;
@@ -1037,15 +1059,16 @@ function DibujaLineas_PortalEmpleado(){
         //print_r($_SESSION["Controlador"] -> miEstado -> IdTipoPropietario);
         //print_r($_SESSION["Controlador"] -> miEstado -> IdPropietario);
         //sacar los documentos por tipo propietario y el propietario
-        if ($tipoDocf == 3 && $_SESSION["Controlador"] -> miEstado -> IdTipoPropietario != null && $_SESSION["Controlador"] -> miEstado -> IdPropietario != null){
+        if (($tipoDocf == 3 || $tipoDocf == 3.5) && $_SESSION["Controlador"] -> miEstado -> IdTipoPropietario != null && $_SESSION["Controlador"] -> miEstado -> IdPropietario != null){
             $arrayDoc = array_filter($arrayDoc, function ($docF) {
                 return $docF["IdTipoPropietario"] == $_SESSION["Controlador"] -> miEstado -> IdTipoPropietario
                 && $docF["IdPropietario"] ==  $_SESSION["Controlador"] -> miEstado -> IdPropietario;
             });
-        }elseif($tipoDocf == 3 && $_SESSION["Controlador"] -> miEstado -> IdTipoPropietario != null){
+        }elseif(($tipoDocf == 3 || $tipoDocf == 3.5) && $_SESSION["Controlador"] -> miEstado -> IdTipoPropietario != null){
             $arrayDoc = array_filter($arrayDoc, function ($docF) {
                 return $docF["IdTipoPropietario"] == $_SESSION["Controlador"] -> miEstado -> IdTipoPropietario;
             });
+            
         }elseif($tipoDocf == 8){
         //filtrar los documentos de vacaciones
             $anoActual = date("Y");
@@ -1058,7 +1081,7 @@ function DibujaLineas_PortalEmpleado(){
                 });
             }
         }
-
+        
         // funcion para reinedxarlo 
         $arrayDoc = array_values($arrayDoc);
         $listaDoc = "";
@@ -1238,6 +1261,9 @@ function DibujaLineas_PortalEmpleado(){
         
         $listaDoc .= "</section>";
         $listaDoc .= $acciones_globales;
+        
+        
+
         return $listaDoc;
 }
 
@@ -1536,12 +1562,12 @@ function cargaFormularioDinamico2(){
     //print_r($TituloModal);
 
     $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
-        return $form["Estado"] == $_SESSION["Controlador"] -> miEstado -> Estado;
+        return $form["Estado"] == floatval($_SESSION["Controlador"] -> miEstado -> Estado);
     });
 
     $arrayIntermedio = array_shift($arrayForm);
     $arrayCamposForm = $arrayIntermedio["Campos"];
-    
+
     //Extraer los dropdowns que se van a usar
     $arraydropdown = array_filter($_SESSION["Controlador"] -> miEstado -> dropdownsFormularios, function ($filtro) use($arrayCamposForm){
         return in_array($filtro["IdTipoDefinicion"],array_column($arrayCamposForm, "IdTipoDefinicion")); 
@@ -1639,6 +1665,86 @@ function cargaFormularioDinamico2(){
     return $camposForm;
 }
 
+//funcion para poder adjuntar sin rayarme mucho la cabez
+function obtenerFormularioAdjuntos(){
+    $TituloModal = 'Nuevo Adjunto';
+    $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
+        return $form["Estado"] == 4.4;
+    });
+    $arrayIntermedio = array_shift($arrayForm);
+    $arrayCamposForm = $arrayIntermedio["Campos"];
+
+    
+    $arraydropdown = array_filter($_SESSION["Controlador"] -> miEstado -> archivostiposAccesos, function ($campos) {
+        return $campos["IdTipoPropietario"] == $_SESSION["Controlador"] -> miEstado -> IdTipoPropietario;
+    });
+
+
+    
+    $camposForm = '';
+    //GENERAR LA VARIABLE DE MODAL
+    if(!isset($_SESSION["PlantillaModalForm"])){
+        $fileModal = fopen('../html/PlantillaModalFormulario.html', "r");
+        $filesizeModal = filesize('../html/PlantillaModalFormulario.html');
+        $_SESSION["PlantillaModalForm"] = fread($fileModal, $filesizeModal);
+        fclose($fileModal);
+    }
+    $PlantillaModal = $_SESSION["PlantillaModalForm"];
+    $PlantillaModal = str_replace("modalFormularioDinamico","modalFormularioDinamicoAdjuntar",$PlantillaModal);
+    
+
+    $formularioConArchivos = false;
+    foreach($arrayCamposForm as $campo){
+        if($campo["TipoDatoHtml"] == 'file'){
+            $formularioConArchivos = true;
+        }
+        
+        if($campo["SelectorDesplegable"] == 0 && $campo["OUTPUT"] == 0 && $campo["Mostrar"] == 1){
+            // print_r($campo);'.($campo["Mostrar"] == 1 ? "" : 'display:none;').'
+            
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="'.($campo["Mostrar"] == 1 ? "" : 'display:none;').'">';
+            $camposForm .= '<label for="'.$campo["Variable"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
+            $camposForm .= '<input type="'.$campo["TipoDatoHtml"].'" class="form-control border-secondary" id = "'.$campo["Variable"].'" aria-describedby="'.$campo["Nombre_campo"].'"'
+            .($campo["VariableAlmacenada"] != null ? ' value = "'. $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}.'"' : ' value = "'. $campo["ValorPorDefecto"].'"').' '.($campo["Required"] == 1 ? "required" : "").'>';
+            //tremenda fumada
+            if(isset($campo["Condicion"])&& $campo["Condicion"] != null){
+                $camposForm .='<div class=" d-none" id="'.$campo["Variable"].'_condiciones">'.$campo["Condicion"].'</div>';
+            }
+            
+            $camposForm .='<div class="text-danger d-none" id="'.$campo["Variable"].'_msgError">'.$campo["MsgError"].'</div>';
+            $camposForm .= '</div><br>';
+        }elseif($campo["Variable"] == "IdArchivosTipo" && $campo["Mostrar"] == 1 && $campo["SelectorDesplegable"] == 1){
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
+            $camposForm .= '<label for="'.$campo["Variable"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
+            $camposForm .= '<select class="form-select border-secondary" aria-label="'.$campo["Nombre_campo"].'" id="'.$campo["Variable"].'">';
+            $existeSelecion = 0;
+            foreach($arraydropdown as $valorSelecionable){
+                switch ($existeSelecion){
+                    case 0:
+                        $camposForm .= '<option value="'.$valorSelecionable['IdArchivoTipo'].'" selected>'.$valorSelecionable['Nombre'].'</option>';
+                        break;
+                    default:
+                        $camposForm .= '<option value="'.$valorSelecionable['IdArchivoTipo'].'">'.$valorSelecionable['Nombre'].'</option>';
+                        break;
+                }
+                $existeSelecion = 1;
+            }
+            $camposForm .= '</select></div><br>';
+        }
+    
+
+        }
+
+        
+        $camposForm = str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%'],['enctype="multipart/form-data"',$camposForm,$TituloModal],$PlantillaModal);
+        //$camposForm = str_replace("%tipoForm%",'enctype="multipart/form-data" class="formulario_Dinamico_Archivos col-10 col-md-12 mt-3"',$camposForm);
+        $camposForm = str_replace('SubmitModalForm(1)','SubmitModalForm(1,null,1,modalFormularioDinamicoAdjuntar)',$camposForm);
+
+    return $camposForm;
+}
+
+
+
 function cargaModalesCustom(){
     
     if(!isset($_SESSION["PlantillaModalForm"])){
@@ -1659,39 +1765,17 @@ function cargaModalesCustom(){
     $nombre_Form = "";
     switch ($_SESSION["Controlador"] -> miEstado -> Estado){
         case 6.1:
+            //DESPLEGABLE CUSTOM
+            $CModal = fopen('../html/selectBuscar.html', "r");
+            $CsizeModal = filesize('../html/selectBuscar.html');
+            $cDesplegable = fread($CModal, $CsizeModal);
+            fclose($CModal);
+
+
+
             $nombre_Form = "Nuevo tiempo de fase";
             $Modal = str_replace('modalFormularioDinamico','modalFormularioTiemposProyectos',$PlantillaModal);
-            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
-            $camposForm .= '<label for="IdProyectoTarea" class="form-label">Fase</label>';
-            $camposForm .= '<select class="form-select border-secondary" aria-label="Fase" id="IdProyectoTarea">';
-            $existeSelecion = 1;
-            $camposForm .= '<option value="" selected></option>';
 
-            $arrayDc = array_filter($_SESSION["Controlador"] -> miEstado -> datosProyectos[0], function ($valorDropdown){
-                return $valorDropdown["IdProyecto"] ==  $_SESSION["Controlador"] -> miEstado -> IdPropietario;
-            });
-            foreach($arrayDc as $valorSelecionable){
-                switch ($existeSelecion){
-                    case 0:
-                        $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
-                        
-                        break;
-                    default:
-                        $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
-                        break;
-                }
-                $existeSelecion = 1;
-            }
-            
-            $camposForm .= '</select></div>';
-
-            
-
-            // $camposForm .= '<div class="text-danger d-none" id="modalFormularioTiemposProyectos_cadenas">';
-            // foreach($_SESSION["Controlador"] -> miEstado -> datosProyectos[0] as $valorSelecionable){                    
-            //     $camposForm .= '(#)'.$valorSelecionable['IdProyectoTarea'].'(#)'.$valorSelecionable['Descripcion'].'(#)';
-            // }
-            // $camposForm .= '</div>';
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
             $camposForm .= '<label for="IdTipoTarea" class="form-label">Tipo de tarea</label>';
             $camposForm .= '<select class="form-select border-secondary" aria-label="Fase" id="IdTipoTarea">';
@@ -1709,6 +1793,49 @@ function cargaModalesCustom(){
                 $existeSelecion = 1;
             }
             $camposForm .= '</select></div>';
+            
+            
+            // $camposForm .=  '<div class="form-check form-switch">
+            //                 <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+            //                 <label class="form-check-label" for="flexSwitchCheckDefault">Mostrar solo tareas con OF</label>
+            //                 </div>';
+                                        
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
+            $camposForm .= '<label for="IdProyectoTarea" class="form-label">Fase</label>';
+            //$camposForm .= '<select class="form-select border-secondary" aria-label="Fase" id="IdProyectoTarea">';
+            //$existeSelecion = 1;
+            //$camposForm .= '<option value="" selected></option>';
+
+            $ContenidoCModal = "";
+
+            $arrayDc = array_filter($_SESSION["Controlador"] -> miEstado -> datosProyectos[0], function ($valorDropdown){
+                return $valorDropdown["IdProyecto"] ==  $_SESSION["Controlador"] -> miEstado -> IdPropietario;
+            });
+            // foreach($arrayDc as $valorSelecionable){
+            //     switch ($existeSelecion){
+            //         case 0:
+            //             $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'"   cuenta-Of="'.$valorSelecionable['CuentaOF'].'" >'.$valorSelecionable['Descripcion'].'</option>';
+                        
+            //             break;
+            //         default:
+            //             $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'  cuenta-Of='.$valorSelecionable['CuentaOF'].' ">'.$valorSelecionable['Descripcion'].'</option>';
+            //             break;
+            //     }
+            //     $existeSelecion = 1;
+            // }
+            
+            // $camposForm .= '</select></div>';
+            foreach($arrayDc as $valorSelecionable){
+                $ContenidoCModal .= '<div  class="selectBuscar-item" data-value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</div>';
+            }
+            
+            $camposForm .= str_replace("%Options%",$ContenidoCModal,$cDesplegable);
+            // $camposForm .= '<div class="text-danger d-none" id="modalFormularioTiemposProyectos_cadenas">';
+            // foreach($_SESSION["Controlador"] -> miEstado -> datosProyectos[0] as $valorSelecionable){                    
+            //     $camposForm .= '(#)'.$valorSelecionable['IdProyectoTarea'].'(#)'.$valorSelecionable['Descripcion'].'(#)';
+            // }
+             $camposForm .= '</div>';
+            
 
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="">
                                 <label for="FechaInicio" class="form-label">Fecha Inicio</label>
@@ -1728,32 +1855,51 @@ function cargaModalesCustom(){
             /*****************************************/
             /*****MODAL DE MATERIALES DE PROYECTOS****/
             /*****************************************/
+            //DESPLEGABLE CUSTOM
+            $CModal = fopen('../html/selectBuscar.html', "r");
+            $CsizeModal = filesize('../html/selectBuscar.html');
+            $cDesplegable = fread($CModal, $CsizeModal);
+            fclose($CModal);
+
             $nombre_Form = "Nuevo recurso de fase";
             $Modal = str_replace('modalFormularioDinamico','modalFormularioMaterialesProyectos',$PlantillaModal);
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
             $camposForm .= '<label for="IdProyectoTarea" class="form-label">Fase</label>';
-            $camposForm .= '<select class="form-select border-secondary" aria-label="Fase" id="IdProyectoTarea">';
-            $existeSelecion = 1;
-            $camposForm .= '<option value="" selected></option>';
+            //$camposForm .= '<select class="form-select border-secondary" aria-label="Fase" id="IdProyectoTarea">';
+            $ContenidoCModal = "";
 
-            
             $arrayDc = array_filter($_SESSION["Controlador"] -> miEstado -> datosProyectos[0], function ($valorDropdown){
                 return $valorDropdown["IdProyecto"] ==  $_SESSION["Controlador"] -> miEstado -> IdPropietario;
             });
-            foreach($arrayDc as $valorSelecionable){
-                switch ($existeSelecion){
-                    case 0:
-                        $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
-                        
-                        break;
-                    default:
-                        $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
-                        break;
-                }
-                $existeSelecion = 1;
-            }
             
-            $camposForm .= '</select></div>';
+            foreach($arrayDc as $valorSelecionable){
+                $ContenidoCModal .= '<div  class="selectBuscar-item" data-value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</div>';
+            }
+            $camposForm .= str_replace("%Options%",$ContenidoCModal,$cDesplegable);
+            $camposForm .= '</div>';
+            
+            // $existeSelecion = 1;
+            // $camposForm .= '<option value="" selected></option>';
+
+            
+            // $arrayDc = array_filter($_SESSION["Controlador"] -> miEstado -> datosProyectos[0], function ($valorDropdown){
+            //     return $valorDropdown["IdProyecto"] ==  $_SESSION["Controlador"] -> miEstado -> IdPropietario;
+            // });
+            // foreach($arrayDc as $valorSelecionable){
+            //     switch ($existeSelecion){
+            //         case 0:
+            //             $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
+                        
+            //             break;
+            //         default:
+            //             $camposForm .= '<option value="'.$valorSelecionable['IdProyectoTarea'].'">'.$valorSelecionable['Descripcion'].'</option>';
+            //             break;
+            //     }
+            //     $existeSelecion = 1;
+            // }
+            
+            // $camposForm .= '</select></div>';
+                
 
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
             $camposForm .= '<label for="IdProyectoMaterialTipo" class="form-label">Tipo de Artículo</label>';
@@ -1795,10 +1941,10 @@ function cargaModalesCustom(){
 
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Descripcion" class="form-label">Descripción</label><input type="text" class="form-control border-secondary" id="Descripcion" aria-describedby="Descripción" value="" required=><div class="text-danger d-none" id="Descripcion_msgError">El campo no puede estar vacío.</div></div>';
             
-            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Cantidad" class="form-label">Cantidad</label><input type="Number" class="form-control border-secondary" id="Cantidad" aria-describedby="Cantidad" value="0.00" step="0.01" required>';
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Cantidad" class="form-label">Cantidad</label><input type="Number" class="form-control border-secondary" id="Cantidad" aria-describedby="Cantidad" value="0" step="1" required>';
             $camposForm .= '<div class=" d-none" id="Cantidad_condiciones">'."$('#Cantidad').val() &gt; 0</div>".'<div class="text-danger d-none" id="Cantidad_msgError">La cantidad ha de ser mayor que 0.</div></div>';
 
-            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Coste" class="form-label">Coste</label><input type="Number" class="form-control border-secondary" id="Coste" aria-describedby="Coste" value="0.00" step="0.01" required>';
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style=""><label for="Coste" class="form-label">Coste</label><input type="Number" class="form-control border-secondary" id="Coste" aria-describedby="Coste" value="0" step="1" required>';
             $camposForm .= '<div class=" d-none" id="Coste_condiciones">'."$('#Coste').val() &gt; 0</div>".'<div class="text-danger d-none" id="Coste_msgError">El coste ha de ser mayor que 0.</div></div>';
 
 
@@ -1814,7 +1960,7 @@ function cargaModalesCustom(){
     //$ModalListado = str_replace('%descForm%','modalListadoProyectos',$PlantillaModalListado);
             
 
-    return str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%'],['',$camposForm,"Nuevo tiempo de fase"],$Modal);
+    return str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%'],['',$camposForm,$nombre_Form],$Modal);
 }
 
 function PintaArrayValuesSelect($idLinea,$acciones_linea_pintar){
@@ -1887,7 +2033,15 @@ function cargarSeccionesDinamicas(){
                     $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.'portal-empleado-jornada-salida-f2.png"/>';
                     $pestanaSecciones .= '</button>';
                     $pestanaSecciones .= '</div>';
-                    
+                }elseif($seccion['IdFormulario'] == 2640){
+                    $pestanaSecciones .= '<div class="'.$seccion['EstiloPestaña'].'">';
+                    $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina(['.$seccion['ValorAccion'].'])"';
+                    $pestanaSecciones .= 'class="btn btn-md border shadow bg-body rounded d-block mx-auto" >';
+                    $pestanaSecciones .= '<img class="img-fluid" src="Img/'.$rutaImg.''.$seccion['Imagen'].'"/>
+                                            <p class="h5 PestanaMenu" style="color:'.$seccion['ColorPestana'].';">'.$seccion['Nombre'].'</p>';
+                    $pestanaSecciones .= '</button>';
+                    $pestanaSecciones .= '</div>';
+
                 }else{
                     $pestanaSecciones .= '<div class="'.$seccion['EstiloPestaña'].'">';
                     $pestanaSecciones .= '<button id="boton_secciones" onclick="dibuja_pagina(['.$seccion['ValorAccion'].'])"';
@@ -1954,4 +2108,35 @@ function ObtenAccionesPersonalizadas(){
             break;    
     }
     return $accionesPersonalizada;
+}
+
+function superUsuarioModal(){
+    $modalSuperUsuario = 
+        '<div class="modal fade show" id="modalSuperAdmin" tabindex="-1" aria-labelledby="modalDinamico" aria-modal="true" role="dialog" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title">Cambiar Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="formulario_modal  col-12 col-md-12 mt-3" enctype="multipart/form-data">
+                        <div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="">
+                            <div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">
+                                <label for="IdArchivosTipo" class="form-label">Usuario</label>
+                                <select class="form-select border-secondary" aria-label="Tipo de archivo" id="IdArchivosTipo">
+                                    <option value="23" selected="">Contratos </option><option value="29">Certificado de empresa</option><option value="32">Otra Documentación </option><option value="67">contratos de personal</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="SubmitModalForm" onclick="SubmitModalForm(1)">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>';
+    return $modalSuperUsuario;
 }
