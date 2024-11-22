@@ -63,9 +63,9 @@
                         "VariableAlmacenada" : null,
                         "ValorPorDefecto" : null,
                         "ValorAdicional": null,
-                        "Required": 1,
+                        "Required": 0,
                         "MsgError":"Fecha Fin no puede ser anterior a Fecha Inicio.",
-                        "Condicion": "$('#FechaFin').val() > $('#FechaInicio').val() "
+                        "Condicion": "($('#FechaFin').val() > $('#FechaInicio').val() || $('#FechaFin').val() == null) "
                     },
                     {
                         "Variable" : "AsistenciaIncidencia",
@@ -522,6 +522,88 @@
                     "MsgError":""
                 }
             ]        
+        },
+        {
+            "Nombre" : "Observaciones",
+            "Estado" : 4.45,
+            "Instruccion" : "EXECUTE",
+            "Pro_Tabla" : "up_Observaciones_Insert",
+            "Campos" :[
+                {
+                    "Variable" : "IdObservacion",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 1,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable": 0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdPropietario",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdPropietario",
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                },
+                {
+                    "Variable" : "IdTipoPropietario",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdTipoPropietario",
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                },{
+                    "Variable" : "Descripcion",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Varchar",
+                    "Mostrar" : 1,
+                    "Nombre_campo" : "Descripción",
+                    "TipoDatoHtml": "text",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : null,
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 1,
+                    "MsgError":"El campo no puede estar vacío."
+                },
+                {
+                    "Variable" : "IdIdentidad",
+                    "IdTipoDefinicion" : null,
+                    "OUTPUT" : 0,
+                    "TipoDatoBBDD" : "Int",
+                    "Mostrar" : 0,
+                    "Nombre_campo" : "",
+                    "TipoDatoHtml": "",
+                    "SelectorDesplegable":0,
+                    "VariableAlmacenada" : "IdIdentidad",
+                    "ValorPorDefecto" : null,
+                    "ValorAdicional": null,
+                    "Required": 0,
+                    "MsgError":""
+                }
+            ]        
         },       
         {
             "Nombre" : "Vacaciones",
@@ -602,7 +684,7 @@
                     "ValorPorDefecto" : null,
                     "ValorAdicional": null,
                     "Required": 1,
-                    "Condicion": "$('#FechaFin').val() > $('#FechaInicio').val() ",
+                    "Condicion": "$('#FechaFin').val() >= $('#FechaInicio').val() ",
                     "MsgError":"La fecha de fin no puede ser menor que la fecha de inicio"
                 },
                 {
@@ -630,11 +712,11 @@
                     "TipoDatoHtml": "number",
                     "SelectorDesplegable": 0,
                     "VariableAlmacenada" : null,
-                    "ValorPorDefecto" : 0,
+                    "ValorPorDefecto" : 2024,
                     "ValorAdicional": null,
                     "Required": 1,
                     "MsgError":"El Año Imputación ha de tener maximo 1 año de diferencia con el año actual.",
-                    "Condicion": "($('#Año').val() <=  anoActual +1 && $('#Año').val()  >= anoActual -1)  "
+                    "Condicion": "($('#Año').val() <=  anoActual +1 && $('#Año').val()  >= anoActual -1) "
                 },
                 {
                     "Variable" : "IdIdentidadInsert",
