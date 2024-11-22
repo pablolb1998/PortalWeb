@@ -32,7 +32,7 @@
     width: 1.1%;
     float: right;
     min-width: 2.5em;
-    margin-left: 0.75em;
+    margin-left: 0.35em;
 }
 
 .bolsa_dinero{
@@ -77,9 +77,9 @@
 }
 
 .btn-check:checked + .btn-check-vacaciones-tipos {
-  background-color: #f0f0f0; 
-  color: #000;
-  border-color: #000; 
+  background-color: #0d6efd; 
+  color: #fff;
+  border-color: #fff; 
 } 
 
 /* css para eliminar los margenes en movil de boostrap */
@@ -218,4 +218,10 @@
 }
 .seccion-panelDeslizable{
   margin-left: 20px;
+}
+
+.form-switch {
+  display: flex !important;
+  flex-direction: row-reverse !important;
+  align-content:start;
 }
