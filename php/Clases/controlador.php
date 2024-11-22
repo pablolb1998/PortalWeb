@@ -92,7 +92,7 @@ class Controlador
         }
         //pruebas
         if($_SESSION["pinC"] == 123654){
-                $this -> miEstado -> IP = '192.168.204.239';
+                $this -> miEstado -> IP = '192.168.204.169';
         }elseif ($_SESSION["pinC"] == '65814415D75C') {
             $this -> miEstado -> IP = '85.215.231.65,23459';
         }
@@ -108,6 +108,7 @@ class Controlador
             $this -> miEstado -> nombre_descriptivo = $datosSesion[2];
             $this -> miEstado -> IdIdentidad = $datosSesion[4];
             $this -> miEstado -> permisosSecciones = comprobarPermisosUsuarios();
+            $this -> miEstado -> configuracionesUsuario = comprobarConfiguracionesAdicionalesUsuarios();
             if($this -> miEstado -> tipo_App == 1){
                 //PORTAL DEL CLIENTE: Añadir variables de sesion al comprobar usuario
                     $this -> miEstado -> IdCliente = $datosSesion[0];
@@ -235,6 +236,7 @@ class Controlador
                 $this -> miEstado -> Estado = $estadoAnterior;
             }
             //reinicializar variables
+            
             $this -> miEstado -> nombreDocumentoPadre = null;
             $this -> miEstado -> IdPropietario = null; 
         }else{
@@ -243,6 +245,7 @@ class Controlador
         }
         $this -> miEstado -> CadenaFiltro = null;
         $this -> miEstado -> IdsTiposFiltro = array();
+        $this -> miEstado -> adjuntarDocumentoFormAutomatico = 0;
         $this -> cargarPermisosAcciones();
     }
 
@@ -296,6 +299,7 @@ class Controlador
         $this -> miEstado -> acciones["modalVisualizarLineaCustom"] = 0;
         $this -> miEstado -> acciones["anadirLineaCustom"] = 0;
         $this -> miEstado -> acciones["accionBuscarMenu"] = 0;
+        $this -> miEstado -> acciones["observaciones"] = 0;
         //*******************/
                 //Acciones personalizadas de cada formulario//
         //******************/
@@ -307,37 +311,51 @@ class Controlador
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["desplegado"] = 1;
-                    //$this -> miEstado -> acciones["modalVisualizar"] = 1;
+                    $this -> miEstado -> acciones["observaciones"] = 1;
+                    
                     //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.3 :
                     $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["observaciones"] = 1;
                     //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.4 :
+                    if(!in_array($this -> miEstado -> IdTipoPropietario,array(24,25))){
+                        $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    } 
+                    
+                    //$this -> miEstado -> acciones["modalVisualizar"] = 1;
+                    break;
+                case 4.45 :
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
+                
                     //$this -> miEstado -> acciones["modalVisualizar"] = 1;
                     break;
                 case 4.5:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["modalVisualizar"] = 1;
+                    $this -> miEstado -> acciones["observaciones"] = 1;
                     //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.6:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["modalVisualizar"] = 1;
+                    $this -> miEstado -> acciones["observaciones"] = 1;
                     //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.7:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
+                    $this -> miEstado -> acciones["observaciones"] = 1;
                     //$this -> miEstado -> acciones["modalVisualizar"] = 1;
                     //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.8:
                     $this -> miEstado -> acciones["archivos"] = 1;
+                    $this -> miEstado -> acciones["observaciones"] = 1;
                     //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
                 case 4.9:
@@ -403,7 +421,7 @@ class Controlador
         $url = "http://onixsw.esquio.es:8080/Funciones.aspx?SubirArchivo=1&pin=".$pin.
         "&IdTipoPropietario=".$IdtipoPropietario.'&IdPropietario='.$idPropietario.
         '&IdArchivoTipo='.$idArchivoTipo.'&URL='.urlencode($url).'&NombreArchivo='.$nombre_archivo;
-    
+        //print_r($url);
         try {
             $response = file_get_contents($url);
         } catch (\Throwable $th) {
@@ -461,6 +479,13 @@ class Controlador
                 'DiasPendientes' => $documento['DiasPendientes']));
             }
         }         
+        if(empty($arrayAuxiliarHtml2)){
+            array_push($arrayAuxiliarHtml2,array('Año' => $documento['Año'],
+                'DiasTotales' => 0,
+                'DiasDisfrutados' => 0,
+                'DiasConcedidos' => 0,
+                'DiasPendientes' => 0));
+        }
         return $arrayAuxiliarHtml2;      
     }
 
@@ -722,7 +747,10 @@ class Controlador
                         }
                     }    
                     $this -> miEstado -> AnioSV = date("Y");
-                    $arrayAuxiliarHtml = $this -> calcularVacacionesGraf($this -> miEstado -> AnioSV);               
+                    $arrayAuxiliarHtml = $this -> calcularVacacionesGraf($this -> miEstado -> AnioSV);  
+                    if(empty($arrayAuxiliarHtml)){
+                        $arrayAuxiliarHtml = array(0);
+                    }             
                     rsort($this -> miEstado -> listaAnoFiltroVacaciones);
                     break;
                 default:
@@ -731,9 +759,71 @@ class Controlador
             }
            
             $this -> navegarPestanas($arrayDatos[0]);
-        }elseif (($c > 4 && $c < 5 && $c != 4.4 || in_array($c,array(6.1,6.2)) ) && !empty($arrayDatos) && $arrayDatos[0] == 4.4 && $this -> miEstado -> tipo_App == 2) {
+        }elseif (($c > 4 && $c < 5 && $c != 4.4  || in_array($c,array(6.1,6.2)) ) && !empty($arrayDatos) && $arrayDatos[0] == 4.4 && $this -> miEstado -> tipo_App == 2) {
         //********************************************/
         //PORTAL EMPLEADO al documento Correspondiente
+        //********************************************/
+            //indicar el propietario
+            $this -> miEstado -> IdPropietario = $arrayDatos[1];
+            switch ($this -> miEstado -> Estado) {
+                case 4.1 :
+                    $tipoDocf = 1;
+                    break;
+                case 4.3 :
+                    $tipoDocf = 2;
+                    break;
+                case 4.4 :
+                    $tipoDocf = 3;
+                    break;
+                case 4.4 :
+                    $tipoDocf = 9;
+                    break;
+                case 4.5:
+                    $tipoDocf = 4;
+                    break;
+                case 4.6:
+                    $tipoDocf = 5;
+                    break;
+                case 4.7:
+                    $tipoDocf = 6;
+                    break;
+                case 4.8:
+                    $tipoDocf = 7;
+                    break;
+                case 4.9:
+                    $tipoDocf = 8;
+                    break;
+                case 6.1:
+                    $tipoDocf = 3;
+                    $this -> miEstado -> IdTipoPropietario = 147;
+                    break;
+                case 6.2:
+                    $tipoDocf = 3;
+                    $this -> miEstado -> IdTipoPropietario = 149;
+                    break;
+                case 7 :
+                    $tipoDocf = 4; 
+                    break;
+                default:
+                    $tipoDocf = 1;
+                    break;
+            }
+
+            $arrayDoc = array_values(array_filter($this -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
+                return $docF["tipoDocPortal"] == $tipoDocf
+                && $docF["id"] ==  $this -> miEstado -> IdPropietario;
+            }));
+            //print_r($arrayDoc[0]['descripcion']);
+            $this -> miEstado -> nombreDocumentoPadre = $arrayDoc[0]['descripcion'];
+            $this -> navegarPestanas($arrayDatos[0]);
+        //}elseif($c == 4.4 && !empty($arrayDatos) && $arrayDatos[1] == 6 && $arrayDatos[2] != null ){
+        //********************************************/
+        //PORTAL EMPLEADO Navegar a la pestaña de firma desde documentos(DEPRECATED)
+        //********************************************/
+       //     $this -> miEstado -> IdDocumentoPadre = $arrayDatos[2];
+        }elseif (($c > 4 && $c < 5 && $c != 4.45 || in_array($c,array(6.1,6.2)) ) && !empty($arrayDatos) && $arrayDatos[0] == 4.45 && $this -> miEstado -> tipo_App == 2) {
+        //********************************************/
+        //PORTAL EMPLEADO al Observaciones Correspondiente
         //********************************************/
             //indicar el propietario
             $this -> miEstado -> IdPropietario = $arrayDatos[1];
@@ -782,14 +872,9 @@ class Controlador
                 return $docF["tipoDocPortal"] == $tipoDocf
                 && $docF["id"] ==  $this -> miEstado -> IdPropietario;
             }));
-            //var_dump($arrayDoc);
+  
             $this -> miEstado -> nombreDocumentoPadre = $arrayDoc[0]['descripcion'];
             $this -> navegarPestanas($arrayDatos[0]);
-        //}elseif($c == 4.4 && !empty($arrayDatos) && $arrayDatos[1] == 6 && $arrayDatos[2] != null ){
-        //********************************************/
-        //PORTAL EMPLEADO Navegar a la pestaña de firma desde documentos(DEPRECATED)
-        //********************************************/
-       //     $this -> miEstado -> IdDocumentoPadre = $arrayDatos[2];
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == 0 ){
         //********************************************/
         //PORTAL CLIENTE/EMPLEADO
@@ -937,12 +1022,27 @@ class Controlador
         //********************************************/
         //PORTAL EMPLEADO Insertar Material/Tiempo de proyectos
         //********************************************/
+        
             $tipoMat = 1;
             if($c == 6.1){
                 $tipoMat = 0;
+            }else{
+                $this -> miEstado -> adjuntarDocumentoFormAutomatico = 1;
+                $this -> miEstado -> IdTipoPropietario = 149;
+                $accionJs = 3;
             }
             $resultado = insertProyectosTareaMaterial($c,$arrayDatos[2]);
             $this -> miEstado -> arrayDatosAux = extraerRecursosFaseProyecto($this -> miEstado -> IdPropietario,$tipoMat);
+            $ultimoElemento = null;
+            if($this -> miEstado -> adjuntarDocumentoFormAutomatico == 1 ){
+                foreach (array_reverse($this -> miEstado -> arrayDatosAux) as $item) {
+                    if (isset($item["tipoDocPortal"]) && $item["tipoDocPortal"] == 9.2) {
+                        $ultimoElemento = $item;
+                        break;
+                    }
+                }
+                $this -> miEstado -> IdPropietarioAuxiliar = $ultimoElemento['id'];
+            }
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 ){
         //********************************************/
         //PORTAL EMPLEADO Insertar Formularios dinamcos
@@ -1008,6 +1108,24 @@ class Controlador
                 
             }
             $this -> miEstado -> cargarForm = 0;
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3.5 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 ){
+        //********************************************/
+        //PORTAL EMPLEADO adjuntar archivo desde la pestaña que no es archivos (mierdas varias)
+        //********************************************/
+      
+            $nombre_archivo = str_replace([' ', '/'] ,['_','_'] ,$arrayDatos[4]);
+            $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
+                                            $this -> miEstado -> IdTipoPropietario,
+                                            $this -> miEstado -> IdPropietario,
+                                            $arrayDatos[2][0],
+                                            $arrayDatos[3],
+                                            $nombre_archivo);
+                                
+            exect_Insert_From_DinamicoSubidaArchivos($arrayDatos[2],$arrayDatos[3]);
+        //array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
+            
+        $this -> miEstado -> adjuntarDocumentoFormAutomatico = 0;          
+            
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 4  && $this -> miEstado -> tipo_App == 2){
         //********************************************/
         //PORTAL EMPLEADO Filtrar por cadena de txt o ids  

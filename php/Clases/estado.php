@@ -41,6 +41,7 @@ class Estado{
     //datos del empleado
     public $IdPersonal;
     public $permisosSecciones = array();
+    public $configuracionesUsuario = array();
     public $EstadoJornada = array();
     public $HistoricoJornada;
 
@@ -64,6 +65,7 @@ class Estado{
     public $archivostiposAccesos;
     public $linkDocumentoSubido;
     //public $camposFormularios = null;
+    public $IdPropietarioAuxiliar;
 
     //Datos de conexion
     public $IP;
