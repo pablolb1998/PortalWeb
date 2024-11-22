@@ -57,6 +57,7 @@
 
     <!-- link de css -->
     <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/selectBuscar.css">
   <!--Funciones-->
 <script>
 //Imports
@@ -84,7 +85,7 @@ async function dibuja_pagina(arrayDatos = []) {
             document.getElementById('cookie-modal').style.display = 'block';
         }
     } 
-
+    recargarCSSCadaHora('css/header.css', 1); 
     try {
         await new Promise((resolve, reject) => {
             $.ajax({
@@ -105,8 +106,11 @@ async function dibuja_pagina(arrayDatos = []) {
                             /***************************************/
                             // Usar Accion s que viene de php para elegir la accion que realizar
                             /***************************************/
-                            if(respuesta[3] != null && respuesta[3] != 0){
+                            if(respuesta[3] != null){
                                 switch (respuesta[4]) {
+                                    case 3:
+                                        cargarModalFormularioDinamico("modalFormularioDinamicoAdjuntar");
+                                        break;
                                     case 2:
                                         generarGrafico_Barras(respuesta[3][0]);
                                         break;
@@ -259,7 +263,7 @@ async function dibuja_pagina(arrayDatos = []) {
         }
     
     function generarGrafico_Barras(AniosVacaciones) {
-            
+    
             let datosParaAnio = AniosVacaciones;
             // if(AnioSelecionado == null){
             //     datosParaAnio = AniosVacaciones.find((anio) => anio['Año'] == anioActual);
@@ -273,21 +277,25 @@ async function dibuja_pagina(arrayDatos = []) {
             var ctx = document.getElementById('nav-graficos').getContext('2d');
             var dias;
             if(datosParaAnio){
-                dias = [datosParaAnio['DiasTotales'] == null ? 0 : datosParaAnio['DiasTotales']
-                        , datosParaAnio['DiasDisfrutados'] == null ? 0 : datosParaAnio['DiasDisfrutados']
-                        , datosParaAnio['DiasConcedidos'] == null ? 0 : datosParaAnio['DiasConcedidos']
-                        , datosParaAnio['DiasPendientes'] == null ? 0 : datosParaAnio['DiasPendientes']
+                //alert(AniosVacaciones);
+                dias = [datosParaAnio['DiasTotales'] == null ? 1 : datosParaAnio['DiasTotales']
+                        , datosParaAnio['DiasDisfrutados'] == null ? 1 : datosParaAnio['DiasDisfrutados']
+                        , datosParaAnio['DiasConcedidos'] == null ? 1 : datosParaAnio['DiasConcedidos']
+                        , datosParaAnio['DiasPendientes'] == null ? 1 : datosParaAnio['DiasPendientes']
                         ];
             }else{
 
-                dias = [0,0,0,0];
+                dias = [1,1,1,1];
             }
             console.log(dias);
             
             var myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Días Totales', 'Días Disfrutados', 'Días Concedidos', 'Dias Pendientes'],
+                    labels: ['Totales: '+ datosParaAnio['DiasTotales'],
+                            'Disfrutados: '+ datosParaAnio['DiasDisfrutados'],
+                            'Concedidos: '+ datosParaAnio['DiasConcedidos'],
+                            'Pendientes: '+ datosParaAnio['DiasPendientes']],
                     datasets: [{
                         label:  '' ,
                         data: dias,
@@ -310,7 +318,10 @@ async function dibuja_pagina(arrayDatos = []) {
                     scales: {
                         y: {
                             beginAtZero: true,
-                            min: 0 
+                            min: 0,
+                            ticks: {
+                            stepSize: 5 
+                        } 
                         }
                     },
                     animation: {
@@ -399,7 +410,7 @@ async function dibuja_pagina(arrayDatos = []) {
         }
     }
     //esto peta arreglar mañana
-    $(document).on("change",".formulario_modal #FechaFin",calcularDiferenciaHoras);
+   // $(document).on("change",".formulario_modal #FechaFin",calcularDiferenciaHoras);
 
     $(document).on("submit", ".formulario_sociedades", function (event) {
         event.preventDefault();
@@ -427,6 +438,7 @@ async function dibuja_pagina(arrayDatos = []) {
     })
     
     function SubmitModalForm(tipoApp = 0,IdRegisto = null,claseFormulario = null,nombreForm = null ){
+        
         event.preventDefault();
         let campoRequeridoVacio = 0;
         let erroresEnv = 0;
@@ -477,8 +489,13 @@ async function dibuja_pagina(arrayDatos = []) {
                             'overflow': 'auto',
                             'padding-right': '0'
                         });
+                        if (claseFormulario){
+                            //alert(arrayValAdicional);
+                            dibuja_pagina([0,3.5,arrayValAdicional,RutaArchivo,nombreArchivo]);
+                        }else{
+                            dibuja_pagina([0,3,arrayValAdicional,RutaArchivo,nombreArchivo]);
+                        }
                         
-                        dibuja_pagina([0,3,arrayValAdicional,RutaArchivo,nombreArchivo]);
                     }
                 } else {
                     // Error en la solicitud
@@ -491,6 +508,7 @@ async function dibuja_pagina(arrayDatos = []) {
             
             
         }else{
+            
             let nombreForm = 'SubmitModalForm';
             if(claseFormulario != null){
                 nombreForm = nombreForm;
@@ -502,9 +520,10 @@ async function dibuja_pagina(arrayDatos = []) {
             if(IdRegisto != null){
                 valArray.push(claseFormulario,IdRegisto);
             }
-
+            
 
             $(".formulario_modal :input").each(function(){
+                
                 let fechaActual = new Date();
                 let anoActual = fechaActual.getFullYear();
                 let classComprobacion = '#'+ $(this).prop('id') +'_condiciones'; 
@@ -512,6 +531,7 @@ async function dibuja_pagina(arrayDatos = []) {
                 if(!comprobacion){
                     comprobacion = 'true';
                 }
+               
                 if($(this).prop('required') && ($(this).val() == null || $(this).val() =='' || !eval(comprobacion)) && $(this).closest('form').is(':visible')  ){
                     $(this).closest('form').attr('id');
                     $(this).addClass("border-danger");
@@ -523,7 +543,8 @@ async function dibuja_pagina(arrayDatos = []) {
                     let classInput =  '#'+ $(this).prop('id') +'_msgError'; 
                     $(classInput).addClass('d-none');
                 }
-                valArray.push($(this).val());
+               //console.log($(this))
+                valArray.push($(this).hasClass('selectBuscar-input') ? $(this).attr('data-value') : $(this).val());
             })
 
             $('body').css({
@@ -533,6 +554,7 @@ async function dibuja_pagina(arrayDatos = []) {
             if(campoRequeridoVacio == 1){
                 //alert("Complete todos los campos");    
             }else{
+                //alert(valArray)
                 dibuja_pagina([0,3,valArray]);
             }
             
@@ -556,67 +578,82 @@ async function dibuja_pagina(arrayDatos = []) {
     
     //Jquery para dibujar el calendario
     function dibuja_calendario(eventos2){
+
     var eventos = []
+    var TodoDia ;
     for(let ev of eventos2){
         var fechaInicio = new Date(ev[1]);
         var fechaFinalizacion = new Date(ev[2]);
-
+        TodoDia = false;
         // Verificar si las fechas de inicio y finalización están en el mismo día
+        if((fechaInicio.getFullYear() === fechaFinalizacion.getFullYear() &&
+            fechaInicio.getMonth() === fechaFinalizacion.getMonth() &&
+            fechaInicio.getDay() === fechaFinalizacion.getDay()) || ev[2] == "1900-01-01 00:00:00"){
+                TodoDia = true;
+            }
         if (fechaInicio.getDate() == fechaFinalizacion.getDate()) {
             
-            fechaInicio.setDate(fechaInicio.getDate() + 1) // Establecer la hora al final del día
-            fechaInicio.setHours(0, 0, 0, 0); // Establecer la hora al principio del día
-            ev[2] = fechaInicio.toISOString() // Actualizar la fecha de finalización en el array de eventos
-            
+            fechaFinalizacion.setDate(fechaFinalizacion.getDate() + 1); // Mover la fecha al siguiente día
+            fechaFinalizacion.setHours(0, 0, 0, 0); // Establecer la hora al final del día (23:59:59)
+            ev[2] = new Date(fechaFinalizacion)
+      
         }
         
         eventos.push({ title: ev[0],
             start: ev[1],
             end: ev[2],
+            allDay: TodoDia,
             color: ev[3]
         });
         
     }
-
+    
         var calendarEl = document.getElementById('calendar');
         var today = new Date(); 
         var formattedDate = today.toISOString().split('T')[0];
         calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            initialDate: formattedDate,
-            dayHeaderFormat: getDayHeaderFormat(),
-            dayMaxEventRows: 3,
-            headerToolbar: {
-                left: 'prev',
-                center: 'title',
-                right: 'next'
-            },
-            buttonText: {
-                month: 'Mes',
-                today: 'Hoy'
-            },
-            events: eventos,
-            eventClick: function(info) {
-                
-                tippy(info.el, {
-                    content: info.event.title, // Aquí puedes usar el texto completo
-                    trigger: 'click', // Cambia a 'mouseenter' si prefieres hover
-                    placement: 'top', 
-                    size: 'large'
-                });
-
-                // Mostrar el tooltip manualmente
-                tippy(info.el);
-                tippy.show()
-            },
-            locale: 'es',
-            firstDay: 1,
-            contentHeight: '600px' ,
-            
-            fixedWeekCount: false,
-            showNonCurrentDates: false
+    initialView: 'dayGridMonth',
+    initialDate: formattedDate,
+    dayHeaderFormat: getDayHeaderFormat(),
+    dayMaxEventRows: 3,
+    headerToolbar: {
+        left: 'prev',
+        center: 'title',
+        right: 'next'
+    },
+    buttonText: {
+        month: 'Mes',
+        today: 'Hoy'
+    },
+    events: eventos,
+    eventClick: function(info) {
+        tippy(info.el, {
+            content: info.event.title, // Aquí puedes usar el texto completo
+            trigger: 'click', // Cambia a 'mouseenter' si prefieres hover
+            placement: 'top', 
+            size: 'large'
         });
-        calendar.render();
+
+        // Mostrar el tooltip manualmente
+        tippy(info.el);
+        tippy.show();
+    },
+    locale: 'es',
+    firstDay: 1,
+    contentHeight: '600px',
+    fixedWeekCount: false,
+    showNonCurrentDates: false,
+
+    // Personalizar eventos
+    // eventDidMount: function(info) {
+    //             // Ocultar hora "0"
+    //             if (startDate.getHours() === 0 && startDate.getMinutes() === 0) {
+    //                 const timeElement = info.el.querySelector('.fc-event-time');
+    //                 if (timeElement) timeElement.style.display = 'none';
+    //             }
+    //         }
+        });
+calendar.render();
     }
     //Formato calendario
     function getDayHeaderFormat() {
@@ -775,11 +812,45 @@ async function dibuja_pagina(arrayDatos = []) {
         btnsv.setAttribute("onclick","guardarFirma("+Id+","+TipoF+","+IdP+","+IdTp+","+IdS+",'"+IPc+"','"+BBDD+"')");
     }
 
-    function toggleContentPorId(contentId) {
-            // Muestra el contenido seleccionado
-            $('#'+contentId).toggleClass("d-none");
-            //$('#'+contentId+"IMG").toggleClass("rotar_imagen_90");
-        }
+    //ModalBuscar
+    function showOptions() {
+        document.getElementById("optionsList").style.display = "block";
+        anadirEventosSelectBuscar();
+    }
+
+  function filterOptions() {
+    const input = document.querySelector(".selectBuscar-input").value.toLowerCase();
+    const options = document.querySelectorAll(".selectBuscar-item");
+
+    options.forEach(option => {
+      const text = option.textContent.toLowerCase();
+      option.style.display = text.includes(input) ? "block" : "none";
+    });
+  }
+ function anadirEventosSelectBuscar(){
+    document.addEventListener("click", function(event) {
+    const dropdown = document.querySelector(".selectBuscar");
+    if (!dropdown.contains(event.target)) {
+      document.getElementById("optionsList").style.display = "none";
+    }
+  });
+
+  document.querySelectorAll(".selectBuscar-item").forEach(option => {
+    option.addEventListener("click", function() {
+      document.querySelector(".selectBuscar-input").value = option.textContent;
+      document.querySelector(".selectBuscar-input").setAttribute("data-value", option.getAttribute("data-value"));
+      document.getElementById("optionsList").style.display = "none";
+    });
+  });
+ 
+ }
+  
+
+function toggleContentPorId(contentId) {
+        // Muestra el contenido seleccionado
+        $('#'+contentId).toggleClass("d-none");
+        //$('#'+contentId+"IMG").toggleClass("rotar_imagen_90");
+}
 
    
     function guardarFirma(Id,TipoF,IdP,IdTp,IdS,IPc,BBDD){
@@ -827,6 +898,24 @@ async function dibuja_pagina(arrayDatos = []) {
 
     }
 
+    function recargarCSSCadaHora(cssFileName, horas) {
+            var now = new Date().getTime();
+            var intervalo = horas * 60 * 60 * 1000;
+            var lastReload = localStorage.getItem('cssReloadTime');
+            if (!lastReload || now - lastReload > intervalo) {
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = cssFileName + '?v=' + now; 
+                document.head.appendChild(link);
+                localStorage.setItem('cssReloadTime', now);
+            } else {
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = cssFileName;
+                document.head.appendChild(link);
+            }
+        }
+
     //cambiar el color y el switch del modal
     $(document).on("change","#togglePeticionSwitch",function(event){
         var switchLabel2 = $('.form-check-label2');
@@ -845,7 +934,7 @@ async function dibuja_pagina(arrayDatos = []) {
         window.history.replaceState(null, null, window.location.href);
     }
 
-    /***** Subir el archivo ******/
+    /***** Comprobar Tamaño del archivo ******/
     $(document).on("change","#Archivo",function(event){
         var maxSize = 5 * 1024 * 1024; // 5 MB (en bytes)
         if (this.files[0].size > maxSize) {
@@ -855,7 +944,7 @@ async function dibuja_pagina(arrayDatos = []) {
         }
     });
     //****************************************************************************************/
-    // añadir la funcionalidad  al header de estar fijado a la bara superior al hacer scroll
+    // Añadir la funcionalidad  al header de estar fijado a la bara superior al hacer scroll
     //****************************************************************************************/
     $(document).ready(function() {
         var alturaHedaderOriginal = $('#header_agrupado').outerHeight();
@@ -872,11 +961,8 @@ async function dibuja_pagina(arrayDatos = []) {
                     $('#SeparadorHeader').css('margin-top', $('#header_agrupado').outerHeight()+'px');
                     setTimeout(function(){
                         //simplemente que espere
-                    }, 300);
-                    
-                    
+                    }, 300);             
                 }
-
             } else {
                 $('#header_agrupado').removeClass('fixed-top');
                 //$('#header_agrupado img').removeClass('reduccion');
@@ -885,6 +971,7 @@ async function dibuja_pagina(arrayDatos = []) {
             }
         });
     });
+    
 </script>
 </head>
 
