@@ -1569,9 +1569,12 @@ function cargaFormularioDinamico2(){
     $arrayCamposForm = $arrayIntermedio["Campos"];
 
     //Extraer los dropdowns que se van a usar
-    $arraydropdown = array_filter($_SESSION["Controlador"] -> miEstado -> dropdownsFormularios, function ($filtro) use($arrayCamposForm){
-        return in_array($filtro["IdTipoDefinicion"],array_column($arrayCamposForm, "IdTipoDefinicion")); 
-    });
+    if(!empty(arrayCamposForm)){
+        $arraydropdown = array_filter($_SESSION["Controlador"] -> miEstado -> dropdownsFormularios, function ($filtro) use($arrayCamposForm){
+            return in_array($filtro["IdTipoDefinicion"],array_column($arrayCamposForm, "IdTipoDefinicion")); 
+        });
+        
+    }
     
     //extraer el dropdown de Archivostipos
     if($_SESSION["Controlador"] -> miEstado -> Estado == 4.4){
