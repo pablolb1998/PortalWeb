@@ -5,6 +5,7 @@ class Estado{
     public $Estado;
     public $EstadosAnteriores = array();
     public $IdIdentidad;
+    public $datosPersonal = array();
 
     //variables documentos
     public $tipo_documento;

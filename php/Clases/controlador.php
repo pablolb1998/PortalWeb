@@ -421,7 +421,7 @@ class Controlador
         $url = "http://onixsw.esquio.es:8080/Funciones.aspx?SubirArchivo=1&pin=".$pin.
         "&IdTipoPropietario=".$IdtipoPropietario.'&IdPropietario='.$idPropietario.
         '&IdArchivoTipo='.$idArchivoTipo.'&URL='.urlencode($url).'&NombreArchivo='.$nombre_archivo;
-        //print_r($url);
+       
         try {
             $response = file_get_contents($url);
         } catch (\Throwable $th) {
@@ -510,6 +510,10 @@ class Controlador
         //inicia sesión y navega entre pestañas del portal del comercial
         //********************************************/
                 $InicioS = $this -> IniciarSesion($arrayDatos[0], $arrayDatos[1]);
+                if($this -> miEstado -> tipo_App == 2){
+                    $this -> miEstado -> datosPersonal = comprobarDatosPersonal();
+                    
+                }
                 //$programaActualizado = $this -> comprobarVersion();
                 $programaActualizado = true;
                 $nav = 0;
@@ -538,6 +542,12 @@ class Controlador
         //Abrir la pestaña de cambio de contraseña
         //********************************************/    
             $this -> navegarPestanas($arrayDatos[0]); 
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 10.5){
+        //********************************************/
+        //PORTAL CLIENTE/EMPLEADO
+        //Abrir la pestaña de cambio de contraseña
+        //********************************************/    
+            $this -> navegarPestanas($arrayDatos[0]);
         }elseif(!empty($arrayDatos) && $this -> miEstado -> Estado == 11){
         //********************************************/
         //PORTAL CLIENTE/EMPLEADO
@@ -1018,6 +1028,9 @@ class Controlador
             $this -> miEstado -> AnioSV = intval($arrayDatos[2]);
             $arrayAuxiliarHtml = $this -> calcularVacacionesGraf($this -> miEstado -> AnioSV);
             $accionJs = 2;
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 && $c == 10.5){
+            //print_r($arrayDatos[2]);
+            solicitudCambioDatosInsert($arrayDatos[2]);
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 && in_array($c, array(6.1,6.2))){
         //********************************************/
         //PORTAL EMPLEADO Insertar Material/Tiempo de proyectos
@@ -1048,12 +1061,13 @@ class Controlador
         //PORTAL EMPLEADO Insertar Formularios dinamcos
         //********************************************/ 
             if( $this -> miEstado -> Estado == 4.4 ){
+                print_r( str_replace([' ', '/'] ,['_','_'] ,$arrayDatos[4]));
                 $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
                                                 $this -> miEstado -> IdTipoPropietario,
                                                 $this -> miEstado -> IdPropietario,
                                                 $arrayDatos[2][0],
                                                 $arrayDatos[3],
-                                                $arrayDatos[4]);
+                                                str_replace([' ', '/'] ,['_','_'] ,$arrayDatos[4]) );
             }
 
             if($arrayDatos[2] != 0){
@@ -1116,15 +1130,20 @@ class Controlador
             $nombre_archivo = str_replace([' ', '/'] ,['_','_'] ,$arrayDatos[4]);
             $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
                                             $this -> miEstado -> IdTipoPropietario,
-                                            $this -> miEstado -> IdPropietario,
+                                            $this -> miEstado -> IdPropietarioAuxiliar,
                                             $arrayDatos[2][0],
                                             $arrayDatos[3],
                                             $nombre_archivo);
                                 
-            exect_Insert_From_DinamicoSubidaArchivos($arrayDatos[2],$arrayDatos[3]);
+            $resultadoEjecucion = exect_Insert_From_DinamicoSubidaArchivos($arrayDatos[2],$arrayDatos[3]);
+            if($resultadoEjecucion == false ){
+                $msgError = "Ha ocurrido un error al insertal el registro";
+            }else{
+                array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
+            }
         //array_unshift($_SESSION["Controlador"] -> miEstado -> Documentos,$resultadoEjecucion[0]);
             
-        $this -> miEstado -> adjuntarDocumentoFormAutomatico = 0;          
+            $this -> miEstado -> adjuntarDocumentoFormAutomatico = 0;          
             
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 4  && $this -> miEstado -> tipo_App == 2){
         //********************************************/
