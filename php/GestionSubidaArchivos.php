@@ -39,7 +39,7 @@ if(isset($_FILES["Archivo"])){
                 $urlCompleta = "https://$host$requestUri";
                 $ruta = str_replace('GestionSubidaArchivos.php','',$urlCompleta);
                 
-                echo $ruta.$directorioDestino.$_FILES["Archivo"]["name"];
+                echo $ruta.$directorioDestino.str_replace([' ', '/'] ,['_','_'] ,$_FILES["Archivo"]["name"]);
             } else {
                 echo 0;
             }
