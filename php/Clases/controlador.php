@@ -418,14 +418,14 @@ class Controlador
 
     //Subir los archivos mediante llamada al servicio web
     function subirArchivosServicioWeb($pin,$IdtipoPropietario,$idPropietario,$idArchivoTipo,$url,$nombre_archivo){
-        $url = "http://onixsw.esquio.es:8080/Funciones.aspx?SubirArchivo=1&pin=".$pin.
+        $url2 = "http://onixsw.esquio.es:8080/Funciones.aspx?SubirArchivo=1&pin=".$pin.
         "&IdTipoPropietario=".$IdtipoPropietario.'&IdPropietario='.$idPropietario.
         '&IdArchivoTipo='.$idArchivoTipo.'&URL='.urlencode($url).'&NombreArchivo='.$nombre_archivo;
        
         try {
-            $response = file_get_contents($url);
+            $response = file_get_contents($url2);
         } catch (\Throwable $th) {
-            $platano=1;
+            $platano=1; 
         }
         return true;
     }
@@ -1061,7 +1061,6 @@ class Controlador
         //PORTAL EMPLEADO Insertar Formularios dinamcos
         //********************************************/ 
             if( $this -> miEstado -> Estado == 4.4 ){
-                print_r( str_replace([' ', '/'] ,['_','_'] ,$arrayDatos[4]));
                 $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
                                                 $this -> miEstado -> IdTipoPropietario,
                                                 $this -> miEstado -> IdPropietario,
