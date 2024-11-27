@@ -35,6 +35,44 @@ function comprueba_usuario($usuario, $contrasena){
     }
     sqlsrv_close( $conn );
 }
+function comprobarDatosPersonal(){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $arrayPermisos = array();
+    $sql = "SELECT 
+       FinalC,
+       DiasVacaciones,
+       telefonoparticular,
+       direccion,
+       codpostal,
+       poblacion,
+       NombreCuenta,
+       CCC,
+       Iban,
+       Bic,
+       TallaCamisa,
+       TallaPantalon,
+       TallaZapatos,
+       Turno,
+       Departamento,
+       Cargo,
+       FirmaNominaPreviaDescarga
+    FROM vw_PEDatosInicio  
+    WHERE IdPersonal = ? ;";
+    $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
+    
+    $stmt = sqlsrv_prepare($conn, $sql, $parm);
+   
+    if (!sqlsrv_execute($stmt)) {
+        return false;
+        die;
+    } else {
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($arrayPermisos, $row);
+        }
+        return $arrayPermisos[0];
+    }
+    sqlsrv_close( $conn );
+} 
 
 function comprobarPermisosUsuarios(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
@@ -1188,6 +1226,67 @@ function confirmarUsuarioSeguridadUnificada($Ip,$bd,$IdIdent,$usu){
         return 1;
     }   
     sqlsrv_close( $conn );
+}
+function solicitudCambioDatosInsert($datos = array()){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $sql = "INSERT INTO dbo.PE_DatosPersonalesModificar
+(
+    IdAppsheetDatosPersonal_Modificaciones,
+    TelefonoParticular,
+    Direccion,
+    Poblacion,
+    CodigoPostal,
+    NombreCuentaBancaria,
+    IBAN,
+    BIC,
+    TallaCamisa,
+    TallaPantalon,
+    TallaZapatos,
+    IdPersonal,
+    FechaInsert,
+    IdIdentidad
+)
+VALUES
+( 
+    ?,
+    ?,
+    ?, 
+    ?,
+    ?, 
+    ?,
+    ?, 
+    ?, 
+    ?, 
+    ?, 
+    ?, 
+    ?, 
+    GETDATE(), 
+    ?  
+    )";
+    $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $claveGenerada = '';
+
+    for ($i = 0; $i < 9; $i++) {
+        $claveGenerada .= $caracteres[rand(0, strlen($caracteres) - 1)];
+    }
+    $claveGenerada;
+    $parm = $datos;
+    array_unshift($parm,$claveGenerada);
+    array_push($parm, $_SESSION["Controlador"] -> miEstado -> IdPersonal,$_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+    // print_r($parm );
+    // print_r($sql);
+    $stmt = sqlsrv_prepare($conn, $sql, $parm);
+    if (!sqlsrv_execute($stmt)) {
+        die(print_r(sqlsrv_errors(), true));
+        return false;
+        die;
+    }else{
+        return 1;
+    }   
+
+
+    
+    
 }
 
 function comprobarUsuarioSURecuperacionContrasena($Ip,$bd,$email){

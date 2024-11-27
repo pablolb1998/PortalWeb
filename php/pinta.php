@@ -185,6 +185,10 @@ function pinta_contenido($estado){
             $titulo = "Cambiar Contraseña";
             $filename = "../html/cambiarContrasena.html";
             break;
+        case 10.5:        
+            $titulo = "Mis Datos";
+            $filename = "../html/misDatos.html";
+            break;
         case 11:        
             $titulo = "Reestablecer Contraseña";
             $filename = "../html/reestablecerContrasenaCampos.html";
@@ -402,6 +406,14 @@ function pinta_contenido($estado){
             // PESTAÑA DE CALENDARIO GENERAR MODAL
             $filetext .= '';
         }
+    }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 10.5){
+    
+       
+        $arrayPer =  $_SESSION["Controlador"] -> miEstado -> datosPersonal;
+        $filetext = str_replace(["%Telf%","%Dir%","%Pob%","%Cp%","%Turno%","%Dep%","%Cargo%","%NomP%","%Bic%","%Iban%","%TZ%","%TP%","%TC%"],
+                                    [$arrayPer['telefonoparticular'],$arrayPer['direccion'],$arrayPer['poblacion'],$arrayPer['codpostal'],$arrayPer['Turno'],$arrayPer['Departamento'],$arrayPer['Cargo'],$arrayPer['NombreCuenta'],$arrayPer['Bic'],$arrayPer['Iban'],$arrayPer['TallaZapatos'],$arrayPer['TallaPantalon'],$arrayPer['TallaCamisa']],$filetext);   
+
+
     } else {
         
         if($_SESSION['Controlador'] -> miEstado -> tipo_App == 1){
@@ -1569,7 +1581,7 @@ function cargaFormularioDinamico2(){
     $arrayCamposForm = $arrayIntermedio["Campos"];
 
     //Extraer los dropdowns que se van a usar
-    if(!empty(arrayCamposForm)){
+    if(!empty($arrayCamposForm)){
         $arraydropdown = array_filter($_SESSION["Controlador"] -> miEstado -> dropdownsFormularios, function ($filtro) use($arrayCamposForm){
             return in_array($filtro["IdTipoDefinicion"],array_column($arrayCamposForm, "IdTipoDefinicion")); 
         });
