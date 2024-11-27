@@ -410,7 +410,7 @@ async function dibuja_pagina(arrayDatos = []) {
         }
     }
     //esto peta arreglar mañana
-   // $(document).on("change",".formulario_modal #FechaFin",calcularDiferenciaHoras);
+    $(document).on("change",".formulario_modal #FechaFin",calcularDiferenciaHoras);
 
     $(document).on("submit", ".formulario_sociedades", function (event) {
         event.preventDefault();
@@ -563,6 +563,16 @@ async function dibuja_pagina(arrayDatos = []) {
         
     }
 
+    function SubmitFormularioCambioDatos(){
+        var valArray = [];
+        $(".tab-pane :input").each(function(){
+            let valor = $(this).val()!='' ? $(this).val()  : null
+                valArray.push($(this).val());
+        })
+            
+            alert("Solicitud registrada correctamente.")
+            dibuja_pagina([0,3,valArray])      
+    }
     //Jquery para mostrar u ocultar la contraseña
     $(document).on("click","#ImgPw",function(event){
         var btnPw = document.querySelector("#togglePassword");
@@ -830,7 +840,7 @@ calendar.render();
  function anadirEventosSelectBuscar(){
     document.addEventListener("click", function(event) {
     const dropdown = document.querySelector(".selectBuscar");
-    if (!dropdown.contains(event.target)) {
+    if (dropdown && !dropdown.contains(event.target)) {
       document.getElementById("optionsList").style.display = "none";
     }
   });
