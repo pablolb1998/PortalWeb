@@ -55,7 +55,8 @@ function comprobarDatosPersonal(){
        Turno,
        Departamento,
        Cargo,
-       FirmaNominaPreviaDescarga
+       FirmaNominaPreviaDescarga,
+       --Uf_DameCadena_CompetenciasPersonal @@idpersonal = P.idpersonal AS Competencias
     FROM vw_PEDatosInicio  
     WHERE IdPersonal = ? ;";
     $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -97,6 +98,8 @@ function comprobarPermisosUsuarios(){
     sqlsrv_close( $conn );
 }
 
+
+#Seccion Superusuarios
 function comprobarConfiguracionesAdicionalesUsuarios(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $arrayConfiguraciones = array();
@@ -117,8 +120,27 @@ function comprobarConfiguracionesAdicionalesUsuarios(){
     }
     sqlsrv_close( $conn );
 }
+function obtenerListaEmpleados(){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $listaUsuaros = array();
+    $sql = "EXECUTE SeguridadUnificada_Personal_Select ";
+    $stmt = sqlsrv_prepare($conn, $sql);
+    //print_r($stmt);
+    if (!sqlsrv_execute($stmt)) {
+        die(print_r(sqlsrv_errors(), true));
+        return false;
+        die;
+    } else {
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($listaUsuaros, $row);
+        }
+        return $listaUsuaros;
+    }
+    sqlsrv_close($conn);
+}
 
 
+#Sección Sociedades
 //Mostrar las sociedades a la que este vinculado el cliente
 function compruebaSociedades($Id){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
@@ -657,7 +679,7 @@ function extraerDocPersonal_Masivo(){
         CONVERT(VARCHAR(50),FechaCreacion,103) AS descripcion2,
         'GREEN' AS color
         FROM dbo.Proyectos
-        where Estado = 0
+        where Estado = 0 AND IdProyecto IN (SELECT IdProyecto FROM vw_Fases_select_appsheet GROUP BY IdProyecto)
         ORDER BY FechaCreacion DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
         //$parm = array($IdCliente);
@@ -1069,8 +1091,9 @@ function insertProyectosTareaMaterial($MaterialProyecto,$arrayDatos){
             $sql = " INSERT INTO dbo.PETiemposProyectosAppSheet
         (IdPETiemposProyectosAppSheet,
         IdProyecto,
-        IdProyectoTarea,
         IdTipoTarea,
+        IdProyectoTarea,
+        
         FechaInicio,
         FechaFin,
 
@@ -1093,7 +1116,7 @@ function insertProyectosTareaMaterial($MaterialProyecto,$arrayDatos){
         69,
         $_SESSION["Controlador"] -> miEstado -> IdPersonal,
         $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
-
+ 
     }else{
         $sql = "DECLARE @FECHA SMALLDATETIME = GETDATE(),
                 @IdProyectoMaterial INT

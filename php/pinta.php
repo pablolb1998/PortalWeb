@@ -5,28 +5,39 @@ $fitro1;
 $filtro2;
 $filtro3;
 $nombre_cliente;
-
- 
+$UsuarioAdmin = FALSE;
+$otroUsuario = FALSE;
+$ModalFirma = 0;
 function pinta_contenido($estado){
+    global $UsuarioAdmin;
+    global $otroUsuario;
     
+#Declaraciones
     $titulo = ""; 
     $cabecera = "../html/header.html";
     $fileheadertext = "";
     $headerCliente = "";
     $footerCliente = "";
+    //Sino se comprueba dentro de la funcion falla
+    if(isset($_SESSION["Controlador"]->miEstado->configuracionesUsuario) && in_array(74, $_SESSION["Controlador"] -> miEstado -> configuracionesUsuario )){
+        $UsuarioAdmin = TRUE;
+    }
+    if($_SESSION["Controlador"] -> miEstado -> IdPersonalAdmin != $_SESSION["Controlador"] -> miEstado -> IdPersonal){
+        $otroUsuario = TRUE;
+    }
     switch ($estado) {
         case 0:
             $cabecera = "";
             $filename = "../html/login.html";
             break;
-        case 0.5:
+        case 0.5:   
             $cabecera = "";
             $filename = "../html/campo_cif.html";
     
             break;
         case 1:
             $titulo = "Selecciona Sociedad";
-            $filename = "../html/sociedades.html";
+            $filename = "../html/socie  dades.html";
             break;
         case 2:
             $titulo = $_SESSION["Controlador"] -> miEstado -> NombreSociedad;
@@ -150,7 +161,7 @@ function pinta_contenido($estado){
                         $filename = "../html/documentos.html";
                         break;
                     case 2:
-                        $titulo = "Mi calendario";
+                        $titulo = "Calendario";
                         $filename = "../html/calendarioEmpleado.html";
                         break;
                 }
@@ -198,7 +209,10 @@ function pinta_contenido($estado){
             break;
     
     }
-  
+    
+    if($UsuarioAdmin && $otroUsuario && !in_array( $_SESSION["Controlador"] -> miEstado ->Estado,array(2,4,6,6.1,6.2))){
+        $titulo .= ' de '.$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo;
+    }
 
     if ($cabecera != "") {
         $fileheadertext = '';
@@ -239,8 +253,9 @@ function pinta_contenido($estado){
     
     //cargar el permiso de buscar 
     
-    if(in_array(74,$_SESSION["Controlador"] -> miEstado -> configuracionesUsuario)){
-        $fileheadertext = str_replace('%CargarUsuario%','<li onclick="" class="dropdown-item">Consultar usuario</li>',$fileheadertext);
+    if($UsuarioAdmin){
+        $fileheadertext = str_replace('%CargarUsuario%','<li class="dropdown-item" onclick="cargarModalFormularioDinamico('."'modalSuperAdmin'".')">Seleccionar Personal</li>',$fileheadertext);
+        
     }else{
         $fileheadertext = str_replace('%CargarUsuario%','',$fileheadertext);
     }
@@ -337,7 +352,14 @@ function pinta_contenido($estado){
         //Pestañas de navegacion
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
             $filetext = str_replace('%LineasE%',DibujaLineas_PortalEmpleado(),$filetext);
-            $filetext = $filetext;
+            if($ModalFirma =1){
+                $fileModal = fopen('../html/ModalFirma.html', "r");
+                $filesizeModal = filesize('../html/ModalFirma.html');
+                $Modalfirmadoc = fread($fileModal, $filesizeModal);
+                fclose($fileModal);
+                $filetext = $filetext.$Modalfirmadoc;
+            } 
+            
             
         }elseif( $_SESSION["Controlador"] -> miEstado -> Estado < 5 && $_SESSION["Controlador"] -> miEstado -> Estado > 4  && in_array($_SESSION["Controlador"] -> miEstado -> Estado,array(4.9) ) && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == null  && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
@@ -353,12 +375,9 @@ function pinta_contenido($estado){
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 5 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
         //Pestaña de jornada
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
-            try {
-                $filetext = str_replace('%FechaAccionjornada%',$_SESSION["Controlador"] -> miEstado -> EstadoJornada[1] -> format('d/m/Y H:i'),$filetext);
-            } catch (\Throwable $th) {
-                $filetext = str_replace('%FechaAccionjornada%',$_SESSION["Controlador"] -> miEstado -> EstadoJornada[1],$filetext);
+            if($UsuarioAdmin && $otroUsuario){
+                $filetext = str_replace('<img src="Img/FlechaJornada.png" alt="BotonIniciarFinalizarJornada">','',$filetext);
             }
-                
             switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
                 case 1:
                     $filetext = str_replace('<b style="color: %color%;"></b>','<b style="color: green;">En jornada</b>',$filetext);
@@ -375,7 +394,7 @@ function pinta_contenido($estado){
                     $filetext = str_replace('%BotonretomarJornada%','block',$filetext);
                     break;
                 default:
-                $filetext = str_replace('<b style="color: %color%;"></b>','<b style="color: red;">Fuera de jornada</b>',$filetext);
+                    $filetext = str_replace('<b style="color: %color%;"></b>','<b style="color: red;">Fuera de jornada</b>',$filetext);
                     $filetext = str_replace('%BotonIniciarJornada%','block',$filetext);
                     $filetext = str_replace('%BotonFinalizarJornada%','none',$filetext);
                     $filetext = str_replace('%BotonPausarJornada%','none',$filetext);
@@ -402,6 +421,7 @@ function pinta_contenido($estado){
                 </div>
                 </div>
             </div>';
+            
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 7 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2 && $_SESSION["Controlador"] -> miEstado -> cargarForm == 0){
             // PESTAÑA DE CALENDARIO GENERAR MODAL
             $filetext .= '';
@@ -410,8 +430,8 @@ function pinta_contenido($estado){
     
        
         $arrayPer =  $_SESSION["Controlador"] -> miEstado -> datosPersonal;
-        $filetext = str_replace(["%Telf%","%Dir%","%Pob%","%Cp%","%Turno%","%Dep%","%Cargo%","%NomP%","%Bic%","%Iban%","%TZ%","%TP%","%TC%"],
-                                    [$arrayPer['telefonoparticular'],$arrayPer['direccion'],$arrayPer['poblacion'],$arrayPer['codpostal'],$arrayPer['Turno'],$arrayPer['Departamento'],$arrayPer['Cargo'],$arrayPer['NombreCuenta'],$arrayPer['Bic'],$arrayPer['Iban'],$arrayPer['TallaZapatos'],$arrayPer['TallaPantalon'],$arrayPer['TallaCamisa']],$filetext);   
+        $filetext = str_replace(["%Telf%","%Dir%","%Pob%","%Cp%","%Turno%","%Dep%","%Cargo%","%Compe%","%NomP%","%Bic%","%Iban%","%TZ%","%TP%","%TC%"],
+                                    [$arrayPer['telefonoparticular'],$arrayPer['direccion'],$arrayPer['poblacion'],$arrayPer['codpostal'],$arrayPer['Turno'],$arrayPer['Departamento'],$arrayPer['Cargo'],$arrayPer['Competencias'],$arrayPer['NombreCuenta'],$arrayPer['Bic'],$arrayPer['Iban'],$arrayPer['TallaZapatos'],$arrayPer['TallaPantalon'],$arrayPer['TallaCamisa']],$filetext);   
 
 
     } else {
@@ -441,6 +461,9 @@ function pinta_contenido($estado){
         $filetext .= '<br>'.$_SESSION['footerCliente'];
     }
     
+    if($UsuarioAdmin){
+        $filetext.=superUsuarioModal();
+    }
     return $filetext;
     
 }
@@ -859,6 +882,9 @@ function pinta_TareasRecursos_Cliente($html){
 
 //Dibujar las lineas de cualquier  del portal de empleado
 function DibujaLineas_PortalEmpleado(){
+    global $UsuarioAdmin;
+    global $otroUsuario;
+    global $ModalFirma;
     //optimizar al cambiar la manera de almacenar los documentos y los filtros "array_filter()"
         $arrayDoc = array();
         $conArrayExterno = 0;
@@ -868,6 +894,7 @@ function DibujaLineas_PortalEmpleado(){
         $pseudoIdentificador = '';
         $conAccionesPersonalizadas = 0;
         $accionModalPersonalizadaOnClick = 0;
+        
         //visualizador para luego
         // if($_SESSION["Controlador"] -> miEstado -> acciones["modalVisualizar"] == 1 ){
         //     $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
@@ -1160,7 +1187,11 @@ function DibujaLineas_PortalEmpleado(){
                     $acciones_linea_pintar = str_replace('%ImgArchivos%',$imgRutaCarpeta,$acciones_linea_pintar);
                 }
                 // incluir la accion de abrir el formulario de firma
-                if(isset($valor["Firmable"]) && $valor["Firmable"] === 1 && (!isset($valor["Firmado"]) || $valor["Firmado"] == 0 ) ){
+                if(isset($valor["Firmable"])){
+                    $ModalFirma =1;
+                }
+                
+                if(isset($valor["Firmable"]) && $valor["Firmable"] === 1 && (!isset($valor["Firmado"]) || $valor["Firmado"] == 0 ) && !($UsuarioAdmin && $otroUsuario)){
                     $tipoD;
                     if($_SESSION["Controlador"] -> miEstado -> IdTipoPropietario == 30){
                         $tipoD = 1;
@@ -1348,6 +1379,7 @@ function cargaFiltros(){
     }
     return $txt_filtros;
 }
+
 
 
 function cargarJornadaHistorico(){
@@ -1761,7 +1793,8 @@ function obtenerFormularioAdjuntos(){
 
 
 function cargaModalesCustom(){
-    
+    global $UsuarioAdmin;
+    global $otroUsuario;
     if(!isset($_SESSION["PlantillaModalForm"])){
         $fileModal = fopen('../html/PlantillaModalFormulario.html', "r");
         $filesizeModal = filesize('../html/PlantillaModalFormulario.html');
@@ -1789,6 +1822,9 @@ function cargaModalesCustom(){
 
 
             $nombre_Form = "Nuevo tiempo de fase";
+            if($UsuarioAdmin && $otroUsuario){
+                $nombre_Form .= ' de '.$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo;
+            }
             $Modal = str_replace('modalFormularioDinamico','modalFormularioTiemposProyectos',$PlantillaModal);
 
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
@@ -2102,14 +2138,14 @@ function cargarCustomGridModal($arrayPintar){
     return $tabla;
 }
 
-//cargar el formulario de firma
-function cargarFormularioFirma(){
-    $documentoFirmable = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($documento) {
-        return $documento["id"] == $_SESSION["Controlador"] -> miEstado -> IdDocumentoPadre;
-    });
-    $documentoFirmable = array_shift($documentoFirmable);
-    print_r($documentoFirmable["Documento"]);
-}
+// //cargar el formulario de firma
+// function cargarFormularioFirma(){
+//     $documentoFirmable = array_filter($_SESSION["Controlador"] -> miEstado -> Documentos, function ($documento) {
+//         return $documento["id"] == $_SESSION["Controlador"] -> miEstado -> IdDocumentoPadre;
+//     });
+//     $documentoFirmable = array_shift($documentoFirmable);
+//     print_r($documentoFirmable["Documento"]);
+// }
 
 function ObtenAccionesPersonalizadas(){
     $accionesPersonalizada = "";
@@ -2127,31 +2163,40 @@ function ObtenAccionesPersonalizadas(){
 
 function superUsuarioModal(){
     $modalSuperUsuario = 
-        '<div class="modal fade show" id="modalSuperAdmin" tabindex="-1" aria-labelledby="modalDinamico" aria-modal="true" role="dialog" style="display: block;">
+        '<div class="modal fade" id="modalSuperAdmin" tabindex="-1" aria-labelledby="modalDinamico" aria-modal="true" role="dialog" style="display: none;">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                <h5 class="modal-title">Cambiar Usuario</h5>
+                <h5 class="modal-title">Seleccionar Personal</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form class="formulario_modal  col-12 col-md-12 mt-3" enctype="multipart/form-data">
+                    <form class="formulario_modal  col-12 col-md-12 mt-3" enctype="multipart/form-data" Id="FormularioCambioUsuario">
                         <div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="">
-                            <div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">
-                                <label for="IdArchivosTipo" class="form-label">Usuario</label>
-                                <select class="form-select border-secondary" aria-label="Tipo de archivo" id="IdArchivosTipo">
-                                    <option value="23" selected="">Contratos </option><option value="29">Certificado de empresa</option><option value="32">Otra Documentación </option><option value="67">contratos de personal</option>
-                                </select>
-                            </div>
+                            <div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
+    $CModal = fopen('../html/selectBuscar.html', "r");
+    $CsizeModal = filesize('../html/selectBuscar.html');
+    $cDesplegable = fread($CModal, $CsizeModal);
+    fclose($CModal);
+
+    $ContenidoCModal = "";
+    foreach($_SESSION["Controlador"] -> miEstado -> ListaEmpleadosVerAdministrador as $valorSelecionable){
+        $ContenidoCModal .= '<div  class="selectBuscar-item" data-value="'.$valorSelecionable['Id'].'">'.$valorSelecionable['Nombre'].'</div>';
+    }
+  
+    $modalSuperUsuario .= str_replace(["%Options%",'class="selectBuscar"'],[$ContenidoCModal,'class="selectBuscar"'],$cDesplegable);
+                      
+    $modalSuperUsuario .= '</div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="SubmitModalForm" onclick="SubmitModalForm(1)">Guardar</button>
+                    <button type="button" class="btn btn-primary" id="SubmitModalForm" onclick="CU()">Guardar</button>
                 </div>
             </div>
         </div>
     </div>';
     return $modalSuperUsuario;
+    
 }
