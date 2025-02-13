@@ -381,6 +381,7 @@ async function dibuja_pagina(arrayDatos = []) {
 
 
     //calcula diferencia en fechas 
+    //es
     function calcularDiferenciaHoras() {
     var fechaInicio = $(".formulario_modal #FechaInicio").val();
     var fechaFin = $("#FechaFin").val(); // Este puede estar fuera o dentro de la clase
@@ -698,8 +699,8 @@ calendar.render();
                 }
                 
                 var data = await response.json();
-                var fechaHoraLocal = data.formatted;
-                return fechaHoraLocal;
+                
+                return [data.formatted,data.gmtOffset];
             } catch (error) {
                 alert('Error al obtener la hora local, asegurese de tener la ubicación activada');
                 return null;
@@ -710,7 +711,9 @@ calendar.render();
         try {
             var latitud = posicion.coords.latitude;
             var longitud = posicion.coords.longitude;
-            var horaLocal = await obtenerHoraLocal(latitud,longitud);
+            var arrayhora = await obtenerHoraLocal(latitud,longitud);
+            var horaLocal = arrayhora[0];
+            
             dibuja_pagina([0,0,latitud,longitud,horaLocal]);
             } catch (error) {
                 dibuja_pagina([0,0]);
@@ -721,26 +724,49 @@ calendar.render();
         if($("#map").length){
             try{
             let localizacion = navigator.geolocation.getCurrentPosition(EditarPosicionMapa);
+           
             }catch(e){
                 $('#map').hide();
                 console.log(e);
             }
         }        
     }
-    function EditarPosicionMapa(posicion){
+    async function EditarPosicionMapa(posicion){
         
         var latitud = posicion.coords.latitude;
         var longitud = posicion.coords.longitude;
-        
-
+        var arrayhora = await obtenerHoraLocal(latitud,longitud);
+        var horaLocal = arrayhora[0];
         var map = L.map('map').setView([latitud, longitud], 13);
 
         // Agregar el mapa base de OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-        // Agregar un marcador en coordenadas específicas
         var marker = L.marker([latitud, longitud]).addTo(map);
+        // Agregar un marcador en coordenadas específicas
+        actualizarHora(horaLocal,arrayhora[1]);
+        setInterval(async () => {
+            horaLocal.setMinutes(horaLocal.getMinutes() + 1);
+            await actualizarHora(horaLocal.toLocaleDateString());
+        }, 60000);
          
+    }
+    async function actualizarHora(horaLocal,GMTSec) {
+
+        // Quitar los segundos del formato de hora (suponiendo formato 'HH:MM:SS')
+        let [fecha, hora] = horaLocal.split(' ');
+        let [año, mes, día] = fecha.split('-'); // Descomponer la fecha
+        let [horas, minutos] = hora.split(':'); // Descomponer la hora
+
+        // Formatear la fecha como "día/mes/año"
+        let fechaFormateada = `${día}/${mes}/${año}`;
+
+        // Formatear la hora como "horas:minutos"
+        let horaFormateada = `${horas}:${minutos}`;
+
+        // Actualizar el contenido del div con la hora sin segundos
+        
+        document.getElementById("fechaActualAutomatica").innerHTML =  `<span style="font-size: 2em; font-weight: bold;">${fechaFormateada} ${horaFormateada}</span> 
+     <span style="style="font-size: 21m;">  (${GMTSec > 0 ? ' GMT+' + GMTSec / 3600 : ' GMT' + GMTSec / 3600} )</span>`;;
     }
 
     function mostrarMapaJornadafichaje(latitud,longitud){
@@ -792,8 +818,7 @@ calendar.render();
             
         }
     }
-
-
+  
 
     function cargarModalFirma(Id,TipoF,IdP,IdTp,IdS,IPc,BBDD){
         //elemento.addEventListener('touchmove', miFuncion, { passive: true });
@@ -856,13 +881,23 @@ calendar.render();
  }
   
 
-function toggleContentPorId(contentId) {
-        // Muestra el contenido seleccionado
-        $('#'+contentId).toggleClass("d-none");
-        //$('#'+contentId+"IMG").toggleClass("rotar_imagen_90");
-}
+    function toggleContentPorId(contentId) {
+            // Muestra el contenido seleccionado
+            $('#'+contentId).toggleClass("d-none");
+            //$('#'+contentId+"IMG").toggleClass("rotar_imagen_90");
+    }
 
-   
+    function CU(){
+
+        let idU = $("#SelectBuscar-InputFinal").attr("data-value");
+        //alert(idU);
+        $('#modalSuperAdmin').modal('hide');
+        $('.modal-backdrop').hide();
+        dibuja_pagina([0,13,[idU]]);
+
+    }
+
+
     function guardarFirma(Id,TipoF,IdP,IdTp,IdS,IPc,BBDD){
         var canvas = document.getElementById("signature-pad");
         var ctx = canvas.getContext('2d');
@@ -1008,26 +1043,7 @@ function toggleContentPorId(contentId) {
         </div>
     </div>
     
-    <!-- Modal para las firmas  -->
-    <div class="modal fade" id="ModalFirma" tabindex="-1" aria-labelledby="CampoFirma" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="TituloError">Firma</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" >
-                <div class="wrapper" id="wrapperFirma">
-                    <canvas id="signature-pad" ></canvas>
-                </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button> 
-                <button type="button" id="btnGuardarFirma"  class="btn btn-primary">Guardar</button>
-            </div>
-          </div>
-        </div>
-      </div>
+    
 
     
 
