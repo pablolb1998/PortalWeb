@@ -92,7 +92,7 @@ class Controlador
         }
         //pruebas
         if($_SESSION["pinC"] == 123654){
-                $this -> miEstado -> IP = '192.168.204.169';
+                $this -> miEstado -> IP = '192.168.204.230';
         }elseif ($_SESSION["pinC"] == '65814415D75C') {
             $this -> miEstado -> IP = '85.215.231.65,23459';
         }
@@ -126,6 +126,10 @@ class Controlador
                 $this -> miEstado -> archivostiposAccesos = extraerArchivosTiposAccesos();
                 $this -> miEstado -> linkDocumentoSubido = null;
                 $IdTipoApp = 33;
+                if( in_array(74,$this -> miEstado -> configuracionesUsuario) ){
+                    $this -> miEstado -> IdPersonalAdmin = $datosSesion[0];
+                    $this -> miEstado -> ListaEmpleadosVerAdministrador = obtenerListaEmpleados();
+                }
                 $this -> cargarDatosForm();
             }
             
@@ -269,6 +273,19 @@ class Controlador
             fclose($header);
         }
         
+    }
+
+    function recargarDatosAdministrador(){
+        $nombreSelccionado = array_values(array_filter($this -> miEstado -> ListaEmpleadosVerAdministrador, function ($usu) {
+            return $usu["Id"] == $this -> miEstado -> IdPersonal;
+        }));
+        $this -> miEstado -> nombre_descriptivo = $nombreSelccionado[0]["Nombre"] ;
+        
+        $this -> miEstado -> lista_sociedades = compruebaSociedades($this -> miEstado -> IdPersonal);
+        $this -> miEstado -> EstadoJornada = comprueba_jornada_personal();
+        $this -> miEstado -> Documentos = extraerDocPersonal_Masivo();
+        $this -> miEstado -> linkDocumentoSubido = null;
+        $this -> cargarDatosForm();
     }
 
 
@@ -638,7 +655,7 @@ class Controlador
             $this -> navegarPestanas($arrayDatos[0]);
         }elseif($c == 9 && !empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2]) && $this -> miEstado -> tipo_App ==  1){
         //********************************************/
-        //PORTAL CLIENTE Subir Arvhivos 
+        //PORTAL CLIENTE Subir Archivos 
         //********************************************/
                 $subida = $this -> subirArchivosServicioWeb($_SESSION["pinC"],
                                                     2,
@@ -656,6 +673,12 @@ class Controlador
             $this -> miEstado -> datosProyecto = extraerRecursosProyectos($arrayDatos[1]);
             usort($this -> miEstado -> datosProyecto[0], 'compararPorDireccionArbol');
             $this -> navegarPestanas(7.1);
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 13 && in_array(74,$this-> miEstado -> configuracionesUsuario) && $this -> miEstado -> tipo_App == 2){
+        //********************************************/
+        //PORTAL EMPLEADO Cambiar el usuario con carga de datos en caso de ser superadministrador
+        //********************************************/
+            $this -> miEstado -> IdPersonal = $arrayDatos[2][0];
+            $this -> recargarDatosAdministrador();    
         }elseif ($c === 2 && !empty($arrayDatos) && $arrayDatos[0] != -1 && $this -> miEstado -> tipo_App == 2) {
         //********************************************/   
         //PORTAL EMPLEADO la navegación Menu principal 
@@ -1047,6 +1070,7 @@ class Controlador
             $resultado = insertProyectosTareaMaterial($c,$arrayDatos[2]);
             $this -> miEstado -> arrayDatosAux = extraerRecursosFaseProyecto($this -> miEstado -> IdPropietario,$tipoMat);
             $ultimoElemento = null;
+            
             if($this -> miEstado -> adjuntarDocumentoFormAutomatico == 1 ){
                 foreach (array_reverse($this -> miEstado -> arrayDatosAux) as $item) {
                     if (isset($item["tipoDocPortal"]) && $item["tipoDocPortal"] == 9.2) {
@@ -1185,15 +1209,16 @@ class Controlador
                 }
                 
             }
+        
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == -1){
             $this -> cerrarSesion();
         }
         //navega a la siguiente pestaña segun el estado de la clase estado
         $txtErr = '';
-        if($_SESSION["pinC"] == 123654){
+        //if($_SESSION["pinC"] == 123654){
             $txtErr = "A:".$this -> miEstado -> tipo_App. "idI :".$this -> miEstado -> IdIdentidad.
-            $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario;
-        }
+            $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario."IdPro : ".$this -> miEstado -> IdPropietario;
+        //}
         
         return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$AccionSinRepintar,$arrayAuxiliarHtml,$accionJs);
     }

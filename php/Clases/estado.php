@@ -41,10 +41,13 @@ class Estado{
 
     //datos del empleado
     public $IdPersonal;
+    public $IdPersonalAdmin;
     public $permisosSecciones = array();
     public $configuracionesUsuario = array();
     public $EstadoJornada = array();
     public $HistoricoJornada;
+
+
 
 
     //Portal del empleado Vacaciones
