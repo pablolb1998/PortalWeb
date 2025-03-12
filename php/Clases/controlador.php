@@ -100,11 +100,11 @@ class Controlador
     }
         
     function IniciarSesion($usr, $pass){
-        //si no encuentra usuario devuelve false
+        //si no encuentra usuario devuelve 0
         $datosSesion = comprueba_usuario($usr, $pass);
         $IdTipoApp;
         
-        if($datosSesion != false){
+        if($datosSesion != false && $datosSesion != 0 ){
             $this -> miEstado -> nombre_descriptivo = $datosSesion[2];
             $this -> miEstado -> IdIdentidad = $datosSesion[4];
             $this -> miEstado -> permisosSecciones = comprobarPermisosUsuarios();
@@ -135,8 +135,9 @@ class Controlador
             
             crearRegistroEntrada_SeguridadUnificada($this -> miEstado -> IdIdentidad,$IdTipoApp);
             return true;
+        }elseif($datosSesion == 0){
+            return 0;
         }else{
-            
             return false;
         }
         
@@ -526,26 +527,32 @@ class Controlador
         //PORTAL CLIENTE/EMPLEADO
         //inicia sesión y navega entre pestañas del portal del comercial
         //********************************************/
+        $nav = 0;
                 $InicioS = $this -> IniciarSesion($arrayDatos[0], $arrayDatos[1]);
-                if($this -> miEstado -> tipo_App == 2){
-                    $this -> miEstado -> datosPersonal = comprobarDatosPersonal();
+                if($InicioS === false){
+                    $msgError = "No hay conexión con el servidor de " . $_SESSION["NombreM"] . ".<br>Contacte con su administrador del sistema.";
+
+                }elseif($InicioS == 0){
                     
-                }
-                //$programaActualizado = $this -> comprobarVersion();
-                $programaActualizado = true;
-                $nav = 0;
-                if(count($this -> miEstado -> lista_sociedades) == 1 && $InicioS && $programaActualizado){
-                    $nav = 2;
-                    $this -> setSociedad($this -> miEstado -> lista_sociedades[0]["idSociedad"]);
-                }elseif($InicioS && $this -> miEstado -> tipo_App == 1 && $programaActualizado){
-                    // LISTA SOCIEDADES
-                    $nav = 1;
-                }elseif($programaActualizado == false){
-                    $msgError = 'Es necesario actualizar el programa.';
-                }else{
                     $msgError = "Usuario o contraseña Incorrectos" ;
+
+                }else{
+                    if($this -> miEstado -> tipo_App == 2){
+                        $this -> miEstado -> datosPersonal = comprobarDatosPersonal();
+                        
+                    }
+                    //$programaActualizado = $this -> comprobarVersion();
+                    $programaActualizado = true;
+                    if(count($this -> miEstado -> lista_sociedades) == 1 && $InicioS && $programaActualizado){
+                        $nav = 2;
+                        $this -> setSociedad($this -> miEstado -> lista_sociedades[0]["idSociedad"]);
+                    }elseif($InicioS && $this -> miEstado -> tipo_App == 1 && $programaActualizado){
+                        // LISTA SOCIEDADES
+                        $nav = 1;
+                    }elseif($programaActualizado == false){
+                        $msgError = 'Es necesario actualizar el programa.';
+                    }
                 }
-                
                 $this -> navegarPestanas($nav);
         }elseif($this -> miEstado -> tipo_App == 1.5 && ($c === 0 ||($c === 0.5 && empty($arrayDatos))) ){
         //********************************************/    
@@ -1215,10 +1222,10 @@ class Controlador
         }
         //navega a la siguiente pestaña segun el estado de la clase estado
         $txtErr = '';
-        //if($_SESSION["pinC"] == 123654){
+        if($_SESSION["pinC"] == 123654){
             $txtErr = "A:".$this -> miEstado -> tipo_App. "idI :".$this -> miEstado -> IdIdentidad.
             $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario."IdPro : ".$this -> miEstado -> IdPropietario;
-        //}
+            }
         
         return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$AccionSinRepintar,$arrayAuxiliarHtml,$accionJs);
     }
