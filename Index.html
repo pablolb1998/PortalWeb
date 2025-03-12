@@ -555,7 +555,7 @@ async function dibuja_pagina(arrayDatos = []) {
             if(campoRequeridoVacio == 1){
                 //alert("Complete todos los campos");    
             }else{
-                //alert(valArray)
+                alert(valArray)
                 dibuja_pagina([0,3,valArray]);
             }
             
@@ -727,6 +727,7 @@ calendar.render();
            
             }catch(e){
                 $('#map').hide();
+                document.getElementById("map").innerHTML = "Error al obtener la ubicación";
                 console.log(e);
             }
         }        
@@ -766,7 +767,8 @@ calendar.render();
         // Actualizar el contenido del div con la hora sin segundos
         
         document.getElementById("fechaActualAutomatica").innerHTML =  `<span style="font-size: 2em; font-weight: bold;">${fechaFormateada} ${horaFormateada}</span> 
-     <span style="style="font-size: 21m;">  (${GMTSec > 0 ? ' GMT+' + GMTSec / 3600 : ' GMT' + GMTSec / 3600} )</span>`;;
+            <span style="style="font-size: 21m;">  (${GMTSec > 0 ? ' GMT+' + GMTSec / 3600 : ' GMT' + GMTSec / 3600} )</span>`;
+
     }
 
     function mostrarMapaJornadafichaje(latitud,longitud){
