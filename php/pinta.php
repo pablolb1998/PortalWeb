@@ -1138,7 +1138,9 @@ function DibujaLineas_PortalEmpleado(){
                 $descripcion4 = '';
                 $descripcion_icono = '';
                 $color = '';
-                if(isset($valor["color"])){
+                if(isset($valor["ColorPestana"])){
+                    $color =  $valor["ColorPestana"];
+                }elseif( isset($valor["color"])){
                     $color =  $valor["color"];
                 }
                 if(isset($valor["descripcion3"])){

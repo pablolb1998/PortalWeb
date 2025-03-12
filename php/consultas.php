@@ -12,28 +12,36 @@ require_once "Conexion.php";
 
 
 
-function comprueba_usuario($usuario, $contrasena){
-    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
-    $IdTipoUsu;
-    if($_SESSION["Controlador"] -> miEstado ->  tipo_App == 1){
-        $IdTipoUsu = 3;
-    }else{
-        $IdTipoUsu = 1;
-    }
-    //Comprueba los datos de la tabla de clientes
-    $sql = "EXECUTE seguridadunificada_identidad_select  @Usuario=?, @Contrasena=?, @IdTipoUsuario = ?;";
-    $parm = array($usuario, $contrasena, $IdTipoUsu);
-    $stmt = sqlsrv_prepare($conn, $sql, $parm);
-    //print_r($stmt);
-    if (!sqlsrv_execute($stmt)) {
-        return false;
-        die;
-    } else {
-        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            return array($row['IdUsuario'], $row["Usuario"], $row["Nombre"],$row["IdTipoUsuario"],$row['IdIdentidad']);
+function comprueba_usuario($usuario, $contrasena) {
+    try {
+        $conn = ConexionBD($_SESSION["Controlador"]->miEstado->IP, $_SESSION["Controlador"]->miEstado->bbdd);
+        
+        if (!$conn) {
+            return false; 
         }
+
+        $IdTipoUsu = ($_SESSION["Controlador"]->miEstado->tipo_App == 1) ? 3 : 1;
+
+        $sql = "EXECUTE seguridadunificada_identidad_select @Usuario=?, @Contrasena=?, @IdTipoUsuario=?;";
+        $params = array($usuario, $contrasena, $IdTipoUsu);
+        $stmt = sqlsrv_prepare($conn, $sql, $params);
+
+        if (!$stmt || !sqlsrv_execute($stmt)) {
+            sqlsrv_close($conn);
+            return false; 
+        }
+
+
+        if ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            sqlsrv_close($conn);
+            return array($row['IdUsuario'], $row["Usuario"], $row["Nombre"], $row["IdTipoUsuario"], $row['IdIdentidad']);
+        }
+        sqlsrv_close($conn);
+        return 0;
+
+    } catch (Exception $e) {
+        return false; 
     }
-    sqlsrv_close( $conn );
 }
 function comprobarDatosPersonal(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
@@ -503,7 +511,7 @@ function extraerDocPersonal_Masivo(){
     $DatosBD = array();
     //1 - Asistencias
         $sql1 = "SELECT IdPersonalAsistencia AS id,descripcion AS descripcion,Justificada AS descripcion2,FechaInicio AS descripcionLateral,FechaFin ,NumeroArchivos,color, tipo AS descripcion3,
-        FechaInicio,FechaFin, duracion AS descripcion4
+        FechaInicio,FechaFin, duracion AS descripcion4,ColorPestana
         FROM dbo.vw_PEAsistencias 
         WHERE IdPersonal = ?  ORDER BY IdPersonalAsistencia DESC";
         $DatosBD = array();
@@ -520,7 +528,7 @@ function extraerDocPersonal_Masivo(){
         }
     //2 - Contratos
         $sql2 = "SELECT idpersonalcontrato AS id,tipo AS descripcion,EstadoContrato AS descripcion2,NumeroArchivos,color,InicioFin AS descripcionLateral, 
-        FechaInicio, FechaInicio AS FechaFin,observaciones FROM dbo.vw_PEContratos 
+        FechaInicio, FechaInicio AS FechaFin,observaciones,color as ColorPestana  FROM dbo.vw_PEContratos 
         WHERE idpersonal = ? ORDER BY fechainicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
         //$parm = array($IdCliente);
@@ -568,7 +576,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //4 - Formacion
-        $sql2 = "SELECT IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3
+        $sql2 = "SELECT IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3,color as ColorPestana
         FROM dbo.vw_PEFormacion
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -584,7 +592,7 @@ function extraerDocPersonal_Masivo(){
         }
     //5 - Incidencias
         $sql5 = "SELECT IdPersonalIncidencia AS id,descripcion AS descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,color,TipoIncidencia AS descripcion3,
-        Fecha AS FechaInicio, Fecha AS FechaFin
+        Fecha AS FechaInicio, Fecha AS FechaFin,color as ColorPestana
         FROM dbo.vw_PEIncidencias
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -601,7 +609,7 @@ function extraerDocPersonal_Masivo(){
 
     //6 - Material
         $sql6 = "SELECT IdPersonalMaterial AS id,Material AS descripcion,Cantidad AS descripcion3,Fecha AS descripcionLateral, color,Validado AS descripcion2,
-        Fecha AS FechaInicio, Fecha AS FechaFin
+        Fecha AS FechaInicio, Fecha AS FechaFin,color as ColorPestana
         FROM dbo.vw_PEMaterial
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -617,7 +625,7 @@ function extraerDocPersonal_Masivo(){
         }
     //7 - Nominas
         $sql7 = "SELECT IdPersonalSalario AS id ,Fecha  AS descripcion,Pagado  AS descripcion2, CAST(Liquido AS VARCHAR)+'€' AS descripcionLateral,color,'Bruto :'+CAST(SalarioBruto AS VARCHAR)+'€' AS descripcion3,
-        FechaRegistro AS FechaInicio, FechaRegistro AS FechaFin,IdArchivo as NumeroArchivos
+        FechaRegistro AS FechaInicio, FechaRegistro AS FechaFin,IdArchivo as NumeroArchivos,color as ColorPestana
         FROM dbo.vw_selectSalariosAppsheet
         WHERE IdPersonal = ? ORDER BY FechaRegistro DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -638,7 +646,7 @@ function extraerDocPersonal_Masivo(){
         Estado2 AS descripcion2, 
         color2 as color,
         FechaInicio,FechaFin,Año as AñoV,
-        Estado
+        Estado,color as ColorPestana
         FROM dbo.vw_PEVacaciones
         WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -929,6 +937,8 @@ function exect_Insert_From_Dinamico($arrayValores){
     }
 
         $parm = $arrayValores;
+        print_r($parm);
+        print_r($sql);
         $stmt = sqlsrv_prepare($conn, $sql, $parm);
         
         if (!sqlsrv_execute($stmt)) {
