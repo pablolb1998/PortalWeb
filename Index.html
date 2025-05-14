@@ -515,15 +515,13 @@ async function dibuja_pagina(arrayDatos = []) {
                 nombreForm = nombreForm;
             }
 
-            $('#'+nombreForm).modal('hide');
-            $('.modal-backdrop').hide();
+           
             let valArray = [];
             if(IdRegisto != null){
                 valArray.push(claseFormulario,IdRegisto);
             }
-            
-
-            $(".formulario_modal :input").each(function(){
+           
+            $(" .formulario_modal:visible :input").each(function(){
                 
                 let fechaActual = new Date();
                 let anoActual = fechaActual.getFullYear();
@@ -544,19 +542,28 @@ async function dibuja_pagina(arrayDatos = []) {
                     let classInput =  '#'+ $(this).prop('id') +'_msgError'; 
                     $(classInput).addClass('d-none');
                 }
-               //console.log($(this))
-                valArray.push($(this).hasClass('selectBuscar-input') ? $(this).attr('data-value') : $(this).val());
+               
+                if ($(this).hasClass('selectBuscar-input')){
+                    valArray.push($(this).attr('data-value'));
+                    
+                }else{
+                    valArray.push($(this).val());
+                }
             })
 
             $('body').css({
                 'overflow': 'auto',
                 'padding-right': '0'
             });
+
+            $('#'+nombreForm).modal('hide');
+            $('.modal-backdrop').hide();
+            
             if(campoRequeridoVacio == 1){
-                //alert("Complete todos los campos");    
+                alert("Complete todos los campos");    
             }else{
-                alert(valArray)
-                dibuja_pagina([0,3,valArray]);
+                //alert(valArray);
+               dibuja_pagina([0,3,valArray]);
             }
             
         }
@@ -812,12 +819,78 @@ calendar.render();
         
     }
     
-    function cargarModalFormularioDinamico(nombreFormulario = null,idRegistro = null) {
-        if (nombreFormulario == null ) {
-            $('#modalFormularioDinamico').modal('show');
-        }  else {
+    function cargarModalFormularioDinamico(nombreFormulario = null,IdRegistro = null,Valores = null) {
+
+        if(nombreFormulario == null){
+            nombreFormulario = 'modalFormularioDinamico';
+        }
+
+
+        const tituloAlta = document.querySelector('#'+nombreFormulario+' .modal-title');
+        const tituloModificacion = document.querySelector('#'+nombreFormulario+' .modal-title-modificacion');
+        var NombreForm = nombreFormulario;
+
+        
+        if(IdRegistro === null && Valores === null){
+            if (tituloAlta) tituloAlta.style.display = '';
+            if (tituloModificacion) tituloModificacion.style.display = 'none';
             $('#'+nombreFormulario).modal('show');
-            
+        }else{
+            const modal = $('#'+nombreFormulario);
+            if (tituloAlta) tituloAlta.style.display = 'none';
+            if (tituloModificacion) tituloModificacion.style.display = '';
+            modal.modal('show');
+
+            // Esperar a que el modal esté completamente visible
+            modal.on('shown.bs.modal', function () {
+                const formulario = document.querySelector('#'+nombreFormulario+' form');
+                if (!formulario) {
+                    console.warn('Formulario no encontrado dentro del modal');
+                    return;
+                }
+
+                const camposVisibles = Array.from(formulario.querySelectorAll('input, select, textarea'))
+                    .filter(el => el.type !== 'hidden' && el.type !== 'button' && el.type !== 'submit');
+
+                camposVisibles.forEach((campo, index) => {
+                    if (index < Valores.length) {
+                        if (campo.type === 'datetime-local') {
+                            campo.value = Valores[index].substring(0, 16);
+                        } else if (campo.classList.contains('selectBuscar-input')) {
+                            asignarValorSelectBuscar(campo.id, Valores[index]);
+                        } else {
+                            campo.value = Valores[index];
+                        }
+                    }
+                });
+                const inputIdModificar = document.getElementById('IdModificar');
+                if (inputIdModificar && IdRegistro !== null) {
+                    inputIdModificar.value = IdRegistro;
+                }
+
+                // Remover listener para evitar duplicación si se llama múltiples veces
+                modal.off('shown.bs.modal'); 
+            });
+        }
+
+    }
+
+
+    // funcion auxliar para poder asignar valores dinamicamente al select buscar  
+    function asignarValorSelectBuscar(inputId, valor) {
+     
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const lista = input.closest('.selectBuscar').querySelectorAll('.selectBuscar-item');
+        const item = Array.from(lista).find(el => el.dataset.value === valor.toString());
+
+        if (item) {
+            input.dataset.value = item.dataset.value;
+            input.value = item.textContent.trim();
+        } else {
+            input.dataset.value = '';
+            input.value = '';
         }
     }
   
