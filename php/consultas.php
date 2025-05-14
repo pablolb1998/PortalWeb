@@ -510,8 +510,8 @@ function extraerDocPersonal_Masivo(){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $DatosBD = array();
     //1 - Asistencias
-        $sql1 = "SELECT IdPersonalAsistencia AS id,descripcion AS descripcion,Justificada AS descripcion2,FechaInicio AS descripcionLateral,FechaFin ,NumeroArchivos,color, tipo AS descripcion3,
-        FechaInicio,FechaFin, duracion AS descripcion4,ColorPestana
+        $sql1 = "SELECT IdPersonalAsistencia AS id,descripcion AS Descripcion,Justificada AS descripcion2,FechaInicio AS descripcionLateral,FechaFin ,NumeroArchivos,color, tipo AS descripcion3,
+        FechaInicio,FechaFin, duracion AS descripcion4,ColorPestana,IdTipo
         FROM dbo.vw_PEAsistencias 
         WHERE IdPersonal = ?  ORDER BY IdPersonalAsistencia DESC";
         $DatosBD = array();
@@ -527,7 +527,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //2 - Contratos
-        $sql2 = "SELECT idpersonalcontrato AS id,tipo AS descripcion,EstadoContrato AS descripcion2,NumeroArchivos,color,InicioFin AS descripcionLateral, 
+        $sql2 = "SELECT idpersonalcontrato AS id,tipo AS Descripcion,EstadoContrato AS descripcion2,NumeroArchivos,color,InicioFin AS descripcionLateral, 
         FechaInicio, FechaInicio AS FechaFin,observaciones,color as ColorPestana  FROM dbo.vw_PEContratos 
         WHERE idpersonal = ? ORDER BY fechainicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -542,7 +542,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //3 - Documentos
-        $sql2 = "SELECT IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
+        $sql2 = "SELECT IdArchivo AS id, Documento AS Descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
         IdTipoPropietario,IdPropietario,Documento, Firmable ,Firmado
         FROM dbo.vw_PEArchivosPersonal 
         WHERE idpersonal = ? ORDER BY FechaCreacionRegistro DESC";
@@ -559,7 +559,7 @@ function extraerDocPersonal_Masivo(){
         }
     //3.5 - Observaciones
         $sql2 = "SELECT IdObservacion AS id, 
-        Descripcion AS descripcion,
+        Descripcion AS Descripcion,
         Fecha AS descripcionLateral,
         IdTipoPropietario,IdPropietario
         FROM dbo.vw_PEObservaciones 
@@ -576,7 +576,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //4 - Formacion
-        $sql2 = "SELECT IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3,color as ColorPestana
+        $sql2 = "SELECT IdPersonalFormacion AS id,Curso AS Descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3,color as ColorPestana
         FROM dbo.vw_PEFormacion
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
@@ -591,7 +591,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //5 - Incidencias
-        $sql5 = "SELECT IdPersonalIncidencia AS id,descripcion AS descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,color,TipoIncidencia AS descripcion3,
+        $sql5 = "SELECT IdPersonalIncidencia AS id,descripcion AS Descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,color,TipoIncidencia AS descripcion3,
         Fecha AS FechaInicio, Fecha AS FechaFin,color as ColorPestana
         FROM dbo.vw_PEIncidencias
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
@@ -608,7 +608,7 @@ function extraerDocPersonal_Masivo(){
         }
 
     //6 - Material
-        $sql6 = "SELECT IdPersonalMaterial AS id,Material AS descripcion,Cantidad AS descripcion3,Fecha AS descripcionLateral, color,Validado AS descripcion2,
+        $sql6 = "SELECT IdPersonalMaterial AS id,Material AS Descripcion,Cantidad AS descripcion3,Fecha AS descripcionLateral, color,Validado AS descripcion2,
         Fecha AS FechaInicio, Fecha AS FechaFin,color as ColorPestana
         FROM dbo.vw_PEMaterial
         WHERE IdPersonal = ? ORDER BY Fecha DESC";
@@ -624,7 +624,7 @@ function extraerDocPersonal_Masivo(){
             }
         }
     //7 - Nominas
-        $sql7 = "SELECT IdPersonalSalario AS id ,Fecha  AS descripcion,Pagado  AS descripcion2, CAST(Liquido AS VARCHAR)+'€' AS descripcionLateral,color,'Bruto :'+CAST(SalarioBruto AS VARCHAR)+'€' AS descripcion3,
+        $sql7 = "SELECT IdPersonalSalario AS id ,Fecha  AS Descripcion,Pagado  AS descripcion2, CAST(Liquido AS VARCHAR)+'€' AS descripcionLateral,color,'Bruto :'+CAST(SalarioBruto AS VARCHAR)+'€' AS descripcion3,
         FechaRegistro AS FechaInicio, FechaRegistro AS FechaFin,IdArchivo as NumeroArchivos,color as ColorPestana
         FROM dbo.vw_selectSalariosAppsheet
         WHERE IdPersonal = ? ORDER BY FechaRegistro DESC";
@@ -641,7 +641,7 @@ function extraerDocPersonal_Masivo(){
         }
     //8 - Vacaciones
         $sql8 = "SELECT IdPersonalVacaciones AS id,
-        EstadoV  AS descripcion, 
+        EstadoV  AS Descripcion, 
         RangoFechas  AS descripcionLateral,  
         Estado2 AS descripcion2, 
         color2 as color,
@@ -678,7 +678,7 @@ function extraerDocPersonal_Masivo(){
     
     //9 Proyectos a los que tiene acceso el personal
         $sql9 = "SELECT IdProyecto AS id,
-        ISNULL(Codigo,'')+' '+ISNULL(Nombre,'')  AS descripcion,
+        ISNULL(Codigo,'')+' '+ISNULL(Nombre,'')  AS Descripcion,
         case
             when Estado = 0 THEN 'Iniciado'
             --when Estado=2 Then 'Cerrado'
@@ -804,22 +804,25 @@ function extraerFasesProyectos(){
     
     return array($Fases,$TiposTareas,$ProyectosMaterialesTipos,$Articulos);
 }
-function ExtraccionSOldadoRyan($vehiculo,$lat,$lon){
 
-}
 
 function extraerRecursosFaseProyecto($idProyecto,$FaseMaterial){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $DatosBD = array();
 
     if($FaseMaterial == 0) {
-        $sql= "SELECT T.IdProyectoRecurso AS id,T.IdProyectoTarea,
-                CONVERT(VARCHAR(50), t.FechaInicio, 103)+' - '+CONVERT(VARCHAR(50), t.FechaFin, 103) AS descripcion2,
-                CAST(T.Duracion AS VARCHAR(50))+' horas' AS descripcionLateral,
-                Duracion,ISNULL(pt.Nombre,pt.nombre) AS descripcion,t.Fecha AS fecha 
+        $sql= "SELECT T.IdProyectoRecurso AS id,T.IdProyectoTarea,T.IdProduccionTipoTarea AS IdTipoTarea,t.FechaInicio AS FechaInicio,t.FechaFin AS FechaFin,
+                CONVERT(VARCHAR(50), t.FechaInicio, 103)+ ' ' + CONVERT(VARCHAR(5), t.FechaInicio, 108)  AS descripcion2,
+                CONVERT(VARCHAR(5),ROUND(T.Duracion,2)) +' horas' AS descripcionLateral,
+                Duracion,
+				IsNULL(ptt.Nombre,pr.Nombre) AS Descripcion,
+				pt.Nombre AS descripcion3,
+				t.Fecha AS fecha 
                 FROM dbo.ProyectosRecursos T
                 INNER JOIN proyectos Pr ON Pr.IdProyecto = T.IdProyecto
                 left JOIN dbo.ProyectosTareas pt ON pt.IdProyectoTarea=t.IdProyectoTarea
+				LEFT JOIN dbo.ProduccionTiposTareas ptt ON ptt.IdProduccionTipoTarea = T.IdProduccionTipoTarea
+
                 WHERE T.IdProyecto = ? AND T.idpersonal = ?";
         $parm = array($idProyecto,$_SESSION["Controlador"] -> miEstado -> IdPersonal);
         $stmt = sqlsrv_query($conn,$sql,$parm);
@@ -834,10 +837,17 @@ function extraerRecursosFaseProyecto($idProyecto,$FaseMaterial){
             }
         }
     }else{
+
         $sql= " SELECT PM.IdProyectoMaterial AS id,PM.IdProyectoTarea,
                 CONVERT(VARCHAR(50), PM.Fecha, 103) AS descripcion2,
                 'Cant: ' + CONVERT(VARCHAR(50),PM.Cantidad) AS descripcionLateral,
-				PM.Descripcion AS descripcion,PM.Fecha AS fecha 
+				PM.Descripcion AS Descripcion,PM.Fecha AS fecha ,
+                PM.IdProyectoTarea,
+                IdProyectoMaterialTipo, 
+                IdArticulo,
+                PM.Cantidad,
+                Coste,
+                Fecha
                 FROM dbo.ProyectosMateriales PM
                 INNER JOIN proyectos Pr ON Pr.IdProyecto = PM.IdProyecto
                 INNER JOIN dbo.ProyectosTareas pt ON pt.IdProyectoTarea=PM.IdProyectoTarea
@@ -937,8 +947,8 @@ function exect_Insert_From_Dinamico($arrayValores){
     }
 
         $parm = $arrayValores;
-        print_r($parm);
-        print_r($sql);
+        // print_r($parm);
+        // print_r($sql);
         $stmt = sqlsrv_prepare($conn, $sql, $parm);
         
         if (!sqlsrv_execute($stmt)) {
@@ -952,14 +962,14 @@ function exect_Insert_From_Dinamico($arrayValores){
             $tipoDoc = 0;
             switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
                 case 4.1:
-                    $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,descripcion AS descripcion,Justificada AS descripcion2,FechaInicio AS descripcionLateral,FechaFin ,NumeroArchivos,color, tipo AS descripcion3,
+                    $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,Descripcion AS descripcion,Justificada AS descripcion2,FechaInicio AS descripcionLateral,FechaFin ,NumeroArchivos,color, tipo AS descripcion3,
                     FechaInicio,FechaFin, duracion AS descripcion4
                     FROM dbo.vw_PEAsistencias 
                     WHERE IdPersonal = ? ORDER BY IdPersonalAsistencia DESC" ;
                     $tipoDoc = 1;
                     break;
                 case 4.4:
-                    $sqlReturn = "SELECT TOP 1 IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
+                    $sqlReturn = "SELECT TOP 1 IdArchivo AS id, Documento AS Descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
                     IdTipoPropietario,IdPropietario,Documento, Firmable ,Firmado
                     FROM dbo.vw_PEArchivosPersonal 
                     WHERE idpersonal = ? ORDER BY IdArchivo DESC" ;
@@ -967,7 +977,7 @@ function exect_Insert_From_Dinamico($arrayValores){
                     break;
                 case 4.45:
                     $sqlReturn = "SELECT TOP 1 IdObservacion AS id, 
-                                Descripcion AS descripcion,
+                                Descripcion AS Descripcion,
                                 Fecha AS descripcionLateral,
                                 IdTipoPropietario,IdPropietario
                                 FROM dbo.vw_PEObservaciones 
@@ -978,14 +988,14 @@ function exect_Insert_From_Dinamico($arrayValores){
                    
                 case 4.5:
                     
-                    $sqlReturn = "SELECT TOP 1  IdPersonalFormacion AS id,Curso AS descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3
+                    $sqlReturn = "SELECT TOP 1  IdPersonalFormacion AS id,Curso AS Descripcion,validada AS descripcion2,Fecha AS descripcionLateral,color,Horas  AS descripcion3
                     FROM dbo.vw_PEFormacion
                     WHERE IdPersonal = ? ORDER BY IdPersonalFormacion DESC" ;
                     $tipoDoc = 4;
                     break;
                     
                 case 4.6:
-                    $sqlReturn = "SELECT TOP 1 IdPersonalIncidencia AS id,descripcion AS descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,color,TipoIncidencia AS descripcion3,
+                    $sqlReturn = "SELECT TOP 1 IdPersonalIncidencia AS id,descripcion AS Descripcion,Justificada AS descripcion2,Fecha AS descripcionLateral,color,TipoIncidencia AS descripcion3,
                     Fecha AS FechaInicio, Fecha AS FechaFin
                     FROM dbo.vw_PEIncidencias
                     WHERE IdPersonal = ?  ORDER BY IdPersonalIncidencia DESC";
@@ -993,7 +1003,7 @@ function exect_Insert_From_Dinamico($arrayValores){
                     $tipoDoc = 5;
                     break;
                 case 4.7:
-                    $sqlReturn = "SELECT TOP 1 IdPersonalMaterial AS id,Material AS descripcion,Cantidad AS descripcion3,Fecha AS descripcionLateral, color,Validado AS descripcion2,
+                    $sqlReturn = "SELECT TOP 1 IdPersonalMaterial AS id,Material AS Descripcion,Cantidad AS descripcion3,Fecha AS descripcionLateral, color,Validado AS descripcion2,
                     Fecha AS FechaInicio, Fecha AS FechaFin
                     FROM dbo.vw_PEMaterial
                     WHERE IdPersonal = ? ORDER BY IdPersonalMaterial DESC";
@@ -1002,7 +1012,7 @@ function exect_Insert_From_Dinamico($arrayValores){
                     break;
                 case 4.9:
                 
-                    $sqlReturn = "SELECT top 1 IdPersonalVacaciones AS id,EstadoV  AS descripcion, RangoFechas  AS descripcionLateral,  Estado2 AS descripcion2, color2 as color,'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
+                    $sqlReturn = "SELECT top 1 IdPersonalVacaciones AS id,EstadoV  AS Descripcion, RangoFechas  AS descripcionLateral,  Estado2 AS descripcion2, color2 as color,'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
                     FechaInicio,FechaFin,Año as AñoV
                     FROM dbo.vw_PEVacaciones
                     WHERE IdPersonal = ? ORDER BY IdPersonalVacaciones DESC";
@@ -1071,7 +1081,7 @@ function exect_Insert_From_DinamicoSubidaArchivos($arrayValores,$ruta){
         $sqlReturn = "";
         $tipoDoc = 0;
         
-        $sqlReturn = "SELECT TOP 1 IdArchivo AS id, Documento AS descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
+        $sqlReturn = "SELECT TOP 1 IdArchivo AS id, Documento AS Descripcion, tipoArchivo AS descripcion2,FechaCreacionRegistro AS descripcionLateral,
         IdTipoPropietario,IdPropietario,Documento, Firmable ,Firmado
         FROM dbo.vw_PEArchivosPersonal 
         WHERE idpersonal = ? ORDER BY IdArchivo DESC" ;
@@ -1102,19 +1112,17 @@ function insertProyectosTareaMaterial($MaterialProyecto,$arrayDatos){
         (IdPETiemposProyectosAppSheet,
         IdProyecto,
         IdTipoTarea,
-        IdProyectoTarea,
-        
+        IdProyectoTarea,      
         FechaInicio,
         FechaFin,
-
         IdTipoHora,
         Fecha,
         IdPersonal,
-        IdIdentidad
-        
+        IdIdentidad,
+        IdModificar
         )
         VALUES
-        (?,?,?,?,?,?,?,GETDATE(),?,?)";
+        (?,?,?,?,?,?,?,GETDATE(),?,?,?)";
 
         $parm = array(
         $randomNumber = rand(10000, 999999),
@@ -1125,34 +1133,73 @@ function insertProyectosTareaMaterial($MaterialProyecto,$arrayDatos){
         date('Ymd H:i:s', strtotime($arrayDatos[3]) ),
         69,
         $_SESSION["Controlador"] -> miEstado -> IdPersonal,
-        $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+        $_SESSION["Controlador"] -> miEstado -> IdIdentidad,
+        $arrayDatos[5]
+    );
  
     }else{
-        $sql = "DECLARE @FECHA SMALLDATETIME = GETDATE(),
-                @IdProyectoMaterial INT
-        EXECUTE dbo.up_ProyectosMateriales_Insert
-        @IdProyectoMaterial = @IdProyectoMaterial OUTPUT,
-        @IdProyecto = ?,
-        @IdProyectoTarea = ?,
-        @IdProyectoMaterialTipo = ?, 
-        @IdArticulo = ?, 
-        @Descripcion = ?, 
-        @Cantidad = ?,
-        @Coste = ?,
-        @Fecha =?,
-        @IdPersonal = ?,
-        @IdIdentidad = ?";
-        $parm = array($_SESSION["Controlador"] -> miEstado -> IdPropietario,
-        $arrayDatos[0],
-        $arrayDatos[1],
-        $arrayDatos[2],
-        $arrayDatos[3],
-        $arrayDatos[4],
-        $arrayDatos[5],
-        date('Ymd H:i:s', strtotime($arrayDatos[6]) ),
-        $_SESSION["Controlador"] -> miEstado -> IdPersonal,
-        $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+
+        if($arrayDatos[7] == 0 || $arrayDatos[7] == NULL || $arrayDatos[7] == ''){
+            $sql = "DECLARE @FECHA SMALLDATETIME = GETDATE(),
+                    @IdProyectoMaterial INT
+            EXECUTE dbo.up_ProyectosMateriales_Insert
+            @IdProyectoMaterial = @IdProyectoMaterial OUTPUT,
+            @IdProyecto = ?,
+            @IdProyectoTarea = ?,
+            @IdProyectoMaterialTipo = ?, 
+            @IdArticulo = ?, 
+            @Descripcion = ?, 
+            @Cantidad = ?,
+            @Coste = ?,
+            @Fecha =?,
+            @IdPersonal = ?,
+            @IdIdentidad = ?";
+
+            
+
+            $parm = array($_SESSION["Controlador"] -> miEstado -> IdPropietario,
+            $arrayDatos[0],
+            $arrayDatos[1],
+            $arrayDatos[2],
+            $arrayDatos[3],
+            ConvertirAFloat($arrayDatos[4]),
+            ConvertirAFloat($arrayDatos[5]),
+            date('Ymd H:i:s', strtotime($arrayDatos[7]) ),
+            $_SESSION["Controlador"] -> miEstado -> IdPersonal,
+            $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+        }else{
+
+            $sql = "DECLARE @FECHA SMALLDATETIME = GETDATE()
+                EXECUTE up_ProyectosMateriales_Update_From_PE
+                @IdProyectoMaterial  = ?,
+                @IdProyecto = ?,
+                @IdProyectoTarea = ?,
+                @IdProyectoMaterialTipo = ?, 
+                @IdArticulo = ?, 
+                @Descripcion = ?, 
+                @Cantidad  = ?,
+                @Coste = ?,
+                @Fecha = ?,
+                @IdPersonal = ?,
+                @IdIdentidad = ?";
+
+
+           $parm = array(
+            $arrayDatos[7],
+            $_SESSION["Controlador"] -> miEstado -> IdPropietario,
+            $arrayDatos[0],
+            $arrayDatos[1],
+            $arrayDatos[2],
+            $arrayDatos[3],
+            ConvertirAFloat($arrayDatos[4]),
+            ConvertirAFloat($arrayDatos[5]),
+            date('Ymd H:i:s', strtotime($arrayDatos[6]) ),
+            $_SESSION["Controlador"] -> miEstado -> IdPersonal,
+            $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+ 
+        }
     }
+    
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
     if (!sqlsrv_execute($stmt)) {
         die(print_r(sqlsrv_errors(), true));
@@ -1440,6 +1487,10 @@ function PEfirmaInsert($IdDoc,$IdTipoDoc,$NArchivo,$IdA,$LinkA,$IP,$BBDD){
         return true;
     }   
     sqlsrv_close( $conn );
+}
+
+function ConvertirAFloat($val) {
+    return is_numeric($val) ? (float)$val : null;
 }
 
 ?>

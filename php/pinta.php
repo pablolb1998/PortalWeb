@@ -352,7 +352,8 @@ function pinta_contenido($estado){
         //Pestañas de navegacion
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
             $filetext = str_replace('%LineasE%',DibujaLineas_PortalEmpleado(),$filetext);
-            if($ModalFirma =1){
+            if($ModalFirma ==1){
+                
                 $fileModal = fopen('../html/ModalFirma.html', "r");
                 $filesizeModal = filesize('../html/ModalFirma.html');
                 $Modalfirmadoc = fread($fileModal, $filesizeModal);
@@ -525,6 +526,7 @@ function muestra_documentos(){
     if($_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"] == 1){
         $acciones_globales .= '<button onclick="cargarModalValidacion(1,0,0)"  class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
     }
+
     
 
 
@@ -894,7 +896,7 @@ function DibujaLineas_PortalEmpleado(){
         $pseudoIdentificador = '';
         $conAccionesPersonalizadas = 0;
         $accionModalPersonalizadaOnClick = 0;
-        
+        $ListadoAccionesMostar = array();
         //visualizador para luego
         // if($_SESSION["Controlador"] -> miEstado -> acciones["modalVisualizar"] == 1 ){
         //     $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
@@ -925,6 +927,13 @@ function DibujaLineas_PortalEmpleado(){
             $acciones_globales .= cargaFormularioDinamico2();
             
         }
+        if($_SESSION["Controlador"] -> miEstado -> acciones["ModificarLineaCustom"] == 1 && $_SESSION["Controlador"] -> miEstado -> acciones["anadirLineaCustom"] == 0){
+            //dibuja_pagina([0,3])
+
+            $acciones_linea .= '<button onclick="cargarModalFormularioDinamico(null,%IdProp%,%arrayValoresResgistroModal%)"    style="all: initial;cursor: pointer; padding: 0; border: none; margin: 0;display:%DispAccionC%;"><img class="pdf_icono" src="Img/IconosAcciones/Observaciones.png"></button>';    
+            
+        }
+
         if($_SESSION["Controlador"] -> miEstado -> adjuntarDocumentoFormAutomatico == 1 ){
             $acciones_globales .= obtenerFormularioAdjuntos();
         }
@@ -940,8 +949,10 @@ function DibujaLineas_PortalEmpleado(){
                 default:
                     $Nombreform = "'modalFormularioTiemposProyectos'";
                     break;
+            };
+            if($_SESSION["Controlador"] -> miEstado -> acciones["ModificarLineaCustom"] == 1 ){
+                $acciones_linea .= '<button onclick="cargarModalFormularioDinamico('.$Nombreform.',%IdProp%,%arrayValoresResgistroModal%)"    style="all: initial;cursor: pointer; padding: 0; border: none; margin: 0;display:%DispAccionC%;"><img class="pdf_icono" src="Img/IconosAcciones/Observaciones.png"></button>';    
             }
-            ;
             //modalFormularioMaterialesProyectos
             $acciones_globales .= '<button onclick="cargarModalFormularioDinamico('.$Nombreform.')" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
             $acciones_globales .= cargaModalesCustom();
@@ -952,6 +963,7 @@ function DibujaLineas_PortalEmpleado(){
             //$acciones_linea = '<a href="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin='.$_SESSION["pinC"].'&IdArchivo=%IdProp%" target="_blank">
             //<img class="pdf_icono" src="%imgTipoArchivo%"></a>';
             $acciones_linea .= '<a onclick="dibuja_pagina([0,11,[%id%,'."'%codigo%'".'],'."'O'".'])" ><img class="pdf_icono" src="%imgTipoArchivo%"></a>';
+            //$ListadoAccionesMostar = cargaArrayVisibleLineasEmpleado();
         }
         
         
@@ -1036,7 +1048,7 @@ function DibujaLineas_PortalEmpleado(){
             
                 // Comprobación de la cadena de filtro en las descripciones
                 return str_contains(
-                    strtoupper($docF["descripcion"].'#'.$docF["descripcion2"].'#'.$resultadoLateral.'#'.$resultado2.'#'.$resultado3.'#'.$resultado4),
+                    strtoupper($docF["Descripcion"].'#'.$docF["descripcion2"].'#'.$resultadoLateral.'#'.$resultado2.'#'.$resultado3.'#'.$resultado4),
                     strtoupper($CadenaFiltro)
                 );
             });
@@ -1068,12 +1080,14 @@ function DibujaLineas_PortalEmpleado(){
                     $resultadoLateral = $docF["descripcionLateral"]->format('d/m/Y');
                 } else {
                     $resultadoLateral = isset($docF["descripcionLateral"]) ? $docF["descripcionLateral"] : '';
+                    
                 }
             
                 // Comprobación de la cadena de filtro en las descripciones
                 return $docF["tipoDocPortal"] == $tipoDocf && str_contains(
-                    strtoupper($docF["descripcion"].'#'.$docF["descripcion2"].'#'.$resultadoLateral.'#'.$resultado2.'#'.$resultado3.'#'.$resultado4),
+                    strtoupper($docF["Descripcion"].'#'.$docF["descripcion2"].'#'.$resultadoLateral.'#'.$resultado2.'#'.$resultado3.'#'.$resultado4),
                     strtoupper($CadenaFiltro)
+                    
                 );
             });
         }else{
@@ -1122,9 +1136,12 @@ function DibujaLineas_PortalEmpleado(){
         }
         
         // funcion para reinedxarlo 
+        
         $arrayDoc = array_values($arrayDoc);
         $listaDoc = "";
         $listaDoc .= "<section>";
+        $ListadoAccionesMostar = cargaArrayVisibleLineasEmpleado();
+
         if(count($arrayDoc)>0){
             
             $listaDoc .=  "<table class='table table-striped table-bordered-bottom' id='cuerpo'>";
@@ -1132,7 +1149,7 @@ function DibujaLineas_PortalEmpleado(){
             $listaDoc .=  "<tbody id='myTable'>";
             for($dc = 0; $dc < count($arrayDoc) ; $dc++ ){
                 $valor = $arrayDoc[$dc];
-                $descripcion = $valor["descripcion"];
+                $descripcion = $valor["Descripcion"];
                 $descripcion2 = $valor["descripcion2"];
                 $descripcion3 = '';
                 $descripcion4 = '';
@@ -1143,13 +1160,15 @@ function DibujaLineas_PortalEmpleado(){
                 }elseif( isset($valor["color"])){
                     $color =  $valor["color"];
                 }
+
+                
                 if(isset($valor["descripcion3"])){
                     $descripcion3 =  $valor["descripcion3"].'<br>';
                 }
                 if(isset($valor["descripcion4"])){
                     $descripcion4 =  $valor["descripcion4"];
                 }
-                
+            
                 $id = $valor["id"];
                 
                 try {
@@ -1178,6 +1197,30 @@ function DibujaLineas_PortalEmpleado(){
                 }
                 //añadir a las acciones el id del propietario y el tipo
                 $acciones_linea_pintar = str_replace('%IdProp%',$id,$acciones_linea);
+                if ($color =='#0e860e' && $_SESSION["Controlador"] -> miEstado -> acciones["ModificarLineaCustom"] == 1){
+                    $acciones_linea_pintar = str_replace('%DispAccionC%','none',$acciones_linea_pintar);
+                }else{
+                    $acciones_linea_pintar = str_replace('%DispAccionC%','',$acciones_linea_pintar);
+                    $parametrosValoresMostrar = array();
+
+                    foreach ($ListadoAccionesMostar as $key) {
+                        if (isset($valor[$key])) {
+                            $valorElemento = $valor[$key];
+                            if ($valorElemento instanceof DateTime) {
+                                $valorElemento = $valorElemento->format('Y-m-d H:i:s');
+                            }
+
+                            //$valorEscapado = str_replace("'", "\\'", strval($valorElemento));
+                            array_push($parametrosValoresMostrar, "'" . $valorElemento . "'");
+
+
+                        }
+                    }
+
+                    $llamadaJS = "[" . implode(",", $parametrosValoresMostrar) . "]";
+                    $acciones_linea_pintar = str_replace('%arrayValoresResgistroModal%',$llamadaJS,$acciones_linea_pintar);
+                    
+                }
                 //elegir el color de la carpeta segun tenga archivos
                 if($_SESSION["Controlador"] -> miEstado -> acciones["archivos"] == 1 ){
                     $imgRutaCarpeta = '';
@@ -1190,7 +1233,8 @@ function DibujaLineas_PortalEmpleado(){
                 }
                 // incluir la accion de abrir el formulario de firma
                 if(isset($valor["Firmable"])){
-                    $ModalFirma =1;
+                    
+                    $ModalFirma = 1;
                 }
                 
                 if(isset($valor["Firmable"]) && $valor["Firmable"] === 1 && (!isset($valor["Firmado"]) || $valor["Firmado"] == 0 ) && !($UsuarioAdmin && $otroUsuario)){
@@ -1250,10 +1294,6 @@ function DibujaLineas_PortalEmpleado(){
                     $acciones_linea_pintar = str_replace('%imgTipoArchivo%',$imgExtension,$acciones_linea_pintar);
                     $acciones_linea_pintar = str_replace('%id%',$id,$acciones_linea_pintar);
                     $acciones_linea_pintar = str_replace('%codigo%',$descripcion,$acciones_linea_pintar);
-                    
-                    //$acciones_linea_pintar = str_replace(['%id%','%codigo%'], [$id,$descripcion], $acciones_linea_pintar);
-                    
-                    
                 }
                 
                 if($conAccionesPersonalizadas == 1){
@@ -1278,12 +1318,13 @@ function DibujaLineas_PortalEmpleado(){
                         
                     }
                     $listaDoc .='<summary></summary>';
-                    $listaDoc .='<p> <span style="color:'.$color.';">' . $descripcion2 . '</span><br>';
+                    $listaDoc .='<p style="font-size: smaller; font-weight: normal;"> <span style="color:'.$color.';">' . $descripcion2 . '</span><br>';
                     $listaDoc .= $descripcion3 . $descripcion4.'</p>';
                     if($_SESSION["Controlador"] -> miEstado -> acciones["desplegado"] == 0){
                         $listaDoc .= '</details>';
                     }
                 }
+
                 $listaDoc .= '</div></td><td class="col-5"><div id="fecha_a" class="d-flex align-items-end flex-column" style="float:right;color:'.$color.';"><h5>'. $descripcionLateral.'<h5>';
                 $listaDoc .= '<div class="mt-1">' . $acciones_linea_pintar . '</div>';
                 $listaDoc .= '</div></td></tr>'; 
@@ -1382,6 +1423,59 @@ function cargaFiltros(){
     return $txt_filtros;
 }
 
+function cargaArrayVisibleLineasEmpleado(){
+     $arrayCamposFormMostrar = array();
+    if($_SESSION["Controlador"] -> miEstado ->Estado == 6.1){
+        $arrayCamposFormMostrar = ['IdTipoTarea',
+        'IdProyectoTarea',
+        'FechaInicio',
+        'FechaFin'];
+    }elseif($_SESSION["Controlador"] -> miEstado ->Estado == 6.2){
+        $arrayCamposFormMostrar = ['IdProyectoTarea',
+        'IdProyectoMaterialTipo', 
+        'IdArticulo' ,
+        'Descripcion', 
+        'Cantidad',
+        'Coste',
+        'Fecha'];
+    }else{
+        $arrayForm = array_filter($_SESSION["Controlador"] -> miEstado -> formularios, function ($form) {
+            return $form["Estado"] == floatval($_SESSION["Controlador"] -> miEstado -> Estado);
+        });
+        
+
+        $arrayIntermedio = array_shift($arrayForm);
+        $arrayCamposForm = $arrayIntermedio["Campos"];
+
+        //Extraer los dropdowns que se van a usar
+        if(!empty($arrayCamposForm)){
+            $arraydropdown = array_filter($_SESSION["Controlador"] -> miEstado -> dropdownsFormularios, function ($filtro) use($arrayCamposForm){
+                return in_array($filtro["IdTipoDefinicion"],array_column($arrayCamposForm, "IdTipoDefinicion")); 
+            });
+            
+        }
+        
+        //extraer el dropdown de Archivostipos
+        if($_SESSION["Controlador"] -> miEstado -> Estado == 4.4){
+            $arraydropdown = array_filter($_SESSION["Controlador"] -> miEstado -> archivostiposAccesos, function ($campos) {
+                return $campos["IdTipoPropietario"] == $_SESSION["Controlador"] -> miEstado -> IdTipoPropietario;
+            });
+        }
+
+
+        $PlantillaModal = $_SESSION["PlantillaModalForm"];
+        
+
+        $formularioConArchivos = false;
+        foreach($arrayCamposForm as $campo){
+            if( $campo["OUTPUT"] == 0 && $campo["Mostrar"] == 1){
+                array_push($arrayCamposFormMostrar,$campo["Variable"]);
+            }
+        }
+    }
+    //var_dump($arrayCamposFormMostrar);
+    return $arrayCamposFormMostrar;
+}
 
 
 function cargarJornadaHistorico(){
@@ -1581,21 +1675,27 @@ function cargaFormularioDinamico(){
 //Pintar los formularios modales dinamicamente
 function cargaFormularioDinamico2(){
     $TituloModal = '';
+    $TituloModalModificacion = '';
     switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
         case 4.1 :
             $TituloModal = 'Nueva Asistencia';
+            $TituloModalModificacion = 'Modificar Asistencia';
             break;
         case 4.4 :
             $TituloModal = 'Nuevo Documento';
+            $TituloModalModificacion = 'Modificar Documento';
             break;
         case 4.5:
             $TituloModal = 'Nueva Formación';
+            $TituloModalModificacion = 'Modificar Formación';
             break;
         case 4.6:
             $TituloModal = 'Nueva Incidencia';
+            $TituloModalModificacion = 'Modificar Incidencia';
             break;
         case 4.7:
             $TituloModal = 'Nuevo Material';
+            $TituloModalModificacion = 'Modificar Material';
             break;
         case 4.9:
             $TituloModal = 'Solicitud Vacaciones';
@@ -1698,6 +1798,17 @@ function cargaFormularioDinamico2(){
                 $existeSelecion = 1;
             }
             $camposForm .= '</select></div><br>';
+        }elseif($campo["OUTPUT"] == 0 && $campo["Mostrar"] == 2){
+
+            $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="display:none;">';
+            $camposForm .= '<label for="'.$campo["Variable"].'" class="form-label">'.$campo["Nombre_campo"].'</label>';
+            $camposForm .= '<input type="'.$campo["TipoDatoHtml"].'" class="form-control border-secondary" id = "'.$campo["Variable"].'" aria-describedby="'.$campo["Nombre_campo"].'"'
+            .($campo["VariableAlmacenada"] != null ? ' value = "'. $_SESSION["Controlador"] -> miEstado -> {$campo["VariableAlmacenada"]}.'"' : ' value = "'. $campo["ValorPorDefecto"].'"').' '.($campo["Required"] == 1 ? "required" : "").'>';
+            //tremenda fumada
+      
+            
+            $camposForm .='<div class="text-danger d-none" id="'.$campo["Variable"].'_msgError">'.$campo["MsgError"].'</div>';
+            $camposForm .= '</div><br>';
         }
     
 
@@ -1707,7 +1818,7 @@ function cargaFormularioDinamico2(){
         $camposForm = str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%'],['enctype="multipart/form-data"',$camposForm,$TituloModal],$PlantillaModal);
         //$camposForm = str_replace("%tipoForm%",'enctype="multipart/form-data" class="formulario_Dinamico_Archivos col-10 col-md-12 mt-3"',$camposForm);
     }else{
-        $camposForm = str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%'],['',$camposForm,$TituloModal],$PlantillaModal);
+        $camposForm = str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%','%TituloModalModificacion%'],['',$camposForm,$TituloModal,$TituloModalModificacion],$PlantillaModal);
         
     }
 
@@ -1813,6 +1924,7 @@ function cargaModalesCustom(){
     $PlantillaModal = $_SESSION["PlantillaModalForm"];
     $PlantillaModalListado = $_SESSION["PlantillaForm"];
     $nombre_Form = "";
+    $nombre_Form_Modificacion = "";
     switch ($_SESSION["Controlador"] -> miEstado -> Estado){
         case 6.1:
             //DESPLEGABLE CUSTOM
@@ -1824,6 +1936,7 @@ function cargaModalesCustom(){
 
 
             $nombre_Form = "Nuevo tiempo de fase";
+            $nombre_Form_Modificacion = "Modificar tiempo de fase";
             if($UsuarioAdmin && $otroUsuario){
                 $nombre_Form .= ' de '.$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo;
             }
@@ -1915,6 +2028,7 @@ function cargaModalesCustom(){
             fclose($CModal);
 
             $nombre_Form = "Nuevo recurso de fase";
+            $nombre_Form_Modificacion = "Modificar recurso de fase";
             $Modal = str_replace('modalFormularioDinamico','modalFormularioMaterialesProyectos',$PlantillaModal);
             $camposForm .= '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg">';
             $camposForm .= '<label for="IdProyectoTarea" class="form-label">Fase</label>';
@@ -2010,10 +2124,14 @@ function cargaModalesCustom(){
         default:
             break;    
     }
+
+    $camposForm .=  '<div class="mb-3 col-12 col-md-10 offset-md-1 input-group-lg" style="display:none;">';
+    $camposForm .= '<input type="Number" class="form-control border-secondary" id ="IdModificar" value ="0" >';
+    $camposForm .= '</div><br>';
     //$ModalListado = str_replace('%descForm%','modalListadoProyectos',$PlantillaModalListado);
             
 
-    return str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%'],['',$camposForm,$nombre_Form],$Modal);
+    return str_replace(["%tipoForm%",'%BodyModal%','%TituloModal%','%TituloModalModificacion%'],['',$camposForm,$nombre_Form, $nombre_Form_Modificacion],$Modal);
 }
 
 function PintaArrayValuesSelect($idLinea,$acciones_linea_pintar){
