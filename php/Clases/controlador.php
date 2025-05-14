@@ -318,9 +318,10 @@ class Controlador
         $this -> miEstado -> acciones["anadirLineaCustom"] = 0;
         $this -> miEstado -> acciones["accionBuscarMenu"] = 0;
         $this -> miEstado -> acciones["observaciones"] = 0;
+        $this -> miEstado -> acciones["ModificarLineaCustom"] = 0;
         //*******************/
                 //Acciones personalizadas de cada formulario//
-        //******************/
+        //******************/ 
         $this -> miEstado -> acciones["accionCustom1"] = 0;
         if($this -> miEstado -> tipo_App == 2){
             //Portal del empleado
@@ -330,6 +331,7 @@ class Controlador
                     $this -> miEstado -> acciones["anadirLinea"] = 1;
                     $this -> miEstado -> acciones["desplegado"] = 1;
                     $this -> miEstado -> acciones["observaciones"] = 1;
+                    $this -> miEstado -> acciones["ModificarLineaCustom"] = 1;
                     
                     //$this -> miEstado -> acciones["accionBuscarMenu"] = 1;
                     break;
@@ -391,13 +393,16 @@ class Controlador
                 case 6.1:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLineaCustom"] = 1;
+                    $this -> miEstado -> acciones["ModificarLineaCustom"] = 1;
                     break;
                 case 6.2:
                     $this -> miEstado -> acciones["archivos"] = 1;
                     $this -> miEstado -> acciones["anadirLineaCustom"] = 1;
+                    $this -> miEstado -> acciones["ModificarLineaCustom"] = 1;
                     break;
                 case 7:
                     $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
+                    
                     break;
                 default:
                     $this -> miEstado -> IdTipoPropietario = null;
@@ -454,11 +459,11 @@ class Controlador
             $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerPDF=1&pin=".$_SESSION["pinC"].'&IdOrigenImpresion='.$OI.'&IdPropietario='.$IdP;
         }else{
             $url_archivo ="http://onixsw.esquio.es:8080/Funciones.aspx?ObtenerArchivo=1&pin=".$_SESSION["pinC"].'&IdArchivo='.$IdP;
+            
             // print_r($url_archivo);
             // print_r('<br>');
         }
- 
-
+       
         
         $directorio_destino = "subidasTemp/".$_SESSION["pinC"]."/";
         // Verificar si el directorio existe, si no, crearlo
@@ -912,8 +917,8 @@ class Controlador
                 return $docF["tipoDocPortal"] == $tipoDocf
                 && $docF["id"] ==  $this -> miEstado -> IdPropietario;
             }));
-  
-            $this -> miEstado -> nombreDocumentoPadre = $arrayDoc[0]['descripcion'];
+            
+            $this -> miEstado -> nombreDocumentoPadre = $arrayDoc[0]['Descripcion'];
             $this -> navegarPestanas($arrayDatos[0]);
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == -1 && $arrayDatos[1] == 0 ){
         //********************************************/
@@ -930,8 +935,8 @@ class Controlador
                 && $docF["id"] ==  $arrayDatos[1];
             }));
 
-
-            $this -> miEstado -> nombreDocumentoPadre = $arrayDoc[0]['descripcion'];
+            
+            $this -> miEstado -> nombreDocumentoPadre = $arrayDoc[0]['Descripcion'];
             $tipoMat = 1;
             if($arrayDatos[0] == 6.1){
                 $tipoMat = 0;
@@ -1134,12 +1139,16 @@ class Controlador
                             $valorCampo = DateTime::createFromFormat('Y-m-d', $valorCampo) -> format('Ymd');
                         }
                         array_push($arrayValores,$valorCampo);
+                    }elseif($campo["Mostrar"] == 2){
+                        $valorCampo = array_shift($arrayDatos[2]);
+                        array_push($arrayValores,$valorCampo);
                     }
                 }
             
                 $resultadoEjecucion = true;
 
             if($arrayIntermedio["Instruccion"] != ""){
+                
                 $resultadoEjecucion = exect_Insert_From_Dinamico($arrayValores);
             }
                 
