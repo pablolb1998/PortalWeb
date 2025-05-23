@@ -1107,7 +1107,16 @@ function DibujaLineas_PortalEmpleado(){
             });
             
         }
-
+        if(!empty($_SESSION["Controlador"] -> miEstado -> IdsTiposFiltroVacaciones)){
+            //print_r($_SESSION["Controlador"]->miEstado->IdsTiposFiltro);
+            //print_r($arrayDoc);
+            
+            $arrayDoc = array_filter($arrayDoc, function ($docF) use ($idsTiposFiltroLower) {
+                return in_array($docF["Estado"],  $_SESSION["Controlador"]->miEstado->IdsTiposFiltroVacaciones);
+            });
+            
+        }
+        
         //print_r($arrayDoc);
         //print_r($_SESSION["Controlador"] -> miEstado -> IdTipoPropietario);
         //print_r($_SESSION["Controlador"] -> miEstado -> IdPropietario);
@@ -1383,6 +1392,13 @@ function DibujaPestanaVacaciones_Empleado($html){
     }
     $desplegableAnos .= '</div>';
     $html = str_replace(['%ListaV%','%GraficoV%','%anoActualDropdown%'], [$lineas_PE,$graficoV,$desplegableAnos], $html);
+
+    foreach( $_SESSION["Controlador"] -> miEstado -> IdsTiposFiltroVacaciones as $valor){
+        //var_dump('value="' . $valor . '" autocomplete="off">');
+        $html = str_replace('value="' . $valor . '" autocomplete="off">', 'value="' . $valor . '" autocomplete="off" checked>', $html);
+    }
+
+
     return $html;
 }   
 
