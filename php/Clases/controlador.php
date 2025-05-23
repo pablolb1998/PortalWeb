@@ -249,7 +249,7 @@ class Controlador
             $this -> miEstado -> Estado = $ps;
         }
         $this -> miEstado -> CadenaFiltro = null;
-        $this -> miEstado -> IdsTiposFiltro = array();
+        $this -> miEstado -> IdsTiposFiltroVacaciones = array("3");
         $this -> miEstado -> adjuntarDocumentoFormAutomatico = 0;
         $this -> cargarPermisosAcciones();
     }
@@ -961,7 +961,7 @@ class Controlador
                         $msgError = "Error del servidor en la conversión DateTime.";
                     }
                     if($ff && $fi){
-                        $dc = array($documento["descripcion"],
+                        $dc = array($documento["Descripcion"],
                             $fi,
                             $ff,
                             $documento["color"],
@@ -1188,14 +1188,14 @@ class Controlador
         //********************************************/
         //PORTAL EMPLEADO Filtrar por cadena de txt o ids  
         //********************************************/
-            $this -> miEstado -> IdsTiposFiltro = array();
-
+            $this -> miEstado -> IdsTiposFiltroVacaciones = array();
+            
             $this -> miEstado -> CadenaFiltro = null;
             if($arrayDatos[2] != null && $arrayDatos[2] != ''){
                 $this -> miEstado -> CadenaFiltro = $arrayDatos[2];
             }
             if(!empty($arrayDatos[3])){
-                $this -> miEstado -> IdsTiposFiltro = $arrayDatos[3];
+                $this -> miEstado -> IdsTiposFiltroVacaciones = $arrayDatos[3];
             }
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 0 && $this -> miEstado -> Estado == 5 && $this -> miEstado -> tipo_App == 2){
         //********************************************/

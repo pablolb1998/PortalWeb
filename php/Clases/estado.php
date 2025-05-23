@@ -25,6 +25,7 @@ class Estado{
     
     public $CadenaFiltro;
     public $IdsTiposFiltro = array();
+    public $IdsTiposFiltroVacaciones = array();
     public $tipofiltro;
 
     
