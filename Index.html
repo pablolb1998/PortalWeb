@@ -242,6 +242,7 @@ async function dibuja_pagina(arrayDatos = []) {
                 return selectedIds.includes(evento.id);
             });
             // // Actualiza el calendario con los eventos filtrados
+            
             calendar.removeAllEvents();
             calendar.addEventSource(filteredEvents);
             desplegarPanelFiltros()
@@ -727,17 +728,21 @@ calendar.render();
             }
     }
 
-    function CargarMapaFichaje(){
-        if($("#map").length){
-            try{
-            let localizacion = navigator.geolocation.getCurrentPosition(EditarPosicionMapa);
-           
-            }catch(e){
-                $('#map').hide();
-                document.getElementById("map").innerHTML = "Error al obtener la ubicación";
-                console.log(e);
-            }
-        }        
+    function CargarMapaFichaje() {
+        const mapa = document.getElementById("map");
+        
+        if (mapa) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    EditarPosicionMapa(position);
+                },
+                function (error) {
+                    mapa.style.display = "none";
+                    mapa.innerHTML = "Error al obtener la ubicación.";
+                    console.error("Error de geolocalización:", error);
+                }
+            );
+        }
     }
     async function EditarPosicionMapa(posicion){
         
@@ -1046,6 +1051,32 @@ calendar.render();
         }
     });
     
+    //****************************************************************************************/
+                        //Dejar el formulario en blanco al cerrarlo
+    //****************************************************************************************/
+    function resetearFormularioDinamico(formularioId = null) {
+        if (formularioId == null){
+            formularioId = 'modalFormularioDinamico';
+        }
+        const formulario = document.getElementById(formularioId);
+        if (!formulario) return;
+
+        const campos = formulario.querySelectorAll('input, select, textarea');
+
+        campos.forEach(campo => {
+            if (campo.classList.contains('selectBuscar-input')) {
+                campo.value = '';
+                campo.dataset.value = '';
+            } else if (campo.type === 'datetime-local') {
+                const ahora = new Date().toISOString().slice(0, 16);
+                campo.value = ahora;
+            } else if (campo.tagName.toLowerCase() === 'select') {
+                campo.selectedIndex = 0;
+            } else if (campo.type !== 'button' && campo.type !== 'submit' && campo.type !== 'hidden') {
+                campo.value = '';
+            }
+        });
+    }
 
     //****************************************************************************************/
                         // Evitar que recargue al enviar un formulario
@@ -1056,10 +1087,10 @@ calendar.render();
 
     /***** Comprobar Tamaño del archivo ******/
     $(document).on("change","#Archivo",function(event){
-        var maxSize = 5 * 1024 * 1024; // 5 MB (en bytes)
+        var maxSize = 20 * 1024 * 1024; // 5 MB (en bytes)
         if (this.files[0].size > maxSize) {
             // cambiar por nuestro modal
-            alert('El archivo demasiado grande. El tamaño máximo es 5 MB.');
+            alert('El archivo demasiado grande. El tamaño máximo es 20 MB.');
             this.value = ''; 
         }
     });
