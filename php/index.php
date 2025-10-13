@@ -6,7 +6,22 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
     file_put_contents('errores.txt', $error_message . "\n", FILE_APPEND);
     file_put_contents('errores.txt', '['.date('Y-m-d H:i:s').']' . ' -> ' . $error_message . ' -> ', FILE_APPEND);
 });
-
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        $error_message = "Fatal error [{$error['type']}] en {$error['file']}:{$error['line']} - {$error['message']}";
+        file_put_contents('errores.txt', '['.date('Y-m-d H:i:s').'] ' . $error_message . "\n", FILE_APPEND);
+        
+        // También podrías mostrar algo al usuario si estás en modo desarrollo:
+        // echo json_encode(['error' => 'Algo salió mal.']);
+    }
+});
+set_exception_handler(function($exception) {
+    $error_message = "Excepción no capturada: " . $exception->getMessage();
+    file_put_contents('errores.txt', '['.date('Y-m-d H:i:s').'] ' . $error_message . "\n", FILE_APPEND);
+    var_dump($exception);
+    echo json_encode(["Ha ocurrido un error inesperado", null, 0]);
+});
 require_once "Clases/controlador.php";
 require_once 'Clases/estado.php';
 session_start();

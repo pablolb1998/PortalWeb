@@ -22,6 +22,7 @@ if(isset($_POST['arrayDatos'])){
         $asuntoCorreo= 'Activación usuario Area de cliente';
         $email = $arratLogin[2];
         $UsuarioCreado = execSeguridadUnificada_Identidad_Insert($Ip,$datosBBDD[0]["BBDD"],$email,$arratLogin[3],$arratLogin[1],$arratLogin[0],3);
+        
         $saludo = 'Bienvenido a nuestra área de cliente';
         $linkBase = 'http://www.areadecliente.de/php/ActivadorUsuariosClientes.php?';   
     }else{
@@ -42,6 +43,7 @@ if(isset($_POST['arrayDatos'])){
             //$plantilla .= $_SESSION['footerCliente'];
         }
         $htmlCorreo = str_replace(["%LinkActivacionPortal%",'%msgSaludo%','%usuario%'],[$link,$saludo,$email],$plantilla);
+
         if(execute_EnviarMail_CreacionUsuario($email,$htmlCorreo,$asuntoCorreo)){
             echo "Se ha generado el usuario correctamente, por favor revise su correo.";
         }else{

@@ -8,9 +8,11 @@ $nombre_cliente;
 $UsuarioAdmin = FALSE;
 $otroUsuario = FALSE;
 $ModalFirma = 0;
+
 function pinta_contenido($estado){
     global $UsuarioAdmin;
     global $otroUsuario;
+    global $ModalFirma;
     
 #Declaraciones
     $titulo = ""; 
@@ -37,7 +39,7 @@ function pinta_contenido($estado){
             break;
         case 1:
             $titulo = "Selecciona Sociedad";
-            $filename = "../html/socie  dades.html";
+            $filename = "../html/sociedades.html";
             break;
         case 2:
             $titulo = $_SESSION["Controlador"] -> miEstado -> NombreSociedad;
@@ -311,7 +313,7 @@ function pinta_contenido($estado){
             $filetext = str_replace('%NombreProyecto%',$nombreP[0]['Descripcion'],$filetext);
             $filetext = pinta_TareasRecursos_Cliente($filetext);
         }elseif($_SESSION["Controlador"] -> miEstado -> Estado == 2 && $_SESSION["Controlador"] -> miEstado -> tipo_App == 2){
-            // elegir la pestaña de la jornad++++a correspondiente switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
+            // elegir la pestaña de la jornada correspondiente switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
             switch ($_SESSION["Controlador"] -> miEstado -> EstadoJornada[0]) {
                 case 0:
                     $filetext = str_replace('id="pestanaFueraJornada" style="display: none;">','id="pestanaFueraJornada" style="display: flex;">',$filetext);
@@ -352,8 +354,7 @@ function pinta_contenido($estado){
         //Pestañas de navegacion
             $filetext = str_replace('%NombreEmpleado%',$_SESSION["Controlador"] -> miEstado -> nombre_descriptivo,$filetext);
             $filetext = str_replace('%LineasE%',DibujaLineas_PortalEmpleado(),$filetext);
-            if($ModalFirma ==1){
-                
+            if($ModalFirma == 1){
                 $fileModal = fopen('../html/ModalFirma.html', "r");
                 $filesizeModal = filesize('../html/ModalFirma.html');
                 $Modalfirmadoc = fread($fileModal, $filesizeModal);
@@ -884,6 +885,7 @@ function pinta_TareasRecursos_Cliente($html){
 
 //Dibujar las lineas de cualquier  del portal de empleado
 function DibujaLineas_PortalEmpleado(){
+  
     global $UsuarioAdmin;
     global $otroUsuario;
     global $ModalFirma;
@@ -927,6 +929,13 @@ function DibujaLineas_PortalEmpleado(){
             $acciones_globales .= cargaFormularioDinamico2();
             
         }
+
+         if($_SESSION["Controlador"] -> miEstado -> acciones["Eliminar"] == 1){
+            //dibuja_pagina([0,3])
+            $acciones_linea .= '<button onclick="" class="btn_acciones" style><img src="Img/IconosAcciones/Cross.png"></button>';    
+            
+        }
+
         if($_SESSION["Controlador"] -> miEstado -> acciones["ModificarLineaCustom"] == 1 && $_SESSION["Controlador"] -> miEstado -> acciones["anadirLineaCustom"] == 0){
             //dibuja_pagina([0,3])
 
@@ -1106,8 +1115,9 @@ function DibujaLineas_PortalEmpleado(){
                 return in_array($docF["Estado"],  $_SESSION["Controlador"]->miEstado->IdsTiposFiltro);
             });
             
+            
         }
-        if(!empty($_SESSION["Controlador"] -> miEstado -> IdsTiposFiltroVacaciones)){
+        if(!empty($_SESSION["Controlador"] -> miEstado -> IdsTiposFiltroVacaciones) && $_SESSION["Controlador"]->miEstado->Estado == 4.9){
             //print_r($_SESSION["Controlador"]->miEstado->IdsTiposFiltro);
             //print_r($arrayDoc);
             
@@ -1147,10 +1157,10 @@ function DibujaLineas_PortalEmpleado(){
         // funcion para reinedxarlo 
         
         $arrayDoc = array_values($arrayDoc);
+
         $listaDoc = "";
         $listaDoc .= "<section>";
         $ListadoAccionesMostar = cargaArrayVisibleLineasEmpleado();
-
         if(count($arrayDoc)>0){
             
             $listaDoc .=  "<table class='table table-striped table-bordered-bottom' id='cuerpo'>";
@@ -1242,7 +1252,6 @@ function DibujaLineas_PortalEmpleado(){
                 }
                 // incluir la accion de abrir el formulario de firma
                 if(isset($valor["Firmable"])){
-                    
                     $ModalFirma = 1;
                 }
                 
@@ -1357,7 +1366,7 @@ function DibujaLineas_PortalEmpleado(){
         $listaDoc .= "</section>";
         $listaDoc .= $acciones_globales;
         
-        
+          
 
         return $listaDoc;
 }

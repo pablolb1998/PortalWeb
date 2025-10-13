@@ -650,7 +650,7 @@ function extraerDocPersonal_Masivo(){
         FROM dbo.vw_PEVacaciones
         WHERE IdPersonal = ? ORDER BY FechaInicio DESC";
         $parm = array($_SESSION["Controlador"] -> miEstado -> IdPersonal);
-        //$parm = array($IdCliente);
+        //$parm = array($IdCliente) ESTO ES UN ;
         $stmt = sqlsrv_query($conn,$sql8,$parm);
         if ($stmt === false) {
             die(print_r(sqlsrv_errors(), true));
@@ -811,7 +811,7 @@ function extraerRecursosFaseProyecto($idProyecto,$FaseMaterial){
     $DatosBD = array();
 
     if($FaseMaterial == 0) {
-        $sql= "SELECT T.IdProyectoRecurso AS id,T.IdProyectoTarea,T.IdProduccionTipoTarea AS IdTipoTarea,t.FechaInicio AS FechaInicio,t.FechaFin AS FechaFin,
+        $sql="SELECT T.IdProyectoRecurso AS id,T.IdProyectoTarea,T.IdProduccionTipoTarea AS IdTipoTarea,t.FechaInicio AS FechaInicio,t.FechaFin AS FechaFin,
                 CONVERT(VARCHAR(50), t.FechaInicio, 103)+ ' ' + CONVERT(VARCHAR(5), t.FechaInicio, 108)  AS descripcion2,
                 CONVERT(VARCHAR(5),ROUND(T.Duracion,2)) +' horas' AS descripcionLateral,
                 Duracion,
@@ -871,20 +871,20 @@ function extraerRecursosFaseProyecto($idProyecto,$FaseMaterial){
 //iniciar o finalizar jornada
 function exec_up_Tiempos_Insert($lat = '',$long = '' , $horaLocal = null){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
-    $sql = "DECLARE @IdTiempo INT,
-    @FechaVisualizacion DATETIME;
-    EXEC up_Tiempos_Insert
-    @IdTiempo = @IdTiempo OUTPUT,
-	@IdSociedad = ?,
-	@IdCentroTrabajo = ?,
-	@IdPersonal = ?,
-    @FechaInicio = ?,
-	@InicioFin= ?,
-    @FechaImputacion = ?,
-    @Latitud = ?,                     
-    @Longitud = ?,
-    @Observaciones = ?,
-    @FechaVisualizacion = @FechaVisualizacion OUTPUT";
+    $sql =" DECLARE @IdTiempo INT,
+            @FechaVisualizacion DATETIME;
+            EXEC up_Tiempos_Insert
+            @IdTiempo = @IdTiempo OUTPUT,
+            @IdSociedad = ?,
+            @IdCentroTrabajo = ?,
+            @IdPersonal = ?,
+            @FechaInicio = ?,
+            @InicioFin= ?,
+            @FechaImputacion = ?,
+            @Latitud = ?,                     
+            @Longitud = ?,
+            @Observaciones = ?,
+            @FechaVisualizacion = @FechaVisualizacion OUTPUT";
     $horaFormateada = '';
     if($horaLocal != null){
         $horaFormateada = 'Hora Geolocalizacion : '.date('H:i', strtotime($horaLocal));
@@ -1013,7 +1013,7 @@ function exect_Insert_From_Dinamico($arrayValores){
                 case 4.9:
                 
                     $sqlReturn = "SELECT top 1 IdPersonalVacaciones AS id,EstadoV  AS Descripcion, RangoFechas  AS descripcionLateral,  Estado2 AS descripcion2, color2 as color,'Año : ' + CAST(Año AS VARCHAR) AS descripcion3,
-                    FechaInicio,FechaFin,Año as AñoV
+                    FechaInicio,FechaFin,Año as AñoV,Estado
                     FROM dbo.vw_PEVacaciones
                     WHERE IdPersonal = ? ORDER BY IdPersonalVacaciones DESC";
                     $tipoDoc = 8;
@@ -1164,7 +1164,7 @@ function insertProyectosTareaMaterial($MaterialProyecto,$arrayDatos){
             $arrayDatos[3],
             ConvertirAFloat($arrayDatos[4]),
             ConvertirAFloat($arrayDatos[5]),
-            date('Ymd H:i:s', strtotime($arrayDatos[7]) ),
+            date('Ymd H:i:s', strtotime($arrayDatos[6]) ),
             $_SESSION["Controlador"] -> miEstado -> IdPersonal,
             $_SESSION["Controlador"] -> miEstado -> IdIdentidad);
         }else{
@@ -1199,7 +1199,9 @@ function insertProyectosTareaMaterial($MaterialProyecto,$arrayDatos){
  
         }
     }
-    
+    // var_dump($parm);
+    // var_dump($sql);
+    // var_dump($arrayDatos);
     $stmt = sqlsrv_prepare($conn, $sql, $parm);
     if (!sqlsrv_execute($stmt)) {
         die(print_r(sqlsrv_errors(), true));
@@ -1310,62 +1312,62 @@ function confirmarUsuarioSeguridadUnificada($Ip,$bd,$IdIdent,$usu){
 function solicitudCambioDatosInsert($datos = array()){
     $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
     $sql = "INSERT INTO dbo.PE_DatosPersonalesModificar
-(
-    IdAppsheetDatosPersonal_Modificaciones,
-    TelefonoParticular,
-    Direccion,
-    Poblacion,
-    CodigoPostal,
-    NombreCuentaBancaria,
-    IBAN,
-    BIC,
-    TallaCamisa,
-    TallaPantalon,
-    TallaZapatos,
-    IdPersonal,
-    FechaInsert,
-    IdIdentidad
-)
-VALUES
-( 
-    ?,
-    ?,
-    ?, 
-    ?,
-    ?, 
-    ?,
-    ?, 
-    ?, 
-    ?, 
-    ?, 
-    ?, 
-    ?, 
-    GETDATE(), 
-    ?  
-    )";
-    $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $claveGenerada = '';
+    (
+        IdAppsheetDatosPersonal_Modificaciones,
+        TelefonoParticular,
+        Direccion,
+        Poblacion,
+        CodigoPostal,
+        NombreCuentaBancaria,
+        IBAN,
+        BIC,
+        TallaCamisa,
+        TallaPantalon,
+        TallaZapatos,
+        IdPersonal,
+        FechaInsert,
+        IdIdentidad
+    )
+    VALUES
+    ( 
+        ?,
+        ?,
+        ?, 
+        ?,
+        ?, 
+        ?,
+        ?, 
+        ?, 
+        ?, 
+        ?, 
+        ?, 
+        ?, 
+        GETDATE(), 
+        ?  
+        )";
+        $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $claveGenerada = '';
 
-    for ($i = 0; $i < 9; $i++) {
-        $claveGenerada .= $caracteres[rand(0, strlen($caracteres) - 1)];
-    }
-    $claveGenerada;
-    $parm = $datos;
-    array_unshift($parm,$claveGenerada);
-    array_push($parm, $_SESSION["Controlador"] -> miEstado -> IdPersonal,$_SESSION["Controlador"] -> miEstado -> IdIdentidad);
-    // print_r($parm );
-    // print_r($sql);
-    $stmt = sqlsrv_prepare($conn, $sql, $parm);
-    if (!sqlsrv_execute($stmt)) {
-        die(print_r(sqlsrv_errors(), true));
-        return false;
-        die;
-    }else{
-        return 1;
-    }   
+        for ($i = 0; $i < 9; $i++) {
+            $claveGenerada .= $caracteres[rand(0, strlen($caracteres) - 1)];
+        }
+        $claveGenerada;
+        $parm = $datos;
+        array_unshift($parm,$claveGenerada);
+        array_push($parm, $_SESSION["Controlador"] -> miEstado -> IdPersonal,$_SESSION["Controlador"] -> miEstado -> IdIdentidad);
+        // print_r($parm );
+        // print_r($sql);
+        $stmt = sqlsrv_prepare($conn, $sql, $parm);
+        if (!sqlsrv_execute($stmt)) {
+            die(print_r(sqlsrv_errors(), true));
+            return false;
+            die;
+        }else{
+            return 1;
+        }   
 
 
-    
+        
     
 }
 
