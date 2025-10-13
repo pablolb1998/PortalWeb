@@ -92,7 +92,7 @@ class Controlador
         }
         //pruebas
         if($_SESSION["pinC"] == 123654){
-                $this -> miEstado -> IP = '192.168.204.230';
+                $this -> miEstado -> IP = '192.168.204.169';
         }elseif ($_SESSION["pinC"] == '65814415D75C') {
             $this -> miEstado -> IP = '85.215.231.65,23459';
         }
@@ -249,7 +249,7 @@ class Controlador
             $this -> miEstado -> Estado = $ps;
         }
         $this -> miEstado -> CadenaFiltro = null;
-        $this -> miEstado -> IdsTiposFiltroVacaciones = array("3");
+        $this -> miEstado -> IdsTiposFiltroVacaciones = array("3","1","2");
         $this -> miEstado -> adjuntarDocumentoFormAutomatico = 0;
         $this -> cargarPermisosAcciones();
     }
@@ -319,6 +319,7 @@ class Controlador
         $this -> miEstado -> acciones["accionBuscarMenu"] = 0;
         $this -> miEstado -> acciones["observaciones"] = 0;
         $this -> miEstado -> acciones["ModificarLineaCustom"] = 0;
+        $this -> miEstado -> acciones["Eliminar"] = 0;
         //*******************/
                 //Acciones personalizadas de cada formulario//
         //******************/ 
@@ -383,6 +384,7 @@ class Controlador
                     $this -> miEstado -> acciones["desplegado"] = 1;
                     $this -> miEstado -> acciones["modalVisualizar"] = 1;
                     $this -> miEstado -> acciones["accionBuscarMenu"] = 1;
+                    $this -> miEstado -> acciones["Eliminar"] = 1;
                     break;
                 case 6:
                     $this -> miEstado -> acciones["desplegado"] = 1;
@@ -731,7 +733,7 @@ class Controlador
                                     
                                 }
                                 if($ff && $fi){
-                                    $dc = array($documento["descripcion"],
+                                    $dc = array($documento["Descripcion"],
                                         $fi,
                                         $ff,
                                         $documento["color"],
@@ -756,6 +758,7 @@ class Controlador
         //********************************************/
         //PORTAL EMPLEADO  la navegación Submenu
         //********************************************/
+        
             switch ($arrayDatos[0]) {   
                 case 4.1 :
                     $this -> miEstado -> IdTipoPropietario = 143;
@@ -804,6 +807,7 @@ class Controlador
             }
            
             $this -> navegarPestanas($arrayDatos[0]);
+
         }elseif (($c > 4 && $c < 5 && $c != 4.4  || in_array($c,array(6.1,6.2)) ) && !empty($arrayDatos) && $arrayDatos[0] == 4.4 && $this -> miEstado -> tipo_App == 2) {
         //********************************************/
         //PORTAL EMPLEADO al documento Correspondiente
@@ -853,7 +857,7 @@ class Controlador
                     $tipoDocf = 1;
                     break;
             }
-
+            
             $arrayDoc = array_values(array_filter($this -> miEstado -> Documentos, function ($docF) use($tipoDocf) {
                 return $docF["tipoDocPortal"] == $tipoDocf
                 && $docF["id"] ==  $this -> miEstado -> IdPropietario;
@@ -961,6 +965,7 @@ class Controlador
                         $msgError = "Error del servidor en la conversión DateTime.";
                     }
                     if($ff && $fi){
+                        
                         $dc = array($documento["Descripcion"],
                             $fi,
                             $ff,
@@ -1231,10 +1236,10 @@ class Controlador
         }
         //navega a la siguiente pestaña segun el estado de la clase estado
         $txtErr = '';
-        if($_SESSION["pinC"] == 123654){
+        //if($_SESSION["pinC"] == 123654){
             $txtErr = "A:".$this -> miEstado -> tipo_App. "idI :".$this -> miEstado -> IdIdentidad.
             $this -> miEstado -> IdPersonal."pin :".$_SESSION["pinC"]."Estado:".$this -> miEstado -> Estado."tipo:".$nav."ip :".$this -> miEstado -> IP."bbdd :".$this -> miEstado -> bbdd."IdTP :". $this -> miEstado -> IdTipoPropietario."IdPro : ".$this -> miEstado -> IdPropietario;
-            }
+            //}
         
         return array(pinta_contenido($this -> miEstado -> Estado, $this -> miEstado -> tipo_App).$txtErr,$msgError,$AccionSinRepintar,$arrayAuxiliarHtml,$accionJs);
     }
