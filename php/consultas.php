@@ -962,7 +962,7 @@ function exect_Insert_From_Dinamico($arrayValores){
             $tipoDoc = 0;
             switch ($_SESSION["Controlador"] -> miEstado -> Estado) {
                 case 4.1:
-                    $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,Descripcion AS descripcion,Justificada AS descripcion2,FechaInicio AS descripcionLateral,FechaFin ,NumeroArchivos,color, tipo AS descripcion3,
+                    $sqlReturn = "SELECT TOP 1 IdPersonalAsistencia AS id,Descripcion AS Descripcion,Justificada AS descripcion2,FechaInicio AS descripcionLateral,FechaFin ,NumeroArchivos,color, tipo AS descripcion3,
                     FechaInicio,FechaFin, duracion AS descripcion4
                     FROM dbo.vw_PEAsistencias 
                     WHERE IdPersonal = ? ORDER BY IdPersonalAsistencia DESC" ;
@@ -1210,6 +1210,39 @@ function insertProyectosTareaMaterial($MaterialProyecto,$arrayDatos){
     }else{
         return 1;
     }   
+
+
+}
+
+function eliminarRegistroBBDD($idRegistro,$IdTipoPropietario){
+    $conn = ConexionBD($_SESSION["Controlador"] -> miEstado -> IP, $_SESSION["Controlador"] -> miEstado -> bbdd);
+    $sql = "";
+    $consultaEliminar = "";
+    $parametroEliminar = "";
+
+        switch ($IdTipoPropietario) {
+            case 146:
+                $consultaEliminar = "up_Personal_Vacaciones_Delete";
+                $parametroEliminar = "@IdPersonalVacaciones";
+                break;
+            
+            default:
+                $consultaEliminar = "";
+                $parametroEliminar = "";
+                break;
+        }  
+
+        $sql = "EXECUTE ".$consultaEliminar." ".$parametroEliminar." = ?;";
+
+        $parm = array($idRegistro);
+
+        $stmt = sqlsrv_prepare($conn, $sql, $parm);
+        
+        if (!sqlsrv_execute($stmt)) {
+            die(print_r(sqlsrv_errors(), true));
+            return false;
+            die;
+        }
 
 
 }
