@@ -455,6 +455,8 @@ class Controlador
         return true;
     }
 
+
+
     function descargaArchivoServicoWeb($IdP,$nombre_archivo,$tipoDoc = null,$OI = null){
         
         if($tipoDoc == "OPDF"){
@@ -514,19 +516,50 @@ class Controlador
         return $arrayAuxiliarHtml2;      
     }
 
+    function eliminarRegistroDataset($IdRegistro, $IdTipoPropietario) {
+    $IdTipoPortal = 0;
+
+    switch ($IdTipoPropietario) {
+        case 146:
+            $IdTipoPortal = 8;
+            break;
+        default:
+            $IdTipoPortal = 0;
+            break;
+    }
+
+    $this->miEstado->Documentos = array_values(array_filter(
+        $this->miEstado->Documentos,
+        function($item) use ($IdRegistro, $IdTipoPortal) {
+            return !($item["id"] == $IdRegistro && $item["tipoDocPortal"] == $IdTipoPortal);
+        }
+    ));
+}
+
     //funciones de para generar el contenido
     // optimizar el navegar pestañas
     //$arrayDatos([0]Pestaña a la que navegar,
                     // [1]Accion a realizar,
                     // [2]Datos adicionales, por ejemplo inputs de un form,
                     // )
+
+    //acciones    -1 -> cerrar sesion
+                // 0 -> Marcar firmado documento // Iniciar / finalizar jornada
+                // 2 -> Eliminar archivo
+                // 3 -> insert datos
+                // 3.5 -> adjuntar desde ventana que no es archivos
+                // 4 -> Filtrar por adena de txt o ids
+                // 11 -> Obtener archivo servicio web
+                // 12 -> Cambiar año seleccionado vacaciones
+                // 13 -> superadministrador cambiar usuario visualizacion
+
     function generarContenido($arrayDatos = array()){
         $arrayAuxiliarHtml = array();
         $accionJs = null;
         $msgError = "" ;
         $AccionSinRepintar = 0;
         $c = $this -> miEstado -> Estado;   
-        
+  
         $this -> comprobarBBDD($_SESSION["pinC"]);
         $nav = "";
         if($c === 0 && !empty($arrayDatos) && $arrayDatos[0] != -1 && ($this -> miEstado -> tipo_App == 1 || $this -> miEstado -> tipo_App == 2)){
@@ -1097,6 +1130,16 @@ class Controlador
                 }
                 $this -> miEstado -> IdPropietarioAuxiliar = $ultimoElemento['id'];
             }
+        }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 2 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 ){
+        //********************************************/
+        //PORTAL EMPLEADO Eliminar Registro
+        //********************************************/ 
+        $registro = $arrayDatos[2];
+       
+        $this -> eliminarRegistroDataset($registro,$this -> miEstado -> IdTipoPropietario);
+        eliminarRegistroBBDD($registro,$this -> miEstado -> IdTipoPropietario);
+
+        
         }elseif(!empty($arrayDatos) && $arrayDatos[0] == 0 && $arrayDatos[1] == 3 && isset($arrayDatos[2])  && $this -> miEstado -> tipo_App == 2 ){
         //********************************************/
         //PORTAL EMPLEADO Insertar Formularios dinamcos
