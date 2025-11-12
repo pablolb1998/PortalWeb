@@ -925,14 +925,14 @@ function DibujaLineas_PortalEmpleado(){
         }
         if($_SESSION["Controlador"] -> miEstado -> acciones["anadirLinea"] == 1){
             //dibuja_pagina([0,3])
-            $acciones_globales .= '<button onclick="cargarModalFormularioDinamico()" class="btn_acciones"><img src="Img/Portal_Empleado_Nuevo2.png"></button>';    
+            $acciones_globales .= '<button onclick="cargarModalFormularioDinamico()" class="btn_acciones"><img  src="Img/Portal_Empleado_Nuevo2.png"></button>';    
             $acciones_globales .= cargaFormularioDinamico2();
-            
+
         }
 
          if($_SESSION["Controlador"] -> miEstado -> acciones["Eliminar"] == 1){
             //dibuja_pagina([0,3])
-            $acciones_linea .= '<button onclick="" class="btn_acciones" style><img src="Img/IconosAcciones/Cross.png"></button>';    
+            $acciones_linea .= '<button onclick="dibuja_pagina([0,2,%IdProp%])"  style="all: initial;cursor: pointer;display:%DispAccionE%;"><img class="pdf_icono" src="Img/IconosAcciones/Papelera.png"></button>';    
             
         }
 
@@ -1214,8 +1214,19 @@ function DibujaLineas_PortalEmpleado(){
                 if (strlen($descripcion ?? '') <= 0) {
                     $descripcion = "Sin descripción";
                 }
+                // COndiciones para eliminar (boton)
                 //añadir a las acciones el id del propietario y el tipo
                 $acciones_linea_pintar = str_replace('%IdProp%',$id,$acciones_linea);
+                if ($_SESSION["Controlador"]->miEstado->Estado == 4.9 && ($valor["Estado"] == 3 || ($valor["Estado"] == 1 && $valor["FechaInicio"] < time()))){
+                    //var_dump('a');
+                    $acciones_linea_pintar = str_replace('%DispAccionE%','none',$acciones_linea_pintar);
+                }else {
+                    //var_dump('b');
+                    $acciones_linea_pintar = str_replace('%DispAccionE%','',$acciones_linea_pintar);
+                }
+
+
+                
                 if ($color =='#0e860e' && $_SESSION["Controlador"] -> miEstado -> acciones["ModificarLineaCustom"] == 1){
                     $acciones_linea_pintar = str_replace('%DispAccionC%','none',$acciones_linea_pintar);
                 }else{
@@ -1768,6 +1779,10 @@ function cargaFormularioDinamico2(){
     foreach($arrayCamposForm as $campo){
         if($campo["TipoDatoHtml"] == 'file'){
             $formularioConArchivos = true;
+        }
+
+        if($campo["ValorPorDefecto"] == '%anoActual%'){
+            $campo["ValorPorDefecto"] = date("Y");
         }
         
         if($campo["SelectorDesplegable"] == 0 && $campo["OUTPUT"] == 0 && $campo["Mostrar"] == 1){
