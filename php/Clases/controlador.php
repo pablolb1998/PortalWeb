@@ -481,7 +481,7 @@ class Controlador
             return false;       
         } else {
             // Específica la ruta donde deseas guardar el archivo
-            $nombre_archivo = str_replace('/','_',$nombre_archivo);
+            $nombre_archivo = str_replace('/','_',$IdP.$nombre_archivo);
             $rutaGuardado = $directorio_destino.$nombre_archivo; // Reemplaza esto con la ruta y nombre deseado
         
             // Guarda el contenido en un archivo en el servidor
